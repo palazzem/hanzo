@@ -1,8 +1,13 @@
 ---
-- hosts: 127.0.0.1
+- hosts: dev-machine
   user: root
   sudo: yes
 
-  tasks:
+  vars:
+  - ansible_python_interpreter: /usr/bin/python2
 
-  handlers:
+  tasks:
+  #- include: common/tasks/system.yml
+  #- include: common/tasks/browser.yml
+  #- include: common/tasks/development.yml
+  - include: common/tasks/postgresql.yml

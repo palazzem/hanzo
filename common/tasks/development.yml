@@ -1,0 +1,8 @@
+---
+# Development configuration
+
+- name: Installing Version Control Systems
+  pacman: name=git,mercurial state=installed
+
+- name: Installing Java Development Kit
+  command: yaourt -S jdk

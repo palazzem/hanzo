@@ -1,0 +1,32 @@
+---
+# Configuration of postgresql server
+
+- name: Installing PostgreSQL server
+  pacman: name=postgresql,python2-psycopg2,pgadmin3 state=installed
+
+- name: Starting PostgreSQL on boot
+  command: systemctl enable postgresql
+
+- name: Create tmpfiles.d file for /run/postgresql
+  command: systemd-tmpfiles --create postgresql.conf
+
+- name: Create PostgreSQL data directory
+  file: dest=/var/lib/postgres/data owner=postgres group=postgres mode=0644 state=directory
+
+- name: Initializing database
+  command: /usr/bin/initdb -D /var/lib/postgres/data creates=/var/lib/postgres/data/pg_hba.conf
+  sudo_user: postgres
+
+- name: Starting PostgreSQL
+  command: systemctl start postgresql
+
+- name: Configuring postgres user
+  ignore_errors: yes
+  postgresql_user: user=postgres password=temp state=present
+  sudo_user: postgres
+
+- name: Copying default configuration files
+  template: src=common/templates/pg_hba.conf.j2 dest=/var/lib/postgres/data/pg_hba.conf owner=postgres group=postgres mode=0600 backup=yes
+
+- name: Restarting Postgresql service
+  command: systemctl stop postgresql
