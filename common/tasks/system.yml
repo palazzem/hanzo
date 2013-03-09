@@ -5,7 +5,7 @@
   copy: src=common/files/pacman.conf dest=/etc/pacman.conf owner=root group=root mode=0644 backup=yes
 
 - name: Installing basic system packages
-  pacman: name=sudo,alsa-utils,xf86-video-intel,xf86-input-synaptics,openssh,vim,yaourt,tar,zip,unzip,p7zip,wget,curl state=installed update_cache=yes
+  pacman: name=sudo,alsa-utils,xf86-video-intel,xf86-input-synaptics,openssh,vim,yaourt,tar,zip,unzip,p7zip,wget,curl,mlocate state=installed update_cache=yes
 
 - name: Installing Xorg
   pacman: name=xorg-server,xorg-server-utils,mesa state=installed
