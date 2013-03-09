@@ -58,3 +58,9 @@
 
 - name: Installing Yeoman (Yo)
   shell: npm install -g yo grunt-cli
+
+- name: Downloading Seam Framework
+  get_url: url=$seam dest=/tmp/seam.tar.gz
+
+- name: Installing Seam Framework
+  command: tar -xzf /tmp/seam.tar.gz -C /home/${username}/extra/

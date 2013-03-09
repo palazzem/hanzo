@@ -15,3 +15,6 @@
 
 - name: Creating user
   user: name=$username group=$username password=$userpass generate_ssh_key=true ssh_key_bits=4096 state=present
+
+- name: Creating user extra folder for IDE and framework
+  file: path=/home/${username}/extra owner=$username group=$username state=directory

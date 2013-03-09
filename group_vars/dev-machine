@@ -4,6 +4,7 @@ username: palazzem
 userpass: mypass
 
 # Download URL configuration
+seam: http://downloads.sourceforge.net/project/jboss/JBoss%20Seam/2.3.0.Final/jboss-seam-distribution-2.3.0.Final-dist.tar.gz
 
 # Password configuration
 psqlpassword: mypass
