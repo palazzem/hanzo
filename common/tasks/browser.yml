@@ -2,7 +2,7 @@
 # Installing Internet browser
 
 - name: Installing Firefox Browser
-  pacman: name=firefox state=installed
+  pacman: name=firefox,ttf-win7-fonts state=installed
 
 - name: Installing Google Chrome
   command: yaourt -S google-chrome
