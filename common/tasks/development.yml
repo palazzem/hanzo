@@ -68,3 +68,6 @@
 - name: Installing Seam Framework
   sudo_user: $username
   command: tar -xzf /tmp/seam.tar.gz -C /home/${username}/extra/
+
+- name: Configuring .bashrc
+  template: src=common/templates/.bashrc.j2 dest=/home/${username}/.bashrc owner=$username group=$username mode=0644 backup=yes

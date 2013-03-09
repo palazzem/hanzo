@@ -1,0 +1,36 @@
+# .bashrc
+
+# Source global definitions
+if [ -f /etc/bashrc ]; then
+	. /etc/bashrc
+fi
+
+# User specific aliases and functions
+
+# Heroku toolbelt
+PATH="$PATH:/usr/local/heroku/bin"
+
+# Enable two-finger scroll
+xmodmap -e "pointer = 1 2 3 5 4 7 6 8 9 10 11 12"
+
+# Pythonz configuration
+[[ -s /home/${username}/.pythonz/etc/bashrc ]] && source /home/${username}/.pythonz/etc/bashrc
+
+# Enable Python virtualenvwrapper
+export WORKON_HOME=$HOME/.virtualenvs
+source /usr/bin/virtualenvwrapper.sh
+
+# Java home
+export JAVA_HOME=/usr/java/default
+PATH=$PATH:$JAVA_HOME/bin
+
+# Seam Framework
+export SEAM_HOME=~/extra/seam
+PATH=$PATH:$SEAM_HOME
+
+# Ruby RVM
+[[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm"
+PATH=$PATH:$HOME/.rvm/bin
+
+# NodeJS Version Manager
+[[ -s /home/${username}/.nvm/nvm.sh ]] && . /home/${username}/.nvm/nvm.sh
