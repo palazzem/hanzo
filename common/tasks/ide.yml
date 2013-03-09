@@ -6,6 +6,7 @@
   get_url: url=$adt dest=/tmp/adt_bundle_linux.zip
 
 - name: Installing Android Developer Tools (ADT)
+  register: inst_adt
   sudo_user: $username
   command: unzip /tmp/adt_bundle_linux.zip -d /home/${username}/extra/
 
@@ -14,6 +15,7 @@
   get_url: url=$ndk dest=/tmp/ndk.tar.bz2
 
 - name: Installing Android Development Kit (NDK)
+  register: inst_ndk
   sudo_user: $username
   command: tar -xzf /tmp/ndk.tar.bz2 -C /home/${username}/extra/
 

@@ -5,11 +5,11 @@
   pacman: name=git,mercurial,gitg,meld state=installed
 
 - name: Installing Heroku toolbelt
-  register: heroku
+  register: inst_heroku
   shell: wget -qO- https://toolbelt.heroku.com/install.sh | sh
 
 - name: Installing Pythonz
-  register: pythonz
+  register: inst_pythonz
   shell: curl -kL https://raw.github.com/saghul/pythonz/master/pythonz-install | bash
   sudo_user: $username
 
@@ -17,14 +17,14 @@
   pacman: name=python2-pip state=installed
 
 - name: Installing Python virtualenv
-  register: virtualenvwrapper
+  register: inst_virtualenvwrapper
   shell: pip2 install virtualenvwrapper
 
 - name: Installing system Ruby
   pacman: name=ruby state=installed
 
 - name: Installing Ruby RVM
-  register: rvm
+  register: inst_rvm
   shell: \curl -L https://get.rvm.io | bash -s
   sudo_user: $username
 
@@ -41,7 +41,7 @@
   pacman: name=apache-ant state=installed
 
 - name: Installing Node Version Manager (NVM)
-  register: nvm
+  register: inst_nvm
   shell: curl https://raw.github.com/creationix/nvm/master/install.sh | sh
   sudo_user: $username
 
@@ -66,6 +66,7 @@
   get_url: url=$seam dest=/tmp/seam.tar.gz
 
 - name: Installing Seam Framework
+  register: inst_seam
   sudo_user: $username
   command: tar -xzf /tmp/seam.tar.gz -C /home/${username}/extra/
 
