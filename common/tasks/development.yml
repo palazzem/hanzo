@@ -6,3 +6,11 @@
 
 - name: Installing Java Development Kit
   command: yaourt -S jdk
+
+- name: Installing Heroku toolbelt
+  register: heroku
+  shell: wget -qO- https://toolbelt.heroku.com/install.sh | sh
+
+- name: Installing Pythonz
+  register: pythonz
+  shell: curl -kL https://raw.github.com/saghul/pythonz/master/pythonz-install | bash
