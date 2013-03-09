@@ -12,5 +12,10 @@
   - include: common/tasks/browser.yml tags=browser
   - include: common/tasks/development.yml tags=development
   - include: common/tasks/ide.yml tags=ide
+
+  - name: Configuring .bashrc
+    template: src=common/templates/.bashrc.j2 dest=/home/${username}/.bashrc owner=$username group=$username mode=0644 backup=yes
+
+  - include: common/tasks/extra-development.yml tags=extra-development
   - include: common/tasks/postgresql.yml tags=postgresql
   - include: common/tasks/extras.yml tags=extras

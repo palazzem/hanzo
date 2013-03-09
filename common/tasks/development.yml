@@ -45,22 +45,6 @@
   shell: curl https://raw.github.com/creationix/nvm/master/install.sh | sh
   sudo_user: $username
 
-- name: Installing latest NodeJS 0.8.x
-  sudo_user: $username
-  shell: nvm install 0.8
-
-- name: Default latest NodeJS Version
-  sudo_user: $username
-  shell: nvm alias default 0.8
-
-- name: Installing Bower
-  sudo_user: $username
-  shell: npm install bower -g
-
-- name: Installing Yeoman (Yo)
-  sudo_user: $username
-  shell: npm install -g yo grunt-cli
-
 - name: Downloading Seam Framework
   sudo_user: $username
   get_url: url=$seam dest=/tmp/seam.tar.gz
@@ -69,6 +53,3 @@
   register: inst_seam
   sudo_user: $username
   command: tar -xzf /tmp/seam.tar.gz -C /home/${username}/extra/
-
-- name: Configuring .bashrc
-  template: src=common/templates/.bashrc.j2 dest=/home/${username}/.bashrc owner=$username group=$username mode=0644 backup=yes
