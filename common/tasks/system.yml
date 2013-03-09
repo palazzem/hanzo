@@ -9,3 +9,9 @@
 
 - name: Enabling LXDM display manager
   service: name=lxdm enabled=yes
+
+- name: Creating user group
+  group: name=$username state=present
+
+- name: Creating user
+  user: name=$username group=$username password=$userpass generate_ssh_key=true ssh_key_bits=4096 state=present

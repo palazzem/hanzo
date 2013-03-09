@@ -1,4 +1,8 @@
 ---
+# User configuration
+username: palazzem
+userpass: mypass
+
 # Download URL configuration
 
 # Password configuration
