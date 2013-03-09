@@ -1,0 +1,5 @@
+---
+# Download URL configuration
+
+# Password configuration
+psqlpassword: mypass
