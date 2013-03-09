@@ -1,0 +1,5 @@
+---
+# Configuring Virtualization tools
+
+- name: Installing KVM
+  pacman: name=libvirt,urlgrabber,bridge-utils,virtviewer,virtinst,virt-manager
