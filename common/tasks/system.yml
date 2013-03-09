@@ -2,7 +2,7 @@
 # Arch Linux basic configuration
 
 - name: Installing basic system packages
-  pacman: name=sudo,alsa-utils,xf86-video-intel,xf86-input-synaptics,openssh,vim,yaourt,zip,unzip,p7zip,wget,curl state=installed, update_cache=yes
+  pacman: name=sudo,alsa-utils,xf86-video-intel,xf86-input-synaptics,openssh,vim,yaourt,tar,zip,unzip,p7zip,wget,curl state=installed, update_cache=yes
 
 - name: Installing Xorg and LXDE Desktop Environment
   pacman: name=xorg-server,xorg-server-utils,mesa,lxde,lxdm state=installed
