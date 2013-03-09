@@ -9,6 +9,14 @@
   sudo_user: $username
   command: unzip /tmp/adt_bundle_linux.zip -d /home/${username}/extra/
 
+- name: Downloading Android Development Kit (NDK)
+  sudo_user: $username
+  get_url: url=$ndk dest=/tmp/ndk.tar.bz2
+
+- name: Installing Android Development Kit (NDK)
+  sudo_user: $username
+  command: tar -xzf /tmp/ndk.tar.bz2 -C /home/${username}/extra/
+
 - name: Downloading Eclipse
   sudo_user: $username
   get_url: url=$eclipse dest=/tmp/eclipse.tar.gz

@@ -20,6 +20,9 @@ xmodmap -e "pointer = 1 2 3 5 4 7 6 8 9 10 11 12"
 export WORKON_HOME=$HOME/.virtualenvs
 source /usr/bin/virtualenvwrapper.sh
 
+# Android tools with NDK
+PATH=$PATH:$HOME/extra/adt-bundle-linux-x86_64/sdk/platform-tools:$HOME/extra/adt-bundle-linux-x86_64/sdk/tools:$HOME/extra/android-ndk-r8d
+
 # Java home
 export JAVA_HOME=/usr/java/default
 PATH=$PATH:$JAVA_HOME/bin
