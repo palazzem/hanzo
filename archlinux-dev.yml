@@ -13,3 +13,4 @@
   - include: common/tasks/development.yml tags=development
   - include: common/tasks/ide.yml tags=ide
   - include: common/tasks/postgresql.yml tags=postgresql
+  - include: common/tasks/extras.yml tags=extras

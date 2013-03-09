@@ -1,0 +1,20 @@
+---
+# Some useful programs / tools
+
+- name: Installing GIMP
+  pacman: name=gimp state=installed
+
+- name: Installing Keepassx
+  pacman: name=keepassx state=installed
+
+- name: Installing Libreoffice prerequisite
+  pacman: name=ttf-dejavu,artwiz-fonts state=installed
+
+- name: Installing Libreoffice (AUR)
+  command: yaourt -S libreoffice-rpm
+
+- name: Installing VLC
+  pacman: name=vlc state=installed
+
+- name: Installing xChat
+  pacman: name=xchat state=installed
