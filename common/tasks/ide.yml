@@ -1,0 +1,34 @@
+---
+# Installing some IDEs
+
+- name: Downloading Android Developer Tools (ADT)
+  sudo_user: $username
+  get_url: url=$adt dest=/tmp/adt_bundle_linux.zip
+
+- name: Installing Android Developer Tools (ADT)
+  sudo_user: $username
+  command: unzip /tmp/adt_bundle_linux.zip -d /home/${username}/extra/
+
+- name: Downloading Eclipse
+  sudo_user: $username
+  get_url: url=$eclipse dest=/tmp/eclipse.tar.gz
+
+- name: Installing Eclipse
+  sudo_user: $username
+  command: tar -xzf /tmp/eclipse.tar.gz -C /home/${username}/extra/
+
+- name: Downloading PyCharm
+  sudo_user: $username
+  get_url: url=$pycharm dest=/tmp/pycharm.tar.gz
+
+- name: Installing PyCharm
+  sudo_user: $username
+  command: tar -xzf /tmp/pycharm.tar.gz -C /home/${username}/extra/
+
+- name: Downloading Sublime Text
+  sudo_user: $username
+  get_url: url=$sublime dest=/tmp/sublime.tar.bz2
+
+- name: Installing Sublime Text
+  sudo_user: $username
+  command: tar -xzf /tmp/sublime.tar.bz2 -C /home/${username}/extra/

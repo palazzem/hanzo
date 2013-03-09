@@ -11,4 +11,5 @@
   - include: common/tasks/virtualization.yml tags=virtualization
   - include: common/tasks/browser.yml tags=browser
   - include: common/tasks/development.yml tags=development
+  - include: common/tasks/ide.yml tags=ide
   - include: common/tasks/postgresql.yml tags=postgresql
