@@ -2,7 +2,7 @@
 # Development configuration
 
 - name: Installing Version Control Systems
-  pacman: name=git,mercurial state=installed
+  pacman: name=git,mercurial,gitg,meld state=installed
 
 - name: Installing Heroku toolbelt
   register: heroku
