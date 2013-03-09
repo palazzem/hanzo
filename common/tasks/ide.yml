@@ -3,42 +3,42 @@
 
 - name: Downloading Android Developer Tools (ADT)
   sudo_user: palazzem
-  get_url: url=$adt dest=/tmp/adt_bundle_linux.zip
+  get_url: url=$adt dest=/var/tmp/adt_bundle_linux.zip
 
 - name: Installing Android Developer Tools (ADT)
   register: inst_adt
   sudo_user: palazzem
-  command: unzip /tmp/adt_bundle_linux.zip -d /home/${username}/extra/
+  command: unzip /var/tmp/adt_bundle_linux.zip -d /home/${username}/extra/
 
 - name: Downloading Android Development Kit (NDK)
   sudo_user: palazzem
-  get_url: url=$ndk dest=/tmp/ndk.tar.bz2
+  get_url: url=$ndk dest=/var/tmp/ndk.tar.bz2
 
 - name: Installing Android Development Kit (NDK)
   register: inst_ndk
   sudo_user: palazzem
-  command: tar -xzf /tmp/ndk.tar.bz2 -C /home/${username}/extra/
+  command: tar -xzf /var/tmp/ndk.tar.bz2 -C /home/${username}/extra/
 
 - name: Downloading Eclipse
   sudo_user: palazzem
-  get_url: url=$eclipse dest=/tmp/eclipse.tar.gz
+  get_url: url=$eclipse dest=/var/tmp/eclipse.tar.gz
 
 - name: Installing Eclipse
   sudo_user: palazzem
-  command: tar -xzf /tmp/eclipse.tar.gz -C /home/${username}/extra/
+  command: tar -xzf /var/tmp/eclipse.tar.gz -C /home/${username}/extra/
 
 - name: Downloading PyCharm
   sudo_user: palazzem
-  get_url: url=$pycharm dest=/tmp/pycharm.tar.gz
+  get_url: url=$pycharm dest=/var/tmp/pycharm.tar.gz
 
 - name: Installing PyCharm
   sudo_user: palazzem
-  command: tar -xzf /tmp/pycharm.tar.gz -C /home/${username}/extra/
+  command: tar -xzf /var/tmp/pycharm.tar.gz -C /home/${username}/extra/
 
 - name: Downloading Sublime Text
   sudo_user: palazzem
-  get_url: url=$sublime dest=/tmp/sublime.tar.bz2
+  get_url: url=$sublime dest=/var/tmp/sublime.tar.bz2
 
 - name: Installing Sublime Text
   sudo_user: palazzem
-  command: tar -xzf /tmp/sublime.tar.bz2 -C /home/${username}/extra/
+  command: tar -xzf /var/tmp/sublime.tar.bz2 -C /home/${username}/extra/

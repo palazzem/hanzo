@@ -16,9 +16,17 @@ Then you are able to install Yaourt and Ansible:
 	$ pacman -Sy yaourt
 	$ yaourt -S ansible-git
 	
-Now run Ansible orchestration and relax while she does the pleasure:
+Before starting the whole installation, umount /tmp partition because Arch Linux uses a small temporary tmpfs (about 500Mb) and this is insufficient for all compilation and downloads that should be done. Do:
 	
-	$ ansible-playbook archlinux-dev.yml --connection=local
+	$ umount /tmp
+
+Now you are able to start this Ansible orchestration:
+	
+	$ ansible-playbook archlinux-dev.yml -i inventory --connection=local
+
+Note
+====
+Relax while she does the pleasure!
 
 What is included
 ================

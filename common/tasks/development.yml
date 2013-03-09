@@ -47,9 +47,9 @@
 
 - name: Downloading Seam Framework
   sudo_user: palazzem
-  get_url: url=$seam dest=/tmp/seam.tar.gz
+  get_url: url=$seam dest=/var/tmp/seam.tar.gz
 
 - name: Installing Seam Framework
   register: inst_seam
   sudo_user: palazzem
-  command: tar -xzf /tmp/seam.tar.gz -C /home/${username}/extra/
+  command: tar -xzf /var/tmp/seam.tar.gz -C /home/${username}/extra/
