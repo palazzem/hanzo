@@ -8,10 +8,10 @@
   command: systemd-tmpfiles --create postgresql.conf
 
 - name: Create PostgreSQL data directory
-  file: dest=/var/lib/postgres/data owner=postgres group=postgres mode=0644 state=directory
+  file: dest=/var/lib/postgres/data owner=postgres group=postgres mode=0700 state=directory
 
 - name: Initializing database
-  command: /usr/bin/initdb -D /var/lib/postgres/data creates=/var/lib/postgres/data/pg_hba.conf
+  shell: /usr/bin/initdb -D '/var/lib/postgres/data' creates=/var/lib/postgres/data/pg_hba.conf
   sudo_user: postgres
 
 - name: Starting PostgreSQL
