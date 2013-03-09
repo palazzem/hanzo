@@ -2,17 +2,17 @@
 # Install extra software system and tools
 
 - name: Installing latest NodeJS 0.8.x
-  sudo_user: $username
+  sudo_user: palazzem
   shell: nvm install 0.8
 
 - name: Default latest NodeJS Version
-  sudo_user: $username
+  sudo_user: palazzem
   shell: nvm alias default 0.8
 
 - name: Installing Bower
-  sudo_user: $username
+  sudo_user: palazzem
   shell: npm install bower -g
 
 - name: Installing Yeoman (Yo)
-  sudo_user: $username
+  sudo_user: palazzem
   shell: npm install -g yo grunt-cli

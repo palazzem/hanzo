@@ -11,7 +11,7 @@
 - name: Installing Pythonz
   register: inst_pythonz
   shell: curl -kL https://raw.github.com/saghul/pythonz/master/pythonz-install | bash
-  sudo_user: $username
+  sudo_user: palazzem
 
 - name: Installing PIP
   pacman: name=python2-pip state=installed
@@ -26,7 +26,7 @@
 - name: Installing Ruby RVM
   register: inst_rvm
   shell: \curl -L https://get.rvm.io | bash -s
-  sudo_user: $username
+  sudo_user: palazzem
 
 - name: Installing Java Development Kit
   command: yaourt -S jdk
@@ -43,13 +43,13 @@
 - name: Installing Node Version Manager (NVM)
   register: inst_nvm
   shell: curl https://raw.github.com/creationix/nvm/master/install.sh | sh
-  sudo_user: $username
+  sudo_user: palazzem
 
 - name: Downloading Seam Framework
-  sudo_user: $username
+  sudo_user: palazzem
   get_url: url=$seam dest=/tmp/seam.tar.gz
 
 - name: Installing Seam Framework
   register: inst_seam
-  sudo_user: $username
+  sudo_user: palazzem
   command: tar -xzf /tmp/seam.tar.gz -C /home/${username}/extra/

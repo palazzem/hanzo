@@ -14,6 +14,7 @@
   - include: common/tasks/ide.yml tags=ide
 
   - name: Configuring .bashrc
+    sudo_user: palazzem
     template: src=common/templates/.bashrc.j2 dest=/home/${username}/.bashrc owner=$username group=$username mode=0644 backup=yes
 
   - include: common/tasks/extra-development.yml tags=extra-development
