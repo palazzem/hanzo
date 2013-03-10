@@ -7,11 +7,8 @@
 - name: Installing Keepassx
   pacman: name=keepassx state=installed
 
-- name: Installing Libreoffice prerequisite
-  pacman: name=ttf-dejavu,artwiz-fonts state=installed
-
-- name: Installing Libreoffice (AUR)
-  command: yaourt -S libreoffice-rpm
+- name: Installing Libreoffice
+  pacman: name=ttf-dejavu,artwiz-fonts,libreoffice-en-US,libreoffice-common,libreoffice-base,libreoffice-calc,libreoffice-draw,libreoffice-impress,libreoffice-math,libreoffice-writer state=installed
 
 - name: Installing VLC
   pacman: name=vlc state=installed
