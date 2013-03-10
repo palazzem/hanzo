@@ -7,7 +7,7 @@ userpass: mypass
 seam: http://downloads.sourceforge.net/project/jboss/JBoss%20Seam/2.3.0.Final/jboss-seam-distribution-2.3.0.Final-dist.tar.gz
 adt: http://dl.google.com/android/adt/adt-bundle-linux-x86_64-20130219.zip
 ndk: http://dl.google.com/android/ndk/android-ndk-r8d-linux-x86.tar.bz2
-eclipse: http://rm.mirror.garr.it/mirrors/eclipse/technology/epp/downloads/release/juno/SR2/eclipse-jee-juno-SR2-linux-gtk-x86_64.tar.gz
+eclipse: http://download.eclipse.org/technology/epp/downloads/release/juno/SR2/eclipse-jee-juno-SR2-linux-gtk-x86_64.tar.gz
 pycharm: http://download-ln.jetbrains.com/python/pycharm-2.7.1.tar.gz
 sublime: http://c758482.r82.cf2.rackcdn.com/Sublime%20Text%202.0.1%20x64.tar.bz2
 
