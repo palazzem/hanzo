@@ -3,6 +3,14 @@
 username: palazzem
 userpass: mypass
 
+# Git configuration
+git_username: Emanuele palazzetti
+git_useremail: info@emanuelepalazzetti.eu
+git_checkout_alias: co
+git_status_alias: st
+git_commit_alias: ci
+git_color: true
+
 # Download URL configuration
 seam: http://downloads.sourceforge.net/project/jboss/JBoss%20Seam/2.3.0.Final/jboss-seam-distribution-2.3.0.Final-dist.tar.gz
 adt: http://dl.google.com/android/adt/adt-bundle-linux-x86_64-20130219.zip
