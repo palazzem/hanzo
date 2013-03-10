@@ -25,6 +25,7 @@ PATH="$PATH:/usr/local/heroku/bin"
 {% if inst_virtualenvwrapper %}
 # Enable Python virtualenvwrapper
 export WORKON_HOME=$HOME/.virtualenvs
+export VIRTUALENVWRAPPER_PYTHON=/usr/bin/python2
 source /usr/bin/virtualenvwrapper.sh
 
 {% endif %}
