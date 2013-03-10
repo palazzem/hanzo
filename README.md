@@ -13,7 +13,7 @@ To use this playbook you must have Ansible correctly installed. I prefer to use 
 
 Then you are able to install Yaourt and Ansible:
 
-	$ pacman -Sy yaourt
+	$ pacman -Sy yaourt sudo
 	$ yaourt -S ansible-git
 	
 Before starting the whole installation, umount /tmp partition because Arch Linux uses a small temporary tmpfs (about 500Mb) and this is insufficient for all compilation and downloads that should be done. Do:
