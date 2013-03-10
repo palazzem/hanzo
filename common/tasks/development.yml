@@ -4,33 +4,53 @@
 - name: Installing Version Control Systems
   pacman: name=git,mercurial,gitg,meld state=installed
 
-- name: Installing Heroku toolbelt
+- name: Checking Heroku toolbelt installation
   register: inst_heroku
-  shell: wget -qO- https://toolbelt.heroku.com/install.sh | sh creates=/usr/local/heroku
+  file: path=/usr/local/heroku state=directory
+
+- name: Installing Heroku toolbelt
+  shell: wget -qO- https://toolbelt.heroku.com/install.sh | sh
+  when_changed: $inst_heroku
+
+- name: Checking Pythonz installation
+  register: inst_pythonz
+  file: path=/home/${username}/.pythonz state=directory
 
 - name: Installing Pythonz
-  register: inst_pythonz
-  shell: curl -kL https://raw.github.com/saghul/pythonz/master/pythonz-install | bash creates=/home/${username}/.pythonz
+  shell: curl -kL https://raw.github.com/saghul/pythonz/master/pythonz-install | bash
   sudo_user: palazzem
+  when_changed: $inst_pythonz
 
 - name: Installing PIP
   pacman: name=python2-pip state=installed
 
-- name: Installing Python virtualenv
+- name: Checking Python virtualenv installation
   register: inst_virtualenvwrapper
-  shell: pip2 install virtualenvwrapper creates=/usr/bin/virtualenvwrapper.sh
+  file: path=/usr/bin/virtualenvwrapper.sh
+
+- name: Installing Python virtualenv
+  shell: pip2 install virtualenvwrapper
+  when_changed: $inst_virtualenvwrapper
 
 - name: Installing system Ruby
   pacman: name=ruby state=installed
 
-- name: Installing Ruby RVM
+- name: Checking Ruby RVM installation
   register: inst_rvm
-  shell: \curl -L https://get.rvm.io | bash -s creates=/home/${username}/.rvm
+  file: path=/home/${username}/.rvm state=directory
+
+- name: Installing Ruby RVM
+  shell: \curl -L https://get.rvm.io | bash -s stable
   sudo_user: palazzem
+  when_changed: $inst_rvm
+
+- name: Checking Java Development Kit installation
+  register: inst_java
+  file: path=/opt/java state=directory
 
 - name: Installing Java Development Kit
-  register: inst_java
   command: yaourt -S jdk creates=/opt/java
+  when_changed: $inst_java
 
 - name: Installing Maven
   pacman: name=maven state=installed
@@ -44,15 +64,19 @@
   sudo_user: palazzem
 
 - name: Checking Seam Framework installation
-  register: check_seam
+  register: inst_seam
   file: path=/home/${username}/extra/jboss-seam-2.3.0.Final state=directory
 
 - name: Downloading Seam Framework
   sudo_user: palazzem
   get_url: url=$seam dest=/var/tmp/seam.tar.gz
-  only_if: '${check_seam.changed}'
+  when_changed: $inst_seam
 
 - name: Installing Seam Framework
-  register: inst_seam
   sudo_user: palazzem
-  command: tar -xzf /var/tmp/seam.tar.gz -C /home/${username}/extra/ creates=/home/${username}/extra/jboss-seam-2.3.0.Final
+  command: tar -xzf /var/tmp/seam.tar.gz -C /home/${username}/extra/
+  when_changed: $inst_seam
+
+- name: Configuring .bashrc
+  sudo_user: palazzem
+  template: src=common/templates/.bashrc.j2 dest=/home/${username}/.bashrc owner=$username group=$username mode=0644 backup=yes
