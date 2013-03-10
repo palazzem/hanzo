@@ -29,6 +29,7 @@
   sudo_user: palazzem
 
 - name: Installing Java Development Kit
+  register: inst_java
   command: yaourt -S jdk
 
 # I don't know why but Jython installation ends succesfully but Ansible catch an error
