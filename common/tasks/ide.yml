@@ -7,12 +7,12 @@
 
 - name: Downloading Android Developer Tools (ADT)
   sudo_user: palazzem
-  get_url: url=$adt dest=/var/tmp/adt_bundle_linux.zip
+  get_url: url=$adt dest=/tmp/adt_bundle_linux.zip
   when_changed: $inst_adt
 
 - name: Installing Android Developer Tools (ADT)
   sudo_user: palazzem
-  command: unzip /var/tmp/adt_bundle_linux.zip -d /home/${username}/extra/
+  command: unzip /tmp/adt_bundle_linux.zip -d /home/${username}/extra/
   when_changed: $inst_adt
 
 - name: Checking Android Native Development Kit installation
@@ -21,12 +21,12 @@
 
 - name: Downloading Android Native Development Kit (NDK)
   sudo_user: palazzem
-  get_url: url=$ndk dest=/var/tmp/ndk.tar.bz2
+  get_url: url=$ndk dest=/tmp/ndk.tar.bz2
   when_changed: $inst_ndk
 
 - name: Installing Android Native Development Kit (NDK)
   sudo_user: palazzem
-  command: tar -xjf /var/tmp/ndk.tar.bz2 -C /home/${username}/extra/
+  command: tar -xjf /tmp/ndk.tar.bz2 -C /home/${username}/extra/
   when_changed: $inst_ndk
 
 - name: Checking Eclipse installation
@@ -35,12 +35,12 @@
 
 - name: Downloading Eclipse
   sudo_user: palazzem
-  get_url: url=$eclipse dest=/var/tmp/eclipse.tar.gz
+  get_url: url=$eclipse dest=/tmp/eclipse.tar.gz
   when_changed: $inst_eclipse
 
 - name: Installing Eclipse
   sudo_user: palazzem
-  command: tar -xzf /var/tmp/eclipse.tar.gz -C /home/${username}/extra/
+  command: tar -xzf /tmp/eclipse.tar.gz -C /home/${username}/extra/
   when_changed: $inst_eclipse
 
 - name: Checking PyCharm installation
@@ -49,12 +49,12 @@
 
 - name: Downloading PyCharm
   sudo_user: palazzem
-  get_url: url=$pycharm dest=/var/tmp/pycharm.tar.gz
+  get_url: url=$pycharm dest=/tmp/pycharm.tar.gz
   when_changed: $inst_pycharm
 
 - name: Installing PyCharm
   sudo_user: palazzem
-  command: tar -xzf /var/tmp/pycharm.tar.gz -C /home/${username}/extra/
+  command: tar -xzf /tmp/pycharm.tar.gz -C /home/${username}/extra/
   when_changed: $inst_pycharm
 
 - name: Checking Sublime Text installation
@@ -63,10 +63,10 @@
 
 - name: Downloading Sublime Text
   sudo_user: palazzem
-  get_url: url=$sublime dest=/var/tmp/sublime.tar.bz2
+  get_url: url=$sublime dest=/tmp/sublime.tar.bz2
   when_changed: $inst_sublime
 
 - name: Installing Sublime Text
   sudo_user: palazzem
-  command: tar -xjf /var/tmp/sublime.tar.bz2 -C /home/${username}/extra/
+  command: tar -xjf /tmp/sublime.tar.bz2 -C /home/${username}/extra/
   when_changed: $inst_sublime

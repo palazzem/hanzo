@@ -26,7 +26,7 @@ Now you are able to start this Ansible orchestration:
 
 Note
 ====
-Relax while she does the pleasure!
+Remember to remove /tmp/* files before system restarts.
 
 What is included
 ================
