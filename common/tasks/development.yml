@@ -6,11 +6,11 @@
 
 - name: Installing Heroku toolbelt
   register: inst_heroku
-  shell: wget -qO- https://toolbelt.heroku.com/install.sh | sh
+  shell: wget -qO- https://toolbelt.heroku.com/install.sh | sh creates=/usr/local/heroku
 
 - name: Installing Pythonz
   register: inst_pythonz
-  shell: curl -kL https://raw.github.com/saghul/pythonz/master/pythonz-install | bash
+  shell: curl -kL https://raw.github.com/saghul/pythonz/master/pythonz-install | bash creates=/home/${username}/.pythonz
   sudo_user: palazzem
 
 - name: Installing PIP
@@ -18,19 +18,19 @@
 
 - name: Installing Python virtualenv
   register: inst_virtualenvwrapper
-  shell: pip2 install virtualenvwrapper
+  shell: pip2 install virtualenvwrapper creates=/usr/bin/virtualenvwrapper.sh
 
 - name: Installing system Ruby
   pacman: name=ruby state=installed
 
 - name: Installing Ruby RVM
   register: inst_rvm
-  shell: \curl -L https://get.rvm.io | bash -s
+  shell: \curl -L https://get.rvm.io | bash -s creates=/home/${username}/.rvm
   sudo_user: palazzem
 
 - name: Installing Java Development Kit
   register: inst_java
-  command: yaourt -S jdk
+  command: yaourt -S jdk creates=/opt/java
 
 - name: Installing Maven
   pacman: name=maven state=installed
@@ -43,11 +43,16 @@
   git: repo=git://github.com/creationix/nvm.git dest=/home/${username}/.nvm
   sudo_user: palazzem
 
+- name: Checking Seam Framework installation
+  register: check_seam
+  file: path=/home/${username}/extra/jboss-seam-2.3.0.Final state=directory
+
 - name: Downloading Seam Framework
   sudo_user: palazzem
   get_url: url=$seam dest=/var/tmp/seam.tar.gz
+  only_if: '${check_seam.changed}'
 
 - name: Installing Seam Framework
   register: inst_seam
   sudo_user: palazzem
-  command: tar -xzf /var/tmp/seam.tar.gz -C /home/${username}/extra/
+  command: tar -xzf /var/tmp/seam.tar.gz -C /home/${username}/extra/ creates=/home/${username}/extra/jboss-seam-2.3.0.Final

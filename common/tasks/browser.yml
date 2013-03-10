@@ -5,4 +5,4 @@
   pacman: name=firefox state=installed
 
 - name: Installing Google Chrome
-  command: yaourt -S google-chrome
+  command: yaourt -S google-chrome creates=/opt/google/chrome

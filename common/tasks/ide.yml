@@ -1,44 +1,69 @@
 ---
 # Installing some IDEs
 
+- name: Checking Android Developer Tools installation
+  register: check_adt
+  file: path=/home/${username}/extra/adt-bundle-linux-x86_64-20130219 state=directory
+
 - name: Downloading Android Developer Tools (ADT)
   sudo_user: palazzem
   get_url: url=$adt dest=/var/tmp/adt_bundle_linux.zip
+  only_if: '${check_adt.changed}'
 
 - name: Installing Android Developer Tools (ADT)
   register: inst_adt
   sudo_user: palazzem
-  command: unzip /var/tmp/adt_bundle_linux.zip -d /home/${username}/extra/
+  command: unzip /var/tmp/adt_bundle_linux.zip -d /home/${username}/extra/ creates=/home/${username}/extra/adt-bundle-linux-x86_64-20130219
 
-- name: Downloading Android Development Kit (NDK)
+- name: Checking Android Native Development Kit installation
+  register: check_ndk
+  file: path=/home/${username}/extra/android-ndk-r8d state=directory
+
+- name: Downloading Android Native Development Kit (NDK)
   sudo_user: palazzem
   get_url: url=$ndk dest=/var/tmp/ndk.tar.bz2
+  only_if: '${check_ndk.changed}'
 
-- name: Installing Android Development Kit (NDK)
+- name: Installing Android Native Development Kit (NDK)
   register: inst_ndk
   sudo_user: palazzem
-  command: tar -xzf /var/tmp/ndk.tar.bz2 -C /home/${username}/extra/
+  command: tar -xjf /var/tmp/ndk.tar.bz2 -C /home/${username}/extra/ creates=/home/${username}/extra/android-ndk-r8d
+
+- name: Checking Eclipse installation
+  register: check_eclipse
+  file: path=/home/${username}/extra/eclipse state=directory
 
 - name: Downloading Eclipse
   sudo_user: palazzem
   get_url: url=$eclipse dest=/var/tmp/eclipse.tar.gz
+  only_if: '${check_eclipse.changed}'
 
 - name: Installing Eclipse
   sudo_user: palazzem
-  command: tar -xzf /var/tmp/eclipse.tar.gz -C /home/${username}/extra/
+  command: tar -xzf /var/tmp/eclipse.tar.gz -C /home/${username}/extra/ creates=/home/${username}/extra/eclipse
+
+- name: Checking PyCharm installation
+  register: check_pycharm
+  file: path=/home/${username}/extra/pycharm-2.7.1 state=directory
 
 - name: Downloading PyCharm
   sudo_user: palazzem
   get_url: url=$pycharm dest=/var/tmp/pycharm.tar.gz
+  only_if: '${check_pycharm.changed}'
 
 - name: Installing PyCharm
   sudo_user: palazzem
-  command: tar -xzf /var/tmp/pycharm.tar.gz -C /home/${username}/extra/
+  command: tar -xzf /var/tmp/pycharm.tar.gz -C /home/${username}/extra/ creates=/home/${username}/extra/pycharm-2.7.1
+
+- name: Checking Sublime Text installation
+  register: check_sublime
+  file: path=/home/${username}/extra/Sublime\ Text\ 2 state=directory
 
 - name: Downloading Sublime Text
   sudo_user: palazzem
   get_url: url=$sublime dest=/var/tmp/sublime.tar.bz2
+  only_if: '${check_sublime.changed}'
 
 - name: Installing Sublime Text
   sudo_user: palazzem
-  command: tar -xzf /var/tmp/sublime.tar.bz2 -C /home/${username}/extra/
+  command: tar -xjf /var/tmp/sublime.tar.bz2 -C /home/${username}/extra/ creates=/home/${username}/extra/Sublime\ Text\ 2
