@@ -13,12 +13,6 @@
 - name: Installing Xorg
   pacman: name=xorg-server,xorg-server-utils,mesa state=installed
 
-- name: Installing LXDE Desktop Environment
-  pacman: name=lxde,lxdm state=installed
-
-- name: Enabling LXDM display manager
-  service: name=lxdm enabled=yes
-
 - name: Creating user group
   group: name=$username state=present
 
