@@ -7,6 +7,9 @@
 - name: Configuring GIT defaults
   template: src=common/templates/.gitconfig.j2 dest=/home/${username}/.gitconfig owner=$username group=$username mode=0644 backup=yes
 
+- name: Configuring VIM defaults
+  copy: src=common/files/.exrc dest=/home/${username}/.exrc owner=$username group=$username mode=0644 backup=yes
+
 - name: Checking Heroku toolbelt installation
   register: inst_heroku
   file: path=/usr/local/heroku state=directory
