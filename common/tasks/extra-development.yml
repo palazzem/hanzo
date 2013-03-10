@@ -3,16 +3,16 @@
 
 - name: Installing latest NodeJS 0.8.x
   sudo_user: palazzem
-  shell: nvm install 0.8
+  shell: source ~/.nvm/nvm.sh && nvm install 0.8
 
 - name: Default latest NodeJS Version
   sudo_user: palazzem
-  shell: nvm alias default 0.8
+  shell: source ~/.nvm/nvm.sh && nvm alias default 0.8
 
 - name: Installing Bower
   sudo_user: palazzem
-  shell: npm install bower -g
+  shell: source ~/.nvm/nvm.sh && npm install -g bower chdir=/home/${username}
 
 - name: Installing Yeoman (Yo)
   sudo_user: palazzem
-  shell: npm install -g yo grunt-cli
+  shell: source ~/.nvm/nvm.sh && npm install -g yo grunt-cli chdir=/home/${username}
