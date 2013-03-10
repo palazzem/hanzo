@@ -44,7 +44,7 @@
 
 - name: Installing Node Version Manager (NVM)
   register: inst_nvm
-  shell: curl https://raw.github.com/creationix/nvm/master/install.sh | sh
+  git: repo=git://github.com/creationix/nvm.git dest=/home/${username}/.nvm
   sudo_user: palazzem
 
 - name: Downloading Seam Framework
