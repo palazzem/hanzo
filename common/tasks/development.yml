@@ -32,11 +32,6 @@
   register: inst_java
   command: yaourt -S jdk
 
-# I don't know why but Jython installation ends succesfully but Ansible catch an error
-- name: Installing Jython
-  ignore_errors: yes
-  pacman: name=jython state=installed
-
 - name: Installing Maven
   pacman: name=maven state=installed
 
