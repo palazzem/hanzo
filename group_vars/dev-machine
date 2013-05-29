@@ -12,6 +12,7 @@ git_commit_alias: ci
 git_color: true
 
 # Download URL configuration
+chrome: https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
 seam: http://downloads.sourceforge.net/project/jboss/JBoss%20Seam/2.3.0.Final/jboss-seam-distribution-2.3.0.Final-dist.tar.gz
 adt: http://dl.google.com/android/adt/adt-bundle-linux-x86_64-20130219.zip
 ndk: http://dl.google.com/android/ndk/android-ndk-r8d-linux-x86.tar.bz2
