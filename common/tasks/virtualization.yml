@@ -2,4 +2,7 @@
 # Configuring Virtualization tools
 
 - name: Installing KVM
-  pacman: name=libvirt,urlgrabber,virtviewer,virtinst,virt-manager
+  apt: name=qemu-kvm,libvirt-bin,ubuntu-vm-builder,bridge-utils,virt-manager state=latest
+
+- name: Put user in libvirtd group
+  user: name=$username groups=libvirtd
