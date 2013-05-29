@@ -2,7 +2,7 @@
 # Development configuration
 
 - name: Installing Version Control Systems
-  pacman: name=git,mercurial,gitg,meld state=installed
+  apt: pkg=git,mercurial,gitg,meld state=installed
 
 - name: Configuring GIT defaults
   template: src=common/templates/.gitconfig.j2 dest=/home/${username}/.gitconfig owner=$username group=$username mode=0644 backup=yes
@@ -14,8 +14,8 @@
   register: inst_heroku
   file: path=/usr/local/heroku state=directory
 
-- name: Installing Heroku toolbelt
-  shell: wget -qO- https://toolbelt.heroku.com/install.sh | sh
+- name: Installing Ubuntu Heroku toolbelt
+  shell: wget -qO- https://toolbelt.heroku.com/install-ubuntu.sh | sh
   when_changed: $inst_heroku
 
 - name: Checking Pythonz installation
@@ -24,22 +24,22 @@
 
 - name: Installing Pythonz
   shell: curl -kL https://raw.github.com/saghul/pythonz/master/pythonz-install | bash
-  sudo_user: palazzem
+  sudo_user: $username
   when_changed: $inst_pythonz
 
 - name: Installing PIP
-  pacman: name=python2-pip state=installed
+  apt: pkg=python-pip state=installed
 
-- name: Checking Python virtualenv installation
+- name: Checking Python virtualenvwrapper installation
   register: inst_virtualenvwrapper
   file: path=/usr/bin/virtualenvwrapper.sh
 
 - name: Installing Python virtualenv
-  shell: pip2 install virtualenvwrapper
+  shell: pip install virtualenvwrapper
   when_changed: $inst_virtualenvwrapper
 
-- name: Installing system Ruby
-  pacman: name=ruby state=installed
+- name: Removing system Ruby
+  apt: pkg=ruby1.8,ruby1.9.1 state=absent
 
 - name: Checking Ruby RVM installation
   register: inst_rvm
@@ -47,42 +47,46 @@
 
 - name: Installing Ruby RVM
   shell: \curl -L https://get.rvm.io | bash -s stable
-  sudo_user: palazzem
+  sudo_user: $username
   when_changed: $inst_rvm
 
-- name: Checking Java Development Kit installation
+- name: Checking Oracle JDK 7 installation
   register: inst_java
-  file: path=/opt/java state=directory
+  file: path=/usr/lib/jvm/java-7-oracle state=directory
 
-- name: Installing Java Development Kit
-  command: yaourt -S jdk creates=/opt/java
+- name: Enabling Oracle JDK 7 PPA
+  apt_repository: repo=ppa:webupd8team/java
+  when_changed: $inst_java
+
+- name: Installing Oracle JDK 7
+  apt: pkg=oracle-java7-installer state=latest update_cache=yes
   when_changed: $inst_java
 
 - name: Installing Maven
-  pacman: name=maven state=installed
+  apt: pkg=maven state=installed
 
 - name: Installing Ant
-  pacman: name=apache-ant state=installed
+  apt: pkg=ant state=installed
 
 - name: Installing Node Version Manager (NVM)
   register: inst_nvm
   git: repo=git://github.com/creationix/nvm.git dest=/home/${username}/.nvm
-  sudo_user: palazzem
+  sudo_user: $username
 
 - name: Checking Seam Framework installation
   register: inst_seam
-  file: path=/home/${username}/extra/jboss-seam-2.3.0.Final state=directory
+  file: path=/home/${username}/program/jboss-seam-2.3.0.Final state=directory
 
 - name: Downloading Seam Framework
-  sudo_user: palazzem
+  sudo_user: $username
   get_url: url=$seam dest=/tmp/seam.tar.gz
   when_changed: $inst_seam
 
 - name: Installing Seam Framework
-  sudo_user: palazzem
-  command: tar -xzf /tmp/seam.tar.gz -C /home/${username}/extra/
+  sudo_user: $username
+  command: tar -xzf /tmp/seam.tar.gz -C /home/${username}/program/
   when_changed: $inst_seam
 
-- name: Configuring .bashrc
-  sudo_user: palazzem
-  template: src=common/templates/.bashrc.j2 dest=/home/${username}/.bashrc owner=$username group=$username mode=0644 backup=yes
+- name: Configuring .profile
+  sudo_user: $username
+  template: src=common/templates/.profile.j2 dest=/home/${username}/.profile owner=$username group=$username mode=0644 backup=yes
