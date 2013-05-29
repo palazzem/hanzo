@@ -1,15 +1,29 @@
-# .bashrc
+# ~/.profile: executed by the command interpreter for login shells.
+# This file is not read by bash(1), if ~/.bash_profile or ~/.bash_login
+# exists.
+# see /usr/share/doc/bash/examples/startup-files for examples.
+# the files are located in the bash-doc package.
 
-# If not running interactively, don't do anything
-[[ $- != *i* ]] && return
+# the default umask is set in /etc/profile; for setting the umask
+# for ssh logins, install and configure the libpam-umask package.
+#umask 022
 
-# Shell configuration
-alias ls='ls --color=auto'
-PS1='[\u@\h \W]\$ '
+# if running bash
+if [ -n "$BASH_VERSION" ]; then
+    # include .bashrc if it exists
+    if [ -f "$HOME/.bashrc" ]; then
+	. "$HOME/.bashrc"
+    fi
+fi
 
-# User specific aliases and functions
+# set PATH so it includes user's private bin if it exists
+if [ -d "$HOME/bin" ] ; then
+    PATH="$HOME/bin:$PATH"
+fi
 
-# Enable two-finger scroll
+### User specific aliases and functions ###
+
+# Enable two-finger natural scroll
 xmodmap -e "pointer = 1 2 3 5 4 7 6 8 9 10 11 12"
 
 {% if inst_heroku %}
