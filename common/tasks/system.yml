@@ -1,23 +1,11 @@
 ---
-# Arch Linux basic configuration
+# Ubuntu basic configuration
 
-- name: Configuring pacman.conf
-  copy: src=common/files/pacman.conf dest=/etc/pacman.conf owner=root group=root mode=0644 backup=yes
-
-- name: Configuring yaourtrc
-  copy: src=common/files/yaourtrc dest=/etc/yaourtrc owner=root group=root mode=0644 backup=yes
+- name: Updating all packages
+  apt: upgrade=dist update_cache=yes
 
 - name: Installing basic system packages
-  pacman: name=sudo,alsa-utils,xf86-video-intel,xf86-input-synaptics,openssh,vim,yaourt,tar,zip,unzip,p7zip,wget,curl,mlocate state=installed update_cache=yes
-
-- name: Installing Xorg
-  pacman: name=xorg-server,xorg-server-utils,mesa state=installed
-
-- name: Creating user group
-  group: name=$username state=present
-
-- name: Creating user
-  user: name=$username group=$username password=$userpass generate_ssh_key=true ssh_key_bits=4096 state=present
+  apt: pkg=vim,p7zip,curl state=latest update_cache=yes
 
 - name: Creating user extra folder for IDE and framework
-  file: path=/home/${username}/extra owner=$username group=$username state=directory
+  file: path=/home/${username}/program owner=$username group=$username state=directory
