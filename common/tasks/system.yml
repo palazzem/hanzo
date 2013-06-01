@@ -2,7 +2,7 @@
 # Ubuntu basic configuration
 
 - name: Updating all packages
-  apt: upgrade=dist update_cache=yes
+  apt: upgrade=yes update_cache=yes state=latest
 
 - name: Installing basic system packages
   apt: pkg=vim,p7zip,curl state=latest update_cache=yes

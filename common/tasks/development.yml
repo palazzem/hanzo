@@ -32,9 +32,10 @@
 
 - name: Checking Python virtualenvwrapper installation
   register: inst_virtualenvwrapper
-  file: path=/usr/bin/virtualenvwrapper.sh
+  file: path=/usr/local/bin/virtualenvwrapper.sh
 
 - name: Installing Python virtualenv
+  sudo: yes
   shell: pip install virtualenvwrapper
   when_changed: $inst_virtualenvwrapper
 
@@ -47,7 +48,6 @@
 
 - name: Installing Ruby RVM
   shell: \curl -L https://get.rvm.io | bash -s stable
-  sudo_user: $username
   when_changed: $inst_rvm
 
 - name: Checking Oracle JDK 7 installation
@@ -71,22 +71,18 @@
 - name: Installing Node Version Manager (NVM)
   register: inst_nvm
   git: repo=git://github.com/creationix/nvm.git dest=/home/${username}/.nvm
-  sudo_user: $username
 
 - name: Checking Seam Framework installation
   register: inst_seam
   file: path=/home/${username}/program/jboss-seam-2.3.0.Final state=directory
 
 - name: Downloading Seam Framework
-  sudo_user: $username
   get_url: url=$seam dest=/tmp/seam.tar.gz
   when_changed: $inst_seam
 
 - name: Installing Seam Framework
-  sudo_user: $username
   command: tar -xzf /tmp/seam.tar.gz -C /home/${username}/program/
   when_changed: $inst_seam
 
 - name: Configuring .profile
-  sudo_user: $username
   template: src=common/templates/.profile.j2 dest=/home/${username}/.profile owner=$username group=$username mode=0644 backup=yes

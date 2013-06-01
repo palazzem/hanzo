@@ -2,17 +2,13 @@
 # Install extra software system and tools
 
 - name: Installing latest NodeJS 0.10.x
-  sudo_user: $username
   shell: source ~/.nvm/nvm.sh && nvm install 0.10.8
 
 - name: Default latest NodeJS Version
-  sudo_user: $username
   shell: source ~/.nvm/nvm.sh && nvm alias default 0.10.8
 
 - name: Installing Bower
-  sudo_user: $username
   shell: source ~/.nvm/nvm.sh && npm install -g bower chdir=/home/${username}
 
 - name: Installing Yeoman (Yo)
-  sudo_user: $username
   shell: source ~/.nvm/nvm.sh && npm install -g yo grunt-cli chdir=/home/${username}

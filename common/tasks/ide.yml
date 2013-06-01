@@ -6,12 +6,10 @@
   file: path=/home/${username}/program/adt-bundle-linux-x86_64-20130219 state=directory
 
 - name: Downloading Android Developer Tools (ADT)
-  sudo_user: $username
   get_url: url=$adt dest=/tmp/adt_bundle_linux.zip
   when_changed: $inst_adt
 
 - name: Installing Android Developer Tools (ADT)
-  sudo_user: $username
   command: unzip /tmp/adt_bundle_linux.zip -d /home/${username}/program/
   when_changed: $inst_adt
 
@@ -20,12 +18,10 @@
   file: path=/home/${username}/program/android-ndk-r8d state=directory
 
 - name: Downloading Android Native Development Kit (NDK)
-  sudo_user: $username
   get_url: url=$ndk dest=/tmp/ndk.tar.bz2
   when_changed: $inst_ndk
 
 - name: Installing Android Native Development Kit (NDK)
-  sudo_user: $username
   command: tar -xjf /tmp/ndk.tar.bz2 -C /home/${username}/program/
   when_changed: $inst_ndk
 
@@ -34,12 +30,10 @@
   file: path=/home/${username}/program/eclipse state=directory
 
 - name: Downloading Eclipse
-  sudo_user: $username
   get_url: url=$eclipse dest=/tmp/eclipse.tar.gz
   when_changed: $inst_eclipse
 
 - name: Installing Eclipse
-  sudo_user: $username
   command: tar -xzf /tmp/eclipse.tar.gz -C /home/${username}/program/
   when_changed: $inst_eclipse
 
@@ -48,12 +42,10 @@
   file: path=/home/${username}/program/pycharm-2.7.1 state=directory
 
 - name: Downloading PyCharm
-  sudo_user: $username
   get_url: url=$pycharm dest=/tmp/pycharm.tar.gz
   when_changed: $inst_pycharm
 
 - name: Installing PyCharm
-  sudo_user: $username
   command: tar -xzf /tmp/pycharm.tar.gz -C /home/${username}/program/
   when_changed: $inst_pycharm
 
@@ -62,11 +54,9 @@
   file: path=/home/${username}/program/Sublime\ Text\ 2 state=directory
 
 - name: Downloading Sublime Text
-  sudo_user: $username
   get_url: url=$sublime dest=/tmp/sublime.tar.bz2
   when_changed: $inst_sublime
 
 - name: Installing Sublime Text
-  sudo_user: $username
   command: tar -xjf /tmp/sublime.tar.bz2 -C /home/${username}/program/
   when_changed: $inst_sublime
