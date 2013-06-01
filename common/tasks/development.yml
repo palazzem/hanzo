@@ -24,7 +24,6 @@
 
 - name: Installing Pythonz
   shell: curl -kL https://raw.github.com/saghul/pythonz/master/pythonz-install | bash
-  sudo_user: $username
   when_changed: $inst_pythonz
 
 - name: Installing PIP
