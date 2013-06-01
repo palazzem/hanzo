@@ -2,6 +2,7 @@
 # Development configuration
 
 - name: Installing Version Control Systems
+  sudo: yes
   apt: pkg=git,mercurial,gitg,meld state=installed
 
 - name: Configuring GIT defaults
@@ -39,6 +40,7 @@
   when_changed: $inst_virtualenvwrapper
 
 - name: Installing system Ruby
+  sudo: yes
   apt: pkg=ruby state=latest
 
 - name: Checking Ruby RVM installation
@@ -54,20 +56,25 @@
   file: path=/usr/lib/jvm/java-7-oracle state=directory
 
 - name: Enabling Oracle JDK 7 PPA
+  sudo: yes
   apt_repository: repo=ppa:webupd8team/java
   when_changed: $inst_java
 
 - name: Unattended installation
+  sudo: yes
   shell: echo debconf shared/accepted-oracle-license-v1-1 select true | debconf-set-selections && echo debconf shared/accepted-oracle-license-v1-1 seen true | debconf-set-selections
 
 - name: Installing Oracle JDK 7
+  sudo: yes
   apt: pkg=oracle-java7-installer state=latest update_cache=yes
   when_changed: $inst_java
 
 - name: Installing Maven
+  sudo: yes
   apt: pkg=maven state=installed
 
 - name: Installing Ant
+  sudo: yes
   apt: pkg=ant state=installed
 
 - name: Installing Node Version Manager (NVM)

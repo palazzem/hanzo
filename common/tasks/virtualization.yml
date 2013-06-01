@@ -2,7 +2,9 @@
 # Configuring Virtualization tools
 
 - name: Installing KVM
+  sudo: yes
   apt: name=qemu-kvm,libvirt-bin,ubuntu-vm-builder,bridge-utils,virt-manager state=latest
 
 - name: Put user in libvirtd group
-  user: name=$username groups=libvirtd
+  sudo: yes
+  user: name=$username groups=adm,cdrom,sudo,dip,plugdev,lpadmin,sambashare,libvirtd

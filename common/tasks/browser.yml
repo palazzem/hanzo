@@ -6,6 +6,7 @@
   file: path=/opt/google/chrome state=directory
 
 - name: Checking Google Chrome dependencies
+  sudo: yes
   apt: name=libgconf2-4,libxss1 state=latest
   when_changed: $inst_chrome
 

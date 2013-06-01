@@ -2,13 +2,13 @@
 # Install extra software system and tools
 
 - name: Installing latest NodeJS 0.10.x
-  shell: source ~/.nvm/nvm.sh && nvm install 0.10.8
+  shell: executable=/bin/bash source ~/.nvm/nvm.sh && nvm install 0.10.8
 
 - name: Default latest NodeJS Version
-  shell: source ~/.nvm/nvm.sh && nvm alias default 0.10.8
+  shell: executable=/bin/bash source ~/.nvm/nvm.sh && nvm alias default 0.10.8
 
 - name: Installing Bower
-  shell: source ~/.nvm/nvm.sh && npm install -g bower chdir=/home/${username}
+  shell: executable=/bin/bash source ~/.nvm/nvm.sh && npm install -g bower chdir=/home/${username}
 
 - name: Installing Yeoman (Yo)
-  shell: source ~/.nvm/nvm.sh && npm install -g yo grunt-cli chdir=/home/${username}
+  shell: executable=/bin/bash source ~/.nvm/nvm.sh && npm install -g yo grunt-cli chdir=/home/${username}

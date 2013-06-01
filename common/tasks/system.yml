@@ -2,9 +2,11 @@
 # Ubuntu basic configuration
 
 - name: Updating all packages
+  sudo: yes
   apt: upgrade=yes update_cache=yes state=latest
 
 - name: Installing basic system packages
+  sudo: yes
   apt: pkg=vim,p7zip,curl state=latest update_cache=yes
 
 - name: Creating user extra folder for IDE and framework
