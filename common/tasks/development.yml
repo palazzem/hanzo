@@ -38,8 +38,8 @@
   shell: pip install virtualenvwrapper
   when_changed: $inst_virtualenvwrapper
 
-- name: Removing system Ruby
-  apt: pkg=ruby1.8,ruby1.9.1 state=absent
+- name: Installing system Ruby
+  apt: pkg=ruby state=latest
 
 - name: Checking Ruby RVM installation
   register: inst_rvm
