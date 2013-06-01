@@ -58,6 +58,9 @@
   apt_repository: repo=ppa:webupd8team/java
   when_changed: $inst_java
 
+- name: Unattended installation
+  shell: echo debconf shared/accepted-oracle-license-v1-1 select true | debconf-set-selections && echo debconf shared/accepted-oracle-license-v1-1 seen true | debconf-set-selections
+
 - name: Installing Oracle JDK 7
   apt: pkg=oracle-java7-installer state=latest update_cache=yes
   when_changed: $inst_java
