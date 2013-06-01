@@ -40,28 +40,28 @@ PATH="$PATH:/usr/local/heroku/bin"
 # Enable Python virtualenvwrapper
 export WORKON_HOME=$HOME/.virtualenvs
 export VIRTUALENVWRAPPER_PYTHON=/usr/bin/python2
-source /usr/bin/virtualenvwrapper.sh
+source /usr/local/bin/virtualenvwrapper.sh
 
 {% endif %}
 {% if inst_adt %}
 # Android ADT
-PATH=$PATH:$HOME/extra/adt-bundle-linux-x86_64-20130219/sdk/platform-tools:$HOME/extra/adt-bundle-linux-x86_64-20130219/sdk/tools
+PATH=$PATH:$HOME/program/adt-bundle-linux-x86_64-20130219/sdk/platform-tools:$HOME/program/adt-bundle-linux-x86_64-20130219/sdk/tools
 
 {% endif %}
 {% if inst_ndk %}
 # Android NDK
-PATH=$PATH:$HOME/extra/android-ndk-r8d
+PATH=$PATH:$HOME/program/android-ndk-r8d
 
 {% endif %}
 {% if inst_java %}
 # Java home
-export JAVA_HOME=/opt/java
+export JAVA_HOME=/usr/lib/jvm/java-7-oracle
 PATH=$PATH:$JAVA_HOME/bin
 
 {% endif %}
 {% if inst_seam %}
 # Seam Framework
-export SEAM_HOME=~/extra/seam
+export SEAM_HOME=~/program/seam
 PATH=$PATH:$SEAM_HOME
 
 {% endif %}
