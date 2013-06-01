@@ -1,7 +1,6 @@
 ---
 # User configuration
 username: palazzem
-userpass: mypass
 
 # Git configuration
 git_username: Emanuele palazzetti
