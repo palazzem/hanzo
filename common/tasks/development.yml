@@ -86,6 +86,3 @@
 - name: Installing Seam Framework
   command: tar -xzf /tmp/seam.tar.gz -C /home/${username}/program/
   when_changed: $inst_seam
-
-- name: Configuring .profile
-  template: src=common/templates/.profile.j2 dest=/home/${username}/.profile owner=$username group=$username mode=0644 backup=yes
