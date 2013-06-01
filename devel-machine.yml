@@ -1,7 +1,5 @@
 ---
-- hosts: dev-machine
-  user: root
-  sudo: yes
+- hosts: all
 
   vars:
   - ansible_python_interpreter: /usr/bin/python2
