@@ -2,6 +2,7 @@
 # Installing Internet browser
 
 - name: Checking Google Chrome installation
+  sudo: yes
   register: inst_chrome
   file: path=/opt/google/chrome state=directory
 
@@ -15,5 +16,6 @@
   when_changed: $inst_chrome
 
 - name: Installing Google Chrome
+  sudo: yes
   shell: dpkg -i /tmp/google-chrome-stable_current_amd64.deb
   when_changed: $inst_chrome

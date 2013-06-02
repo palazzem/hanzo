@@ -12,10 +12,12 @@
   copy: src=common/files/.exrc dest=/home/${username}/.exrc owner=$username group=$username mode=0644 backup=yes
 
 - name: Checking Heroku toolbelt installation
+  sudo: yes
   register: inst_heroku
   file: path=/usr/local/heroku state=directory
 
 - name: Installing Ubuntu Heroku toolbelt
+  sudo: yes
   shell: wget -qO- https://toolbelt.heroku.com/install-ubuntu.sh | sh
   when_changed: $inst_heroku
 
@@ -31,6 +33,7 @@
   apt: pkg=python-pip state=installed
 
 - name: Checking Python virtualenvwrapper installation
+  sudo: yes
   register: inst_virtualenvwrapper
   file: path=/usr/local/bin/virtualenvwrapper.sh
 
@@ -52,6 +55,7 @@
   when_changed: $inst_rvm
 
 - name: Checking Oracle JDK 7 installation
+  sudo: yes
   register: inst_java
   file: path=/usr/lib/jvm/java-7-oracle state=directory
 
