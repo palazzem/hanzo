@@ -9,5 +9,5 @@
   sudo: yes
   apt: pkg=vim,p7zip,curl state=latest update_cache=yes
 
-- name: Creating user extra folder for IDE and framework
+- name: Creating program folder inside user home for IDEs and frameworks
   file: path=/home/${username}/program owner=$username group=$username state=directory
