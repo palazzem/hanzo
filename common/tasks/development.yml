@@ -42,6 +42,14 @@
   shell: pip install virtualenvwrapper
   when_changed: $inst_virtualenvwrapper
 
+- name: Installing system iPython
+  sudo: yes
+  pip: name=ipython state=present
+
+- name: Installing system Requests
+  sudo: yes
+  pip: name=requests state=present
+
 - name: Installing system Ruby
   sudo: yes
   apt: pkg=ruby state=latest
