@@ -2,13 +2,17 @@
 # Some useful programs / tools
 
 - name: Installing GIMP
-  pacman: name=gimp state=installed
+  sudo: yes
+  apt: pkg=gimp state=latest
 
 - name: Installing Keepassx
-  pacman: name=keepassx state=installed
+  sudo: yes
+  apt: pkg=keepassx state=latest
 
 - name: Installing VLC
-  pacman: name=vlc state=installed
+  sudo: yes
+  apt: pkg=vlc state=latest
 
 - name: Installing xChat
-  pacman: name=xchat state=installed
+  sudo: yes
+  apt: pkg=xchat state=latest
