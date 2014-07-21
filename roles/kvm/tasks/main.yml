@@ -1,0 +1,15 @@
+---
+
+# KVM virtualization
+
+- name: Installing KVM virtualization
+  apt: name={{item}} state=latest
+  with_items:
+  - qemu-kvm
+  - libvirt-bin
+  - ubuntu-vm-builder
+  - bridge-utils
+  - virt-manager
+
+- name: Add user to libvirtd group
+  user: name={{ ansible_user_id }} append=yes groups=libvirtd

@@ -12,6 +12,16 @@
   roles:
     - system
 
+- name: Add virtualization capabilities to the system
+  hosts: all
+  tags: virtualization
+
+  sudo: True
+  sudo_user: root
+
+  roles:
+    - kvm
+
 #- hosts: all
 #  sudo: no
 #
