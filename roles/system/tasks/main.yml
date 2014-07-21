@@ -3,7 +3,7 @@
 # Contains common plays that must be run as first task
 
 - name: Updating to latest kernel
-  apt: name={{item}} state=latest update_cache=yes
+  apt: name={{item}} state=latest
   register: kernel
   with_items:
     - linux-generic
@@ -20,8 +20,8 @@
     - p7zip
     - curl
 
-- name: Update system
-  apt: name=* state=latest
+- name: Update all system packages
+  apt: upgrade=dist
 
 - name: Install development tools
   apt: name={{item}} state=latest
