@@ -1,0 +1,9 @@
+# Generic
+*.cache
+*.pyc
+
+# OSX
+.DS_Store
+
+# IDE
+.idea/
