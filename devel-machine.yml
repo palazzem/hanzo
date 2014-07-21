@@ -6,6 +6,9 @@
   hosts: all
   tags: system
 
+  sudo: True
+  sudo_user: root
+
   roles:
     - system
 
