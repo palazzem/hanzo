@@ -1,0 +1,29 @@
+---
+
+# Contains common plays that must be run as first task
+
+- name: Updating to latest kernel
+  apt: name={{item}} state=latest update_cache=yes
+  register: kernel
+  with_items:
+    - linux-generic
+    - linux-firmware
+
+- name: Rebooting server
+  command: /sbin/reboot
+  when: kernel|changed
+
+- name: Installing dependencies and support tools
+  apt: name={{item}} state=latest
+  with_items:
+    - vim
+    - p7zip
+    - curl
+
+- name: Update system
+  apt: name=* state=latest
+
+- name: Install development tools
+  apt: name={{item}} state=latest
+  with_items:
+    - build-essential
