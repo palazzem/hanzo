@@ -14,17 +14,15 @@
   file: dest=/var/lib/postgres/data owner=postgres group=postgres mode=0700 state=directory
 
 - name: Initializing database
-  shell: /usr/bin/initdb -D '/var/lib/postgres/data' creates=/var/lib/postgres/data/pg_hba.conf
-  sudo: yes
   sudo_user: postgres
+  shell: /usr/bin/initdb -D '/var/lib/postgres/data' creates=/var/lib/postgres/data/pg_hba.conf
 
 - name: Starting PostgreSQL
   command: systemctl start postgresql
 
 - name: Configuring a 'devel' user
-  postgresql_user: user=devel password=123456 state=present
-  sudo: yes
   sudo_user: postgres
+  postgresql_user: user=devel password=123456 state=present
 
 - name: Starting PostgreSQL on boot
   command: systemctl enable postgresql
