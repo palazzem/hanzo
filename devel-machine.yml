@@ -13,9 +13,6 @@
   hosts: all
   tags: virtualization
 
-  sudo: True
-  sudo_user: root
-
   roles:
     - kvm
 
