@@ -16,6 +16,13 @@
   roles:
     - kvm
 
+- name: Add PostgreSQL DBMS
+  hosts: all
+  tags: postgresql
+
+  roles:
+    - postgresql
+
 #- hosts: all
 #  sudo: no
 #
