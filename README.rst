@@ -2,24 +2,18 @@
 Ansible devel
 =============
 
-This is an Ansible playbook that aims to configure a newly Ubuntu installation with many development tools.
-Even if I used this configuration for my Ubuntu system, I want to port this playbook to other Linux distributions
-like Arch Linux, Fedora and Debian so it can be as generic as possible. **Feel free to help**!
+This is an Ansible playbook that configures a newly ArchLinux installation with many development tools.
+Even if I used this configuration for my system, I want to port this playbook to other Linux distributions
+like Ubuntu, Fedora and Debian so it can be as generic as possible. **Feel free to help**!
 
 Installation
 ------------
 
-As I'm a python software developer, I use ``pip`` to install Ansible with all requirements:
+Ansible is available using the default OS package manager. To install it simply:
 
 .. code-block:: bash
 
-	$ sudo apt-get install git python-pip python-dev -y
-	$ sudo pip install virtualenvwrapper
-	$ source virtualenvwrapper.sh
-	$ mkvirtualenv ansible
-	$ pip install ansible
-
-After you finish all orchestration, you can delete ansible virtualenv.
+	$ pacman -S ansible
 
 Getting started
 ---------------
