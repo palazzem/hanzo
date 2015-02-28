@@ -1,0 +1,22 @@
+---
+
+# Development configuration
+
+- name: Installing Version Control Systems
+  pacman: name={{item}} state=present
+  with_items:
+    - git
+    - mercurial
+    - meld
+
+- name: Configuring .gitconfig
+  copy: src=gitconfig dest=/home/palazzem/.gitconfig owner=palazzem group=palazzem mode=0644
+
+# Includes development environments
+
+- include: heroku.yml
+- include: python.yml
+- include: ruby.yml
+- include: java.yml
+- include: javascript.yml
+
