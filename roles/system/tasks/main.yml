@@ -2,6 +2,13 @@
 
 # Contains common plays that must be run as first task
 
+- name: Adding Yaourt (AUR) repository
+  lineinfile: dest=/etc/pacman.conf state=present line={{item.line}}
+  with_items:
+    - { line: '"[archlinuxfr]"' }
+    - { line: '" SigLevel = Never"' }
+    - { line: '" Server = http://repo.archlinux.fr/$arch"' }
+
 - name: Installing system packages
   pacman: name={{item}} state=present update_cache=yes
   with_items:
@@ -11,6 +18,7 @@
     - xf86-video-intel
     - xf86-input-synaptics
     - openssh
+    - yaourt
 
 - name: Installing support tools
   pacman: name={{item}} state=present
