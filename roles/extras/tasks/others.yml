@@ -1,0 +1,16 @@
+---
+
+# Some useful programs and tools
+
+- name: Installing GIMP
+  pacman: name=gimp state=present
+
+- name: Installing Keepassx
+  pacman: name=keepassx state=present
+
+- name: Installing Libreoffice
+  pacman: name=ttf-dejavu,artwiz-fonts,libreoffice-en-US,libreoffice-fresh state=present
+
+- name: Installing VLC
+  pacman: name=vlc state=present
+
