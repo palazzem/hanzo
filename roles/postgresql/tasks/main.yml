@@ -32,3 +32,6 @@
 - name: Restarting Postgresql service
   command: systemctl restart postgresql
 
+- name: Removing temporary packages
+  pacman: name=python2-psycopg2 state=absent
+
