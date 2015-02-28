@@ -2,26 +2,15 @@
 
 # Overview: configuring a developer machine in just minutes
 
-- name: Prepare the system with basic functions
-  hosts: all
-  tags: system
+- hosts: all
+  remote_user: root
+  sudo: yes
 
   roles:
     - system
-
-- name: Add virtualization capabilities to the system
-  hosts: all
-  tags: virtualization
-
-  roles:
     - kvm
-
-- name: Add PostgreSQL DBMS
-  hosts: all
-  tags: postgresql
-
-  roles:
     - postgresql
+    - development
 
 #- hosts: all
 #  sudo: no
