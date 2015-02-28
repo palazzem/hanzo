@@ -2,24 +2,42 @@
 
 # Contains common plays that must be run as first task
 
-- name: Installing dependencies and support tools
+- name: Installing system packages
   pacman: name={{item}} state=present update_cache=yes
   with_items:
-    - vim
-    - p7zip
-    - curl
+    - base-devel
+    - sudo
+    - alsa-utils
+    - xf86-video-intel
+    - xf86-input-synaptics
+    - openssh
 
-- name: Install development tools
+- name: Installing support tools
   pacman: name={{item}} state=present
   with_items:
-    - base-devel
+    - p7zip
+    - curl
+    - vim
+    - tar
+    - zip
+    - unzip
+    - wget
+    - mlocate
 
-- name: Add default user
+- name: Installing window manager (Awesome!)
+  pacman: name={{item}} state=present
+  with_items:
+    - xorg-server
+    - xorg-server-utils
+    - mesa
+    - awesome
+
+- name: Adding default user
   user: name=palazzem shell=/bin/bash groups=wheel append=yes
 
-- name: Create a default SSH key
+- name: Creating a default SSH key
   user: name=palazzem generate_ssh_key=yes ssh_key_bits=4096 ssh_key_file=.ssh/id_rsa
 
-- name: Create 'program' folder
+- name: Creating 'program' folder
   file: path=/home/palazzem/program owner=palazzem group=palazzem state=directory
 
