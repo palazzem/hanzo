@@ -11,6 +11,7 @@
     - kvm
     - postgresql
     - development
+    - extras
 
 #- hosts: all
 #  sudo: no
