@@ -2,28 +2,24 @@
 
 # Contains common plays that must be run as first task
 
-- name: Updating to latest kernel
-  apt: name={{item}} state=latest
-  register: kernel
-  with_items:
-    - linux-generic
-    - linux-firmware
-
-- name: Rebooting server
-  command: /sbin/reboot
-  when: kernel|changed
-
 - name: Installing dependencies and support tools
-  apt: name={{item}} state=latest
+  pacman: name={{item}} state=present update_cache=yes
   with_items:
     - vim
     - p7zip
     - curl
 
-- name: Update all system packages
-  apt: upgrade=dist
-
 - name: Install development tools
-  apt: name={{item}} state=latest
+  pacman: name={{item}} state=present
   with_items:
-    - build-essential
+    - base-devel
+
+- name: Add default user
+  user: name=palazzem shell=/bin/bash groups=wheel append=yes
+
+- name: Create a default SSH key
+  user: name=palazzem generate_ssh_key=yes ssh_key_bits=4096 ssh_key_file=.ssh/id_rsa
+
+- name: Create 'program' folder
+  file: path=/home/palazzem/program owner=palazzem group=palazzem state=directory
+

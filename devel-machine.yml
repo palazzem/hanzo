@@ -2,12 +2,9 @@
 
 # Overview: configuring a developer machine in just minutes
 
-- name: Prepare the system with basic functions and latest kernel
+- name: Prepare the system with basic functions
   hosts: all
   tags: system
-
-  sudo: True
-  sudo_user: root
 
   roles:
     - system
