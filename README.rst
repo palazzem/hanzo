@@ -24,7 +24,9 @@ First, clone this repository then start the orchestration:
 .. code-block:: bash
 
 	$ git clone https://github.com/palazzem/ansible-devel.git
-	$ ansible-playbook orchestrate.yml -i inventory --connection=local
+	$ ansible-playbook orchestrate.yml -i inventory --connection=local -e username=<your_name>
+
+The ``username`` variable is used to create your default user.
 
 Ansible will go through the following roles:
 

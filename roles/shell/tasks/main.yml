@@ -7,14 +7,14 @@
 
 - name: Checking Oh-my-ZSH presence
   register: zsh
-  stat: path=/home/palazzem/.oh-my-zsh
+  stat: path="/home/{{username}}/.oh-my-zsh"
 
 - name: Installing Oh-my-ZSH
-  sudo_user: palazzem
+  sudo_user: "{{username}}"
   when: zsh.stat.exists == False
-  git: repo=https://github.com/robbyrussell/oh-my-zsh.git dest=/home/palazzem/.oh-my-zsh
+  git: repo=https://github.com/robbyrussell/oh-my-zsh.git dest="/home/{{username}}/.oh-my-zsh"
 
 - name: Changing default shell
-  command: chsh -s /bin/zsh palazzem
+  command: "chsh -s /bin/zsh {{username}}"
 
 # TODO: missing .zshrc

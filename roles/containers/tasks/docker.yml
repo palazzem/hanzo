@@ -12,4 +12,4 @@
   command: systemctl start docker
 
 - name: Adding default user to docker group
-  user: name=palazzem groups=docker append=yes
+  user: name={{username}} groups=docker append=yes

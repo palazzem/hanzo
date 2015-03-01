@@ -48,13 +48,13 @@
     - awesome
 
 - name: Adding default user
-  user: name=palazzem shell=/bin/bash groups=wheel append=yes
+  user: name={{username}} shell=/bin/bash groups=wheel append=yes
 
 - name: Creating a default SSH key
-  user: name=palazzem generate_ssh_key=yes ssh_key_bits=4096 ssh_key_file=.ssh/id_rsa
+  user: name={{username}} generate_ssh_key=yes ssh_key_bits=4096 ssh_key_file=.ssh/id_rsa
 
 - name: Creating 'program' folder
-  file: path=/home/palazzem/program owner=palazzem group=palazzem state=directory
+  file: path="/home/{{username}}/program" owner={{username}} group={{username}} state=directory
 
 - name: Adding 'wheel' group to sudoers
   lineinfile: "dest=/etc/sudoers state=present regexp='^%wheel' line='%wheel ALL=(ALL) ALL'"
