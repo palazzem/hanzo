@@ -22,7 +22,7 @@ First, clone this repository and then start the orchestration:
 .. code-block:: bash
 
 	$ git clone https://github.com/palazzem/ansible-devel.git
-	$ ansible-playbook orchestrate.yml -i inventory --connection=local -e username=<name> desktop=<desktop_environment>
+	$ ansible-playbook orchestrate.yml -i inventory --connection=local -e "username=<name> desktop=<desktop_environment>"
 
 The command above, requires the following parameters list:
 
