@@ -74,10 +74,10 @@ to the snippet below:
         $ yaourt -S android-sdk android-sdk-platform-tools android-sdk-build-tools android-platform android-ndk
 
 **NOTE:** the last command will install Android SDK in ``/opt/android-sdk`` so only the ``root`` user can add
-new SDK platforms. Bear in mind that you can follow these `reccomendation`_ to properly configure your SDK
+new SDK platforms. Bear in mind that you can follow these `recommendations`_ to properly configure your SDK
 folder.
 
-.. _reccomendation: https://wiki.archlinux.org/index.php/android#Android_development
+.. _recommendations: https://wiki.archlinux.org/index.php/android#Android_development
 
 Roadmap
 -------
