@@ -9,12 +9,12 @@ like Ubuntu, Fedora and Debian so it can be as generic as possible. **Feel free 
 Installation
 ------------
 
-Ansible is available using the default OS package manager. Furthermore we need ``git`` VCS to download
-this repository and ``ssh`` to let Ansible work properly. To install these dependencies, simply:
+Ansible is available using the default OS package manager (``pacman``). ``git`` is also required to download
+this repository and you can install both dependencies simply:
 
 .. code-block:: bash
 
-	$ pacman -S ansible git openssh
+	$ pacman -S ansible git
 
 Getting started
 ---------------
