@@ -35,6 +35,9 @@ The command above, requires the following parameters list:
 **NOTE:** This parameters are mandatory and if you don't provide any value, the Ansible script will not proceed with
 the orchestration.
 
+Script roles
+~~~~~~~~~~~~
+
 The Ansible script will go through the following roles:
 
 * system
@@ -45,6 +48,14 @@ The Ansible script will go through the following roles:
 * development
 * extras
 * editors
+
+After the local orchestration is completed, remember to set the password for your user:
+
+.. code-block:: bash
+
+        $ passwd <name>
+
+Then you can reboot the system.
 
 Other tools
 -----------
