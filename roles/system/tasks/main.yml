@@ -44,6 +44,8 @@
   with_items:
     - xorg-server
     - xorg-server-utils
+    - xorg-xinit
+    - xorg-apps
     - mesa
 
 - name: Installing desktop environment or a window manager
