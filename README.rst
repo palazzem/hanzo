@@ -24,7 +24,7 @@ First, clone this repository then start the orchestration:
 .. code-block:: bash
 
 	$ git clone https://github.com/palazzem/ansible-devel.git
-	$ ansible-playbook devel-machine.yml -i inventory --connection=local
+	$ ansible-playbook orchestrate.yml -i inventory --connection=local
 
 Ansible will go through the following roles:
 
