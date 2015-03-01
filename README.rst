@@ -22,10 +22,12 @@ First, clone this repository and then start the orchestration:
 .. code-block:: bash
 
 	$ git clone https://github.com/palazzem/ansible-devel.git
-	$ ansible-playbook orchestrate.yml -i inventory --connection=local -e "username=<name> desktop=<desktop_environment>"
+	$ ansible-playbook orchestrate.yml -i inventory --connection=local -e "fullname=<name> email=<email> username=<name> desktop=<desktop_environment>"
 
 The command above, requires the following parameters list:
 
+* ``fullname`` is used inside the ``.gitconfig.j2`` template
+* ``email`` is used inside the ``.gitconfig.j2`` template
 * ``username`` is the name of created user
 * ``desktop`` is the name of the desktop environment or window manager. Examples are: ``awesome``, ``gnome``, ``lxde``, etc.
   You can find more information in the ArchLinux `Desktop Environment`_ documentation.

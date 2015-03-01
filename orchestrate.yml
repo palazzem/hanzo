@@ -10,6 +10,8 @@
       fail: msg="Variable '{{item}}' is not defined."
       when: "{{item}} is not defined"
       with_items:
+        - fullname
+        - email
         - username
         - desktop
 
