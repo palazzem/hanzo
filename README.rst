@@ -24,9 +24,15 @@ First, clone this repository then start the orchestration:
 .. code-block:: bash
 
 	$ git clone https://github.com/palazzem/ansible-devel.git
-	$ ansible-playbook orchestrate.yml -i inventory --connection=local -e username=<your_name>
+	$ ansible-playbook orchestrate.yml -i inventory --connection=local -e username=<name> desktop=<desktop_environment>
 
-The ``username`` variable is used to create your default user.
+Parameters list:
+
+* ``username`` is the name of created user
+* ``desktop`` is the name of the desktop environment or window manager. Examples are: ``awesome``, ``gnome``, ``lxde``, etc.
+  You can find more information in the ArchLinux `Desktop Environment`_ documentation.
+
+.. _Desktop Environment: https://wiki.archlinux.org/index.php/Desktop_environment
 
 Ansible will go through the following roles:
 

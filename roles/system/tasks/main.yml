@@ -39,13 +39,15 @@
     - xf86-video-vesa
     - xf86-input-synaptics
 
-- name: Installing window manager (Awesome!)
+- name: Installing X
   pacman: name={{item}} state=present
   with_items:
     - xorg-server
     - xorg-server-utils
     - mesa
-    - awesome
+
+- name: Installing desktop environment or a window manager
+  pacman: name={{desktop}} state=present
 
 - name: Adding default user
   user: name={{username}} shell=/bin/bash groups=wheel append=yes
