@@ -1,0 +1,12 @@
+---
+
+# KVM virtualization
+
+- name: Installing KVM virtualization
+  pacman: name={{item}} state=present
+  with_items:
+  - libvirt
+  - urlgrabber
+  - virtviewer
+  - virt-manager
+

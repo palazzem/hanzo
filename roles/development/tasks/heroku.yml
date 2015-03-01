@@ -1,0 +1,12 @@
+---
+
+# Heroku
+
+- name: Checking Heroku toolbelt installation
+  register: heroku
+  stat: path=/usr/local/heroku
+
+- name: Installing Heroku toolbelt
+  shell: wget -qO- https://toolbelt.heroku.com/install.sh | sh
+  when: heroku.stat.exists == False
+

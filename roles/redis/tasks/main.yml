@@ -1,0 +1,7 @@
+---
+
+# Redis
+
+- name: Installing Redis server
+  pacman: name=redis state=present
+
