@@ -19,42 +19,54 @@ this repository and ``ssh`` to let Ansible work properly. To install these depen
 Getting started
 ---------------
 
-First, clone this repository then start with orchestration:
+First, clone this repository then start the orchestration:
 
 .. code-block:: bash
 
 	$ git clone https://github.com/palazzem/ansible-devel.git
-	$ ansible-playbook devel-machine.yml -i inventory --connection=local -K
+	$ ansible-playbook devel-machine.yml -i inventory --connection=local
 
-**However**, if you want to select only some developer tools, you can select them with this command:
-
-.. code-block:: bash
-
-	$ ansible-playbook devel-machine.yml -i inventory --connection=local -K --tags "``<some packages>``"
-
-These are the available packages:
+Ansible will go through the following roles:
 
 * system
-* virtualization
-* browser
-* development
-* ide
-* extra-development
+* shell
+* containers
 * postgresql
+* redis
+* development
 * extras
+* editors
 
-Usage example
+Last commands
 -------------
 
-This command:
+Because some extra tools are required but are only available in AUR repositories, the following
+commands should be launched manually:
 
 .. code-block:: bash
 
-	$ ansible-playbook archlinux-dev.yml -i inventory --connection=local --tags "development,ide"
+        $ yaourt -S firefox-developer
+        $ yaourt -S google-chrome
+        $ yaourt -S vim-youcompleteme-git
+        $ yaourt -S android-sdk android-sdk-platform-tools android-sdk-build-tools android-platform android-ndk
 
-will only install ``development`` and ``ide`` package.
+**NOTE:** the last command will install Android SDK in ``/opt/android-sdk`` so only the ``root`` user can add
+new SDK platforms. Bear in mind that you can follow these `reccomendation`_ to properly configure your SDK
+folder.
+
+.. _reccomendation: https://wiki.archlinux.org/index.php/android#Android_development
+
+Missing features
+----------------
+
+The following are the missing features I need to work on:
+
+* provide a good ``.zshrc``
+* provide a good ``.vimrc`` so ``VIM`` can be used as a default code editor
+* provide an ``awesome`` template
+* provide a default ``.xinitrc`` so ``awesome`` will start automatically after login
 
 Contribute
 ----------
 
-Just fork this repository and make pull requests to support other platforms / development tools!
+Just fork this repository and make pull requests to support other platforms or development tools.
