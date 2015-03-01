@@ -2,9 +2,7 @@
 Ansible devel
 =============
 
-This is an Ansible playbook that configures a newly ArchLinux installation with many development tools.
-Even if I used this configuration for my system, I want to port this playbook to other Linux distributions
-like Ubuntu, Fedora and Debian so it can be as generic as possible. **Feel free to help**!
+This is an Ansible playbook that configures a newly ArchLinux installation with some development tools.
 
 Installation
 ------------
@@ -19,14 +17,14 @@ this repository and you can install both dependencies simply:
 Getting started
 ---------------
 
-First, clone this repository then start the orchestration:
+First, clone this repository and then start the orchestration:
 
 .. code-block:: bash
 
 	$ git clone https://github.com/palazzem/ansible-devel.git
 	$ ansible-playbook orchestrate.yml -i inventory --connection=local -e username=<name> desktop=<desktop_environment>
 
-Parameters list:
+The command above, requires the following parameters list:
 
 * ``username`` is the name of created user
 * ``desktop`` is the name of the desktop environment or window manager. Examples are: ``awesome``, ``gnome``, ``lxde``, etc.
@@ -34,7 +32,10 @@ Parameters list:
 
 .. _Desktop Environment: https://wiki.archlinux.org/index.php/Desktop_environment
 
-Ansible will go through the following roles:
+**NOTE:** This parameters are mandatory and if you don't provide any value, the Ansible script will not proceed with
+the orchestration.
+
+The Ansible script will go through the following roles:
 
 * system
 * shell
@@ -45,11 +46,14 @@ Ansible will go through the following roles:
 * extras
 * editors
 
-Last commands
--------------
+Other tools
+-----------
 
-Because some extra tools are required but are only available in AUR repositories, the following
-commands should be launched manually:
+The Ansible script doesn't provide any extra tools and applications like IDEs, browsers, or Android SDK/NDK that I use
+regularly. Even if it's possible to orchestrate manual installations (for instance: wget the archive, untar, create
+applications shortcuts), I prefer to use the AUR repositories that take care of everything. Anyhow, it's never a good
+idea to install packages from AUR repositories without looking at the PKGBUILD file, so I leave these manual installations
+to the snippet below:
 
 .. code-block:: bash
 
@@ -64,15 +68,15 @@ folder.
 
 .. _reccomendation: https://wiki.archlinux.org/index.php/android#Android_development
 
-Missing features
-----------------
+Roadmap
+-------
 
-The following are the missing features I need to work on:
+The following are some missing features:
 
 * provide a good ``.zshrc``
 * provide a good ``.vimrc`` so ``VIM`` can be used as a default code editor
-* provide an ``awesome`` template
-* provide a default ``.xinitrc`` so ``awesome`` will start automatically after login
+* provide an ``awesome`` template (I use Awesome as a window manager)
+* provide a default ``.xinitrc``
 
 Contribute
 ----------
