@@ -15,10 +15,9 @@
     - base-devel
     - sudo
     - alsa-utils
-    - xf86-video-intel
-    - xf86-input-synaptics
     - openssh
     - yaourt
+    - wicd
 
 - name: Installing support tools
   pacman: name={{item}} state=present
@@ -31,6 +30,14 @@
     - unzip
     - wget
     - mlocate
+
+- name: Installing video drivers
+  pacman: name={{item}} state=present
+  with_items:
+    - xf86-video-intel
+    - xf86-video-fbdev
+    - xf86-video-vesa
+    - xf86-input-synaptics
 
 - name: Installing window manager (Awesome!)
   pacman: name={{item}} state=present
@@ -48,4 +55,7 @@
 
 - name: Creating 'program' folder
   file: path=/home/palazzem/program owner=palazzem group=palazzem state=directory
+
+- name: Adding 'wheel' group to sudoers
+  lineinfile: "dest=/etc/sudoers state=present regexp='^%wheel' line='%wheel ALL=(ALL) ALL'"
 
