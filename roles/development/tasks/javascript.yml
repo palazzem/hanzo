@@ -21,7 +21,7 @@
 
 - name: Installing Frontend toolchain
   sudo_user: "{{username}}"
-  shell: source ~/.nvm/nvm.sh && npm install -g bower yo grunt-cli gulp karma-cli coffee-script phantomjs protractor chdir="/home/{{username}}/"
+  shell: source ~/.nvm/nvm.sh && npm install -g bower yo grunt-cli gulp karma-cli coffee-script phantomjs protractor ionic cordova chdir="/home/{{username}}/"
 
 - name: Updating webdriver
   sudo_user: "{{username}}"
