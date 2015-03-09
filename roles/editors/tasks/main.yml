@@ -2,3 +2,18 @@
 
 # Code editors
 
+- name: Installing VIM bundle (spf13-vim)
+  sudo_user: "{{username}}"
+  shell: curl http://j.mp/spf13-vim3 -L -o - | sh
+
+- name: Choosing bundle groups
+  copy: src=.vimrc.before.local dest="/home/{{username}}/" owner={{username}} group={{username}}
+
+- name: Updating VIM Vundle plugins
+  sudo_user: "{{username}}"
+  shell: vim +BundleInstall +qall && vim +BundleClean +qall
+
+- name: Compiling ycm_support_libs (YouCompleteMe)
+  sudo_user: "{{username}}"
+  shell: ./install.sh --clang-completer chdir="/home/{{username}}/.vim/bundle/YouCompleteMe/"
+
