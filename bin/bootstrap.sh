@@ -45,9 +45,9 @@ function success {
 }
 
 ### Requiring environment variables
-read -p "Provide your full name: " FULLNAME
-read -p "Provide your username: " USERNAME
-read -p "Provide your email: " EMAIL
+read -p "Provide your full name: " FULLNAME < /dev/tty
+read -p "Provide your username: " USERNAME < /dev/tty
+read -p "Provide your email: " EMAIL < /dev/tty
 
 # Installing dependencies
 echo "Installing dependencies..."
