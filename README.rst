@@ -22,25 +22,36 @@ First, clone this repository and then start the orchestration:
 .. code-block:: bash
 
 	$ git clone https://github.com/palazzem/ansible-devel.git
-	$ ansible-playbook orchestrate.yml -i inventory --connection=local -e "fullname=<name> email=<email> username=<name> desktop=<desktop_environment>"
+	$ ansible-playbook orchestrate.yml -i inventory --connection=local -e "fullname=<name> email=<email> username=<name>"
 
 The command above, requires the following parameters list:
 
 * ``fullname`` is used inside the ``.gitconfig.j2`` template
 * ``email`` is used inside the ``.gitconfig.j2`` template
 * ``username`` is the name of created user
-* ``desktop`` is the name of the desktop environment or window manager. Examples are: ``awesome``, ``gnome``, ``lxde``, etc.
-  You can find more information in the ArchLinux `Desktop Environment`_ documentation.
+
+To complete the environment configuration, you can add the window manager or the desktop environment that makes you more
+comfortable. With the following command, you can proceed installing and configuring the ``awesome`` window manager:
+
+.. code-block:: bash
+
+    $ ansible-playbook orchestrate.yml -i inventory --connection=local -e "username=<name>"
+
+The orchestration above, requires this parameter:
+
+* ``username`` is the name of previously created user
+
+You can find more information to manually install other `Desktop Environment`_ in the ArchLinux documentation.
 
 .. _Desktop Environment: https://wiki.archlinux.org/index.php/Desktop_environment
 
-**NOTE:** This parameters are mandatory and if you don't provide any value, the Ansible script will not proceed with
+**NOTE:** These parameters are mandatory and if you don't provide any value, the Ansible script will not proceed with
 the orchestration.
 
 Script roles
 ~~~~~~~~~~~~
 
-The Ansible script will go through the following roles:
+The main script will go through the following roles:
 
 * system
 * shell
@@ -55,7 +66,7 @@ After the local orchestration is completed, remember to set the password for you
 
 .. code-block:: bash
 
-        $ passwd <name>
+    $ passwd <name>
 
 Then you can reboot the system.
 
@@ -70,10 +81,10 @@ to the snippet below:
 
 .. code-block:: bash
 
-        $ yaourt -S firefox-developer
-        $ yaourt -S google-chrome
-        $ yaourt -S vim-youcompleteme-git
-        $ yaourt -S android-sdk android-sdk-platform-tools android-sdk-build-tools android-platform android-ndk
+    $ yaourt -S firefox-developer
+    $ yaourt -S google-chrome
+    $ yaourt -S vim-youcompleteme-git
+    $ yaourt -S android-sdk android-sdk-platform-tools android-sdk-build-tools android-platform android-ndk
 
 **NOTE:** the last command will install Android SDK in ``/opt/android-sdk`` so only the ``root`` user can add
 new SDK platforms. Bear in mind that you can follow these `recommendations`_ to properly configure your SDK
@@ -81,17 +92,8 @@ folder.
 
 .. _recommendations: https://wiki.archlinux.org/index.php/android#Android_development
 
-Roadmap
--------
-
-The following are some missing features:
-
-* provide a good ``.zshrc``
-* provide a good ``.vimrc`` so ``VIM`` can be used as a default code editor
-* provide an ``awesome`` template (I use Awesome as a window manager)
-* provide a default ``.xinitrc``
-
 Contribute
 ----------
 
 Just fork this repository and make pull requests to support other platforms or development tools.
+
