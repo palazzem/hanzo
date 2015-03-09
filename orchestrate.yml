@@ -13,7 +13,6 @@
         - fullname
         - email
         - username
-        - desktop
 
 - hosts: all
   remote_user: root

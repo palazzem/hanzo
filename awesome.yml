@@ -4,6 +4,16 @@
 
 - hosts: all
   remote_user: root
+
+  tasks:
+    - name: Checking required variables
+      fail: msg="Variable '{{item}}' is not defined."
+      when: "{{item}} is not defined"
+      with_items:
+        - username
+
+- hosts: all
+  remote_user: root
   sudo: yes
 
   roles:
