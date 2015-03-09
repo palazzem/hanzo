@@ -29,6 +29,10 @@
 
 set -e
 
+### Variables
+ROOT_FOLDER=/root/ansible-devel/
+REPOSITORY=https://github.com/palazzem/ansible-devel.git
+
 ### Setup tools
 function msg {
     printf '%b\n' "$1" >&2
@@ -50,13 +54,15 @@ echo "Installing dependencies..."
 pacman -S ansible git --noconfirm
 
 echo "Cloning ansible-devel repository..."
-git clone https://github.com/palazzem/ansible-devel.git /root/
+git clone "$REPOSITORY" "$ROOT_FOLDER"
 
 # Proceeding with orchestration
 echo "Starting orchestration..."
+cd "$ROOT_FOLDER"
 ansible-playbook orchestrate.yml -i inventory --connection=local -e "fullname=$FULLNAME email=$EMAIL username=$USERNAME"
 ansible-playbook orchestrate.yml -i inventory --connection=local -e "username=$USERNAME"
 
 success "Configuration completed!"
 echo "Remember to launch the following command:"
 echo "passwd $USERNAME"
+
