@@ -31,6 +31,9 @@
 - name: Adding custom Awesome rc.lua
   copy: src=rc.lua dest="/home/{{username}}/.config/awesome/" owner={{username}} group={{username}} backup=yes
 
+- name: Adding .xinitrc
+  copy: src=.xinitrc dest="/home/{{username}}/" owner={{username}} group={{username}} backup=yes
+
 - name: Fixing some X behaviors
   copy: src=50-synaptics.conf dest=/etc/X11/xorg.conf.d/ owner=root group=root mode=0644
 
