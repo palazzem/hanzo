@@ -6,8 +6,8 @@
   lineinfile: dest=/etc/pacman.conf state=present line={{item.line}}
   with_items:
     - { line: '"[archlinuxfr]"' }
-    - { line: '" SigLevel = Never"' }
-    - { line: '" Server = http://repo.archlinux.fr/$arch"' }
+    - { line: '"SigLevel = Never"' }
+    - { line: '"Server = http://repo.archlinux.fr/$arch"' }
 
 - name: Installing system packages
   pacman: name={{item}} state=present update_cache=yes
