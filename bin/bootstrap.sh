@@ -45,9 +45,9 @@ function success {
 }
 
 ### Requiring environment variables
-read -p "Provide your full name: " FULLNAME < /dev/tty
-read -p "Provide your username: " USERNAME < /dev/tty
-read -p "Provide your email: " EMAIL < /dev/tty
+read -p "Provide your full name: " FULLNAME
+read -p "Provide your username: " USERNAME
+read -p "Provide your email: " EMAIL
 
 # Installing dependencies
 echo "Installing dependencies..."
@@ -59,7 +59,7 @@ git clone "$REPOSITORY" "$ROOT_FOLDER"
 # Proceeding with orchestration
 echo "Starting orchestration..."
 cd "$ROOT_FOLDER"
-ansible-playbook orchestrate.yml -i inventory --connection=local -e "fullname=$FULLNAME email=$EMAIL username=$USERNAME"
+ansible-playbook orchestrate.yml -i inventory --connection=local -e "fullname=\'$FULLNAME\' email=$EMAIL username=$USERNAME"
 ansible-playbook orchestrate.yml -i inventory --connection=local -e "username=$USERNAME"
 
 success "Configuration completed!"
