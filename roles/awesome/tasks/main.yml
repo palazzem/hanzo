@@ -34,9 +34,6 @@
 - name: Adding .xinitrc
   copy: src=.xinitrc dest="/home/{{username}}/" owner={{username}} group={{username}} backup=yes
 
-- name: Fixing some X behaviors
-  copy: src=50-synaptics.conf dest=/etc/X11/xorg.conf.d/ owner=root group=root mode=0644
-
 - name: Generating Awesome menu
   sudo_user: "{{username}}"
   command: xdg_menu --format awesome --root-menu /etc/xdg/menus/arch-applications.menu > /home/{{username}}/.config/awesome/archmenu.lua
