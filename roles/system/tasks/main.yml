@@ -18,6 +18,11 @@
     - openssh
     - yaourt
     - wicd
+    - clang
+    - cmake
+    - mono
+    - unrar
+    - tree
 
 - name: Installing support tools
   pacman: name={{item}} state=present
@@ -30,6 +35,8 @@
     - unzip
     - wget
     - mlocate
+    - dnsutils
+    - whois
 
 - name: Installing video drivers
   pacman: name={{item}} state=present
@@ -57,8 +64,11 @@
 - name: Creating a default SSH key
   user: name={{username}} generate_ssh_key=yes ssh_key_bits=4096 ssh_key_file=.ssh/id_rsa
 
-- name: Creating 'program' folder
-  file: path="/home/{{username}}/program" owner={{username}} group={{username}} state=directory
+- name: Creating 'programs' folder
+  file: path="/home/{{username}}/programs" owner={{username}} group={{username}} state=directory
+
+- name: Creating 'workspaces' folder
+  file: path="/home/{{username}}/workspaces" owner={{username}} group={{username}} state=directory
 
 - name: Adding 'wheel' group to sudoers
   lineinfile: "dest=/etc/sudoers state=present regexp='^%wheel' line='%wheel ALL=(ALL) ALL'"
