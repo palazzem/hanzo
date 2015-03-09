@@ -1,0 +1,40 @@
+---
+
+# Awesome window manager
+
+- name: Installing Awesome window manager
+  pacman: name={{item}} state=present
+  with_items:
+    - awesome
+    - gvfs
+    - gvfs-afc
+    - gvfs-smb
+    - gvfs-mtp
+    - terminator
+    - pcmanfm
+    - xarchiver
+    - xscreensaver
+    - archlinux-xdg-menu
+    - lua-filesystem
+
+- name: Adding widgets and plugins
+  copy: src=widgets.lua dest="/home/{{username}}/.config/awesome/" owner={{username}} group={{username}}
+  with_items:
+    - utils.lua
+    - widgets.lua
+
+- name: Adding executable scripts
+  copy: src={{item}} dest=/usr/bin/ owner=root group=root mode=0755
+  with_items:
+    - battery
+
+- name: Adding custom Awesome rc.lua
+  copy: src=rc.lua dest="/home/{{username}}/.config/awesome/" owner={{username}} group={{username}} backup=yes
+
+- name: Fixing some X behaviors
+  copy: src=50-synaptics.conf dest=/etc/X11/xorg.conf.d/ owner=root group=root mode=0644
+
+- name: Generating Awesome menu
+  sudo_user: "{{username}}"
+  command: xdg_menu --format awesome --root-menu /etc/xdg/menus/arch-applications.menu > /home/{{username}}/.config/awesome/archmenu.lua
+

@@ -1,0 +1,11 @@
+---
+
+# Overview: configuring a developer machine in just minutes
+
+- hosts: all
+  remote_user: root
+  sudo: yes
+
+  roles:
+    - awesome
+

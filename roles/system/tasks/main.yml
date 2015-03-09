@@ -55,9 +55,6 @@
     - xorg-apps
     - mesa
 
-- name: Installing desktop environment or a window manager
-  pacman: name={{desktop}} state=present
-
 - name: Adding default user
   user: name={{username}} shell=/bin/bash groups=wheel append=yes
 
