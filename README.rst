@@ -81,16 +81,34 @@ to the snippet below:
 
 .. code-block:: bash
 
-    $ yaourt -S firefox-developer
-    $ yaourt -S google-chrome
-    $ yaourt -S vim-youcompleteme-git
+    $ yaourt -S downgrade
+    $ yaourt -S ttf-ms-fonts
+    $ yaourt -S mbpfan-git
+    $ yaourt -S firefox-developer google-chrome
     $ yaourt -S android-sdk android-sdk-platform-tools android-sdk-build-tools android-platform android-ndk
 
-**NOTE:** the last command will install Android SDK in ``/opt/android-sdk`` so only the ``root`` user can add
-new SDK platforms. Bear in mind that you can follow these `recommendations`_ to properly configure your SDK
-folder.
+**NOTES:**
+
+* ``ttf-ms-fonts`` is used to solve some rendering problems related to ``awesome`` window manager and browsers
+* ``mbpfan-git`` could be useful only if you install this system in a Macbook notebook
+* the last command will install Android SDK in ``/opt/android-sdk`` so only the ``root`` user can add
+  new SDK platforms. Bear in mind that you can follow these `recommendations`_ to properly configure your SDK
+  folder.
 
 .. _recommendations: https://wiki.archlinux.org/index.php/android#Android_development
+
+What to do next
+---------------
+
+You can follow these advices after the orchestration is finished:
+
+* use ``powertop`` program to activate all required ``Tunables``, fixing eventual battery problems
+
+Known issues
+------------
+
+* ``wicd-curses`` crashes with a python exception. To solve this problem, simply use ``downgrade`` to install
+  ``wicd`` version 1.7.2
 
 Contribute
 ----------
