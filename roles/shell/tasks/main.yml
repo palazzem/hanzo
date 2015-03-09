@@ -17,4 +17,6 @@
 - name: Changing default shell
   command: "chsh -s /bin/zsh {{username}}"
 
-# TODO: missing .zshrc
+- name: Adding .zshrc default configuration
+  template: src=.zshrc.j2 dest="/home/{{username}}/" owner={{username}} group={{username}}
+
