@@ -33,17 +33,6 @@ set -e
 ROOT_FOLDER=/root/ansible-devel/
 REPOSITORY=https://github.com/palazzem/ansible-devel.git
 
-### Setup tools
-function msg {
-    printf '%b\n' "$1" >&2
-}
-
-function success {
-    if [ "$ret" -eq '0' ]; then
-        msg "\e[32m[✔]\e[0m ${1}${2}"
-    fi
-}
-
 ### Requiring environment variables
 read -p "Provide your full name: " FULLNAME
 read -p "Provide your username: " USERNAME
@@ -62,7 +51,7 @@ cd "$ROOT_FOLDER"
 ansible-playbook orchestrate.yml -i inventory --connection=local -e "fullname='$FULLNAME' email=$EMAIL username=$USERNAME"
 ansible-playbook awesome.yml -i inventory --connection=local -e "username=$USERNAME"
 
-success "Configuration completed!"
+echo "Configuration completed!"
 echo "Remember to launch the following command:"
-echo "passwd $USERNAME"
+echo "\n$ passwd $USERNAME"
 
