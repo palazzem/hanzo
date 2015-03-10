@@ -4,18 +4,31 @@ Ansible devel
 
 This is an Ansible playbook that configures a newly ArchLinux installation with some development tools.
 
-Installation
-------------
+Quick start guide
+-----------------
 
-Ansible is available using the default OS package manager (``pacman``). ``git`` is also required to download
-this repository and you can install both dependencies simply:
+The easiest way to configure your system with this Ansible script, is to use the automatic installer by simply
+copying and pasting the following line in your terminal:
+
+.. code-block:: bash
+
+    $ sh <(curl -L http://j.mp/arch-ansible)
+
+A clean ArchLinux installation is recommended but not required. However, **bear in mind** that this configuration
+could **overwrite** some of your settings.
+
+Manual installation
+--------------------
+
+If you prefer using a manual installation, you need to install ``ansible`` and ``git`` packages using the
+ArchLinux default package manager (``pacman``). Simply launch:
 
 .. code-block:: bash
 
 	$ pacman -S ansible git
 
-Getting started
----------------
+Starting the orchestration
+--------------------------
 
 First, clone this repository and then start the orchestration:
 
