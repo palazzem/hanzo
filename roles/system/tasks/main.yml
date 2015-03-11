@@ -30,7 +30,7 @@
   with_items:
     - p7zip
     - curl
-    - vim
+    - gvim
     - tar
     - zip
     - unzip
