@@ -99,6 +99,7 @@ to the snippet below:
     $ yaourt -S mbpfan-git
     $ yaourt -S firefox-developer google-chrome
     $ yaourt -S android-sdk android-sdk-platform-tools android-sdk-build-tools android-platform android-ndk
+    $ yaourt -S watchman
 
 **NOTES:**
 
