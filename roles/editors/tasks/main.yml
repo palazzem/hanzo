@@ -6,8 +6,11 @@
   sudo_user: "{{username}}"
   shell: curl http://j.mp/spf13-vim3 -L -o - | sh
 
-- name: Choosing bundle groups
-  copy: src=.vimrc.before.local dest="/home/{{username}}/" owner={{username}} group={{username}}
+- name: Updating bundles and VIM configurations
+  copy: src={{item}} dest="/home/{{username}}/" owner={{username}} group={{username}}
+  with_items:
+    - .vimrc.before.local
+    - .vimrc.local
 
 - name: Updating VIM Vundle plugins
   sudo_user: "{{username}}"
