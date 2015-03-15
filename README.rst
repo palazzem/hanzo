@@ -98,18 +98,17 @@ to the snippet below:
     $ yaourt -S ttf-ms-fonts
     $ yaourt -S mbpfan-git
     $ yaourt -S firefox-developer google-chrome
-    $ yaourt -S android-sdk android-sdk-platform-tools android-sdk-build-tools android-platform android-ndk
     $ yaourt -S watchman
 
 **NOTES:**
 
 * ``ttf-ms-fonts`` is used to solve some rendering problems related to ``awesome`` window manager and browsers
 * ``mbpfan-git`` could be useful only if you install this system in a Macbook notebook
-* the last command will install Android SDK in ``/opt/android-sdk`` so only the ``root`` user can add
-  new SDK platforms. Bear in mind that you can follow these `recommendations`_ to properly configure your SDK
-  folder.
+* the Android SDK/NDK should be installed in user home folder using the upstream instructions. If you want to install
+  both development tools using AUR packages, follow these `instructions`_ but remember to change in the BUILDPKG the ``/tmp``
+  folder path because most systems don't have enought space left in the ``tmpfs`` virtual partition.
 
-.. _recommendations: https://wiki.archlinux.org/index.php/android#Android_development
+.. _instructions: https://wiki.archlinux.org/index.php/android
 
 What to do next
 ---------------
