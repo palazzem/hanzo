@@ -9,6 +9,7 @@
 - name: Updating bundles and VIM configurations
   copy: src={{item}} dest="/home/{{username}}/" owner={{username}} group={{username}}
   with_items:
+    - .vimrc.bundles.local
     - .vimrc.before.local
     - .vimrc.local
 
