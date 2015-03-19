@@ -94,11 +94,12 @@ to the snippet below:
 
 .. code-block:: bash
 
+    $ yaourt -S firefox-developer google-chrome
+    $ yaourt -S awesome-themes-git
     $ yaourt -S downgrade
     $ yaourt -S ttf-ms-fonts
-    $ yaourt -S mbpfan-git
-    $ yaourt -S firefox-developer google-chrome
     $ yaourt -S watchman
+    $ yaourt -S mbpfan-git # (optional for Macbook laptops)
 
 **NOTES:**
 

@@ -57,7 +57,15 @@ ansible-playbook orchestrate.yml -i inventory --connection=local -e "fullname='$
 ansible-playbook awesome.yml -i inventory --connection=local -e "username=$USERNAME"
 
 echo "Configuration completed!"
-echo "Remember to launch the following commands:"
+echo "The following command is *mandatory*:"
 echo "$ passwd $USERNAME"
+
+echo ""
+echo "You can also install the following packages:"
+echo "$ yaourt -S firefox-developer google-chrome"
 echo "$ yaourt -S awesome-themes-git"
+echo "$ yaourt -S downgrade"
+echo "$ yaourt -S ttf-ms-fonts"
+echo "$ yaourt -S watchman"
+echo "$ yaourt -S mbpfan-git # (optional for Macbook laptops)"
 
