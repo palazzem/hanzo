@@ -57,6 +57,7 @@ ansible-playbook orchestrate.yml -i inventory --connection=local -e "fullname='$
 ansible-playbook awesome.yml -i inventory --connection=local -e "username=$USERNAME"
 
 echo "Configuration completed!"
-echo "Remember to launch the following command:"
-echo "\n$ passwd $USERNAME"
+echo "Remember to launch the following commands:"
+echo "$ passwd $USERNAME"
+echo "$ yaourt -S awesome-themes-git"
 
