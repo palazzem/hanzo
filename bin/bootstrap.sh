@@ -43,11 +43,16 @@ echo "Installing dependencies..."
 pacman -S ansible git --noconfirm
 
 echo "Cloning ansible-devel repository..."
-git clone "$REPOSITORY" "$ROOT_FOLDER"
+if [ ! -d "$ROOT_FOLDER" ]; then
+    git clone "$REPOSITORY" "$ROOT_FOLDER"
+    cd "$ROOT_FOLDER"
+elif
+    cd "$ROOT_FOLDER"
+    git pull
+fi
 
 # Proceeding with orchestration
 echo "Starting orchestration..."
-cd "$ROOT_FOLDER"
 ansible-playbook orchestrate.yml -i inventory --connection=local -e "fullname='$FULLNAME' email=$EMAIL username=$USERNAME"
 ansible-playbook awesome.yml -i inventory --connection=local -e "username=$USERNAME"
 
