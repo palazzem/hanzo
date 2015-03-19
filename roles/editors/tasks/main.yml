@@ -15,7 +15,7 @@
 
 - name: Updating VIM Vundle plugins
   sudo_user: "{{username}}"
-  shell: vim +BundleInstall +qall && vim +BundleClean +qall
+  shell: vim +BundleInstall +qall && vim +BundleClean! +qall
 
 - name: Compiling ycm_support_libs (YouCompleteMe)
   sudo_user: "{{username}}"
