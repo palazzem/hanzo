@@ -1,26 +1,16 @@
 #!/bin/bash
- 
-healthy='#859900'
-low='#b58900'
-discharge='#dc322f'
- 
-capacity=`cat /sys/class/power_supply/BAT0/capacity`
-if (($capacity <= 25));
-then
-        capacityColour=$low
+
+RED='#FF0000' 
+HEALTHY='#859900'
+LOW='#b58900'
+
+CAPACITY=`cat /sys/class/power_supply/BAT0/capacity`
+
+if [ $CAPACITY <= 25 ]; then
+    STATUS=$LOW
 else
-        capacityColour=$healthy
+    STATUS=$HEALTHY
 fi
- 
-status=`cat /sys/class/power_supply/BAT0/status`
- 
-if [[ "$status" = "Discharging" ]]
-then
-        statusColour=$discharge
-        status="▼"
-else
-        statusColour=$healthy
-        status="▲"
-fi
- 
-echo "<span color=\"$capacityColour\">$capacity%</span> <span color=\"$statusColour\">$status</span>"
+
+echo " <span color=\"$RED\" font=\"20\">&#9829;</span> <span color=\"$STATUS\" font=\"20\" face=\"Courier New\">$CAPACITY%</span> "
+
