@@ -15,10 +15,12 @@
     - { line: '"[multilib]"' }
     - { line: '"Include = /etc/pacman.d/mirrorlist"' }
 
+- name: Updating system packages
+  pacman: name=base-devel state=present update_cache=yes
+
 - name: Installing system packages
-  pacman: name={{item}} state=present update_cache=yes
+  pacman: name={{item}} state=present
   with_items:
-    - base-devel
     - sudo
     - alsa-utils
     - openssh
