@@ -46,7 +46,7 @@ echo "Cloning ansible-devel repository..."
 if [ ! -d "$ROOT_FOLDER" ]; then
     git clone "$REPOSITORY" "$ROOT_FOLDER"
     cd "$ROOT_FOLDER"
-elif
+else
     cd "$ROOT_FOLDER"
     git pull
 fi
