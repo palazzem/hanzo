@@ -18,5 +18,5 @@
   command: "chsh -s /bin/zsh {{username}}"
 
 - name: Adding .zshrc default configuration
-  template: src=.zshrc.j2 dest="/home/{{username}}/" owner={{username}} group={{username}}
+  template: src=.zshrc.j2 dest="/home/{{username}}/.zshrc" owner={{username}} group={{username}}
 
