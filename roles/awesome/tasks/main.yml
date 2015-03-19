@@ -18,7 +18,7 @@
     - lua-filesystem
 
 - name: Adding widgets and plugins
-  copy: src=widgets.lua dest="/home/{{username}}/.config/awesome/" owner={{username}} group={{username}}
+  copy: src={{item}} dest="/home/{{username}}/.config/awesome/" owner={{username}} group={{username}}
   with_items:
     - utils.lua
     - widgets.lua
