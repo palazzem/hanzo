@@ -28,6 +28,7 @@
   with_items:
     - battery
     - awesome-menu-update
+    - lock-suspend
 
 - name: Adding custom Awesome rc.lua
   copy: src=rc.lua dest="/home/{{username}}/.config/awesome/" owner={{username}} group={{username}} backup=yes
