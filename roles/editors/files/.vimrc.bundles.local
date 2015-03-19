@@ -1,3 +1,0 @@
-" Disabled bundles
-UnBundle 'majutsushi/tagbar'
-UnBundle 'bling/vim-bufferline'
