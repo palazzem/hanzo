@@ -2,17 +2,37 @@
 
 # Code editors
 
-- name: Updating bundles and VIM configurations
-  copy: src={{item}} dest="/home/{{username}}/" owner={{username}} group={{username}}
-  with_items:
-    - .vimrc.before.local
-    - .vimrc.local
-
-- name: Installing VIM bundle (spf13-vim)
+- name: Installing Vundle
   sudo_user: "{{username}}"
-  shell: curl http://j.mp/spf13-vim3 -L -o - | sh
+  git: repo=https://github.com/gmarik/Vundle.vim.git dest="/home/{{username}}/.vim/bundle/Vundle.vim"
+
+- name: Installing VIM configurations
+  copy: src=.vimrc dest="/home/{{username}}/" owner={{username}} group={{username}}
+
+- name: Installing VIM plugins
+  sudo_user: "{{username}}"
+  shell: vim +PluginInstall +qall
 
 - name: Compiling ycm_support_libs (YouCompleteMe)
   sudo_user: "{{username}}"
   shell: ./install.sh --clang-completer chdir="/home/{{username}}/.vim/bundle/YouCompleteMe/"
 
+- name: Enabling honeybadger theme
+  lineinfile: dest="/home/{{username}}/.vimrc" regexp='^" colorscheme' line='colorscheme honeybadger' backrefs=yes
+
+- name: Creating fonts folders
+  file: path={{item}} state=directory owner="{{username}}" group="{{username}}"
+  with_items:
+    - "/home/{{username}}/.fonts/"
+    - "/home/{{username}}/.config/fontconfig/conf.d/"
+
+- name: Downloading fonts
+  sudo_user: "{{username}}"
+  get_url: url={{item.url}} dest={{item.dest}}
+  with_items:
+      - { url: "https://github.com/powerline/powerline/raw/develop/font/PowerlineSymbols.otf", dest: "/home/{{username}}/.fonts/" }
+      - { url: "https://github.com/powerline/powerline/raw/develop/font/10-powerline-symbols.conf", dest: "/home/{{username}}/.config/fontconfig/conf.d/" }
+
+- name: Updating font cache
+  sudo_user: "{{username}}"
+  shell: fc-cache -vf "/home/{{username}}/.fonts/"
