@@ -2,23 +2,9 @@
 
 # Code editors
 
-- name: Installing Vundle
+- name: Installing NeoBundle
   sudo_user: "{{username}}"
-  git: repo=https://github.com/gmarik/Vundle.vim.git dest="/home/{{username}}/.vim/bundle/Vundle.vim"
-
-- name: Installing VIM configurations
-  copy: src=.vimrc dest="/home/{{username}}/" owner={{username}} group={{username}}
-
-- name: Installing VIM plugins
-  sudo_user: "{{username}}"
-  shell: vim +PluginInstall +qall
-
-- name: Compiling ycm_support_libs (YouCompleteMe)
-  sudo_user: "{{username}}"
-  shell: ./install.sh --clang-completer chdir="/home/{{username}}/.vim/bundle/YouCompleteMe/"
-
-- name: Enabling honeybadger theme
-  lineinfile: dest="/home/{{username}}/.vimrc" regexp='^" colorscheme' line='colorscheme honeybadger' backrefs=yes
+  git: repo=https://github.com/Shougo/neobundle.vim dest="/home/{{username}}/.nvim/bundle/neobundle.vim"
 
 - name: Creating fonts folders
   file: path={{item}} state=directory owner="{{username}}" group="{{username}}"

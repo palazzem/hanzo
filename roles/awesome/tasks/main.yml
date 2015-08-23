@@ -17,21 +17,12 @@
     - archlinux-xdg-menu
     - lua-filesystem
 
-- name: Adding widgets and plugins
-  copy: src={{item}} dest="/home/{{username}}/.config/awesome/" owner={{username}} group={{username}}
-  with_items:
-    - utils.lua
-    - widgets.lua
-
 - name: Adding executable scripts
   copy: src={{item}} dest=/usr/bin/ owner=root group=root mode=0755
   with_items:
     - battery
     - awesome-menu-update
     - lock-suspend
-
-- name: Adding custom Awesome rc.lua
-  copy: src=rc.lua dest="/home/{{username}}/.config/awesome/" owner={{username}} group={{username}} backup=yes
 
 - name: Adding .xinitrc
   copy: src=.xinitrc dest="/home/{{username}}/" owner={{username}} group={{username}} backup=yes
