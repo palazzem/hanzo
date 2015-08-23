@@ -7,21 +7,21 @@ This is an Ansible playbook that configures a newly ArchLinux installation with 
 Quick start guide
 -----------------
 
-The easiest way to configure your system with this Ansible script, is to use the automatic installer by simply
-copying and pasting the following line in your terminal:
+The easiest way to configure your system with this Ansible script, is to launch the automatic installer
+with the following command from your terminal:
 
 .. code-block:: bash
 
     $ sh <(curl -L http://j.mp/arch-ansible)
 
-A clean ArchLinux installation is recommended but not required. However, **bear in mind** that this configuration
-could **overwrite** some of your settings.
+A clean ArchLinux installation is recommended but not required. Anyway, **bear in mind** that this configuration
+may **overwrite** your settings.
 
 Manual installation
---------------------
+-------------------
 
-If you prefer using a manual installation, you need to install ``ansible`` and ``git`` packages using the
-ArchLinux default package manager (``pacman``). Simply launch:
+If you prefer a manual installation, you should install ``ansible`` and ``git`` packages using the
+ArchLinux default package manager (``pacman``). Simply, launch:
 
 .. code-block:: bash
 
@@ -30,7 +30,7 @@ ArchLinux default package manager (``pacman``). Simply launch:
 Starting the orchestration
 --------------------------
 
-First, clone this repository and then start the orchestration:
+Clone this repository and start the orchestration with:
 
 .. code-block:: bash
 
@@ -42,21 +42,6 @@ The command above, requires the following parameters list:
 * ``fullname`` is used inside the ``.gitconfig.j2`` template
 * ``email`` is used inside the ``.gitconfig.j2`` template
 * ``username`` is the name of created user
-
-To complete the environment configuration, you can add the window manager or the desktop environment that makes you more
-comfortable. With the following command, you can proceed installing and configuring the ``awesome`` window manager:
-
-.. code-block:: bash
-
-    $ ansible-playbook orchestrate.yml -i inventory --connection=local -e "username=<name>"
-
-The orchestration above, requires this parameter:
-
-* ``username`` is the name of previously created user
-
-You can find more information to manually install other `Desktop Environment`_ in the ArchLinux documentation.
-
-.. _Desktop Environment: https://wiki.archlinux.org/index.php/Desktop_environment
 
 **NOTE:** These parameters are mandatory and if you don't provide any value, the Ansible script will not proceed with
 the orchestration.
@@ -74,8 +59,10 @@ The main script will go through the following roles:
 * development
 * extras
 * editors
+* awesome
+* dotfiles [tags='dotfiles']
 
-After the local orchestration is completed, remember to set the password for your user:
+When the orchestration is completed, remember to set the user password:
 
 .. code-block:: bash
 
@@ -86,9 +73,9 @@ Then you can reboot the system.
 Other tools
 -----------
 
-The Ansible script doesn't provide any extra tools and applications like IDEs, browsers, or Android SDK/NDK that I use
+The Ansible script doesn't provide any extra tool or applications like IDEs, browsers, or Android SDK/NDK that I use
 regularly. Even if it's possible to orchestrate manual installations (for instance: wget the archive, untar, create
-applications shortcuts), I prefer to use the AUR repositories that take care of everything. Anyhow, it's never a good
+applications shortcuts), I prefer to use the AUR repositories that take care of everything. Anyway, it's never a good
 idea to install packages from AUR repositories without looking at the PKGBUILD file, so I leave these manual installations
 to the snippet below:
 
@@ -132,4 +119,3 @@ Contribute
 ----------
 
 Just fork this repository and make pull requests to support other platforms or development tools.
-
