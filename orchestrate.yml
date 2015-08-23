@@ -28,4 +28,4 @@
     - extras
     - editors
     - awesome
-    - dotfiles
+    - { role: dotfiles, tags: ['dotfiles'] }
