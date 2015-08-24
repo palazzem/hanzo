@@ -21,7 +21,7 @@
   roles:
     - system
     - shell
-    - containers
+    - provisioning
     - postgresql
     - redis
     - development
