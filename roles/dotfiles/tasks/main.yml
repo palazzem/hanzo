@@ -6,6 +6,15 @@
   sudo_user: "{{username}}"
   git: repo=git@github.com:palazzem/dotfiles.git dest="/home/{{username}}/.dotfiles"
 
+- name: Removing old files (if any)
+  sudo_user: "{{username}}"
+  file: state=absent src={{item}}
+  with_items:
+    - "/home/{{username}}/.nvimrc"
+    - "/home/{{username}}/.config/awesome/rc.lua"
+    - "/home/{{username}}/.config/awesome/utils.lua"
+    - "/home/{{username}}/.config/awesome/widgets.lua"
+
 - name: Creating symbolic links
   file: state=link src={{item.src}} dest={{item.dest}}
   with_items:
