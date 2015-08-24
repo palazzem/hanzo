@@ -86,7 +86,7 @@ to the snippet below:
     $ yaourt -S downgrade
     $ yaourt -S ttf-ms-fonts
     $ yaourt -S watchman
-    $ yaourt -S android-sdk android-sdk-platform-tools android-sdk-build-tools android-platform
+    $ yaourt -S gradle android-sdk android-sdk-platform-tools android-sdk-build-tools android-platform
     $ yaourt -S --tmp ~/ android-ndk
     $ yaourt -S mbpfan-git # (optional for Macbook laptops)
 
