@@ -10,7 +10,7 @@
     - gvfs-afc
     - gvfs-smb
     - gvfs-mtp
-    - terminator
+    - gnome-terminal
     - pcmanfm
     - xarchiver
     - xscreensaver
