@@ -36,6 +36,7 @@
     - lib32-ncurses
     - lib32-zlib
     - ntp
+    - bluez
 
 - name: Installing support tools
   pacman: name={{item}} state=present

@@ -89,6 +89,7 @@ to the snippet below:
     $ yaourt -S gradle android-sdk android-sdk-platform-tools android-sdk-build-tools android-platform
     $ yaourt -S --tmp ~/ android-ndk
     $ yaourt -S mbpfan-git # (optional for Macbook laptops)
+    $ yaourt -S blueman
 
 **NOTES:**
 
