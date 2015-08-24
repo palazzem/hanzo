@@ -37,6 +37,8 @@
     - lib32-zlib
     - ntp
     - bluez
+    - dosfstools
+    - ntfsprogs
 
 - name: Installing support tools
   pacman: name={{item}} state=present
