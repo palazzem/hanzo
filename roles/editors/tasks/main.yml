@@ -2,6 +2,9 @@
 
 # Code editors
 
+- name: Installing NeoVim requirements (according to this configuration)
+  pacman: name=the_silver_searcher state=present
+
 - name: Installing NeoBundle
   sudo_user: "{{username}}"
   git: repo=https://github.com/Shougo/neobundle.vim dest="/home/{{username}}/.nvim/bundle/neobundle.vim"
