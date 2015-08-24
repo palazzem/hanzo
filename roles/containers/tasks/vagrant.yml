@@ -1,0 +1,10 @@
+---
+
+# Vagrant configuration
+
+- name: Installing Vagrant provisioning
+  pacman: name=vagrant state=present
+
+- name: Adding Vagrant plugins
+  sudo_user: "{{username}}"
+  shell: vagrant plugin install vagrant-libvirt vagrant-lxc
