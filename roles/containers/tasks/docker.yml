@@ -8,8 +8,11 @@
 - name: Starting docker daemon on boot
   command: systemctl enable docker
 
-- name: Docker on
+- name: Running docker daemon
   command: systemctl start docker
 
 - name: Adding default user to docker group
   user: name={{username}} groups=docker append=yes
+
+- name: Installing Docker Machine
+  get_url: url=https://github.com/docker/machine/releases/download/v0.4.0/docker-machine_linux-amd64 dest=/usr/local/bin/docker-machine mode=0755
