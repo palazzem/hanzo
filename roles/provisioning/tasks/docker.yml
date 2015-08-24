@@ -5,12 +5,6 @@
 - name: Installing docker containers
   pacman: name=docker state=present
 
-- name: Starting docker daemon on boot
-  command: systemctl enable docker
-
-- name: Running docker daemon
-  command: systemctl start docker
-
 - name: Adding default user to docker group
   user: name={{username}} groups=docker append=yes
 
