@@ -11,3 +11,5 @@
     - maven
     - apache-ant
 
+- name: Installing gradle [AUR]
+  shell: yaourt -S gradle --noconfirm
