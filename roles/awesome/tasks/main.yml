@@ -17,12 +17,13 @@
     - archlinux-xdg-menu
     - lua-filesystem
 
-- name: Adding executable scripts
+- name: Adding auxiliar scripts
   copy: src={{item}} dest=/usr/bin/ owner=root group=root mode=0755
   with_items:
     - battery
     - awesome-menu-update
     - lock-suspend
+    - variables.lua
 
 - name: Adding .xinitrc
   copy: src=.xinitrc dest="/home/{{username}}/" owner={{username}} group={{username}} backup=yes
