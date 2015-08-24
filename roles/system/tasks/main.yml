@@ -35,6 +35,7 @@
     - lib32-gcc-libs
     - lib32-ncurses
     - lib32-zlib
+    - ntp
 
 - name: Installing support tools
   pacman: name={{item}} state=present
@@ -70,6 +71,12 @@
 - name: Providing synaptics configuration
   copy: src=50-synaptics.conf dest=/etc/X11/xorg.conf.d/ owner=root group=root
 
+- name: Starting NTP daemon at boot time
+  command: systemctl enable ntpd
+
+- name: Starting NTP daemon now
+  command: systemctl start ntpd
+
 - name: Adding default user
   user: name={{username}} shell=/bin/bash groups=wheel append=yes
 
@@ -84,4 +91,3 @@
 
 - name: Adding 'wheel' group to sudoers
   lineinfile: "dest=/etc/sudoers state=present regexp='^%wheel' line='%wheel ALL=(ALL) ALL'"
-
