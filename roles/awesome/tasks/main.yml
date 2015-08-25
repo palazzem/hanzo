@@ -23,6 +23,9 @@
     - battery
     - awesome-menu-update
     - lock-suspend
+
+- name: Adding generic configurations
+  copy: src={{item}} dest="/home/{{username}}/.config/awesome" owner={{username}} group={{username}}
     - variables.lua
 
 - name: Adding .xinitrc
