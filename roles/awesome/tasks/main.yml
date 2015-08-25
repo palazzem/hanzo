@@ -26,6 +26,7 @@
 
 - name: Adding generic configurations
   copy: src={{item}} dest="/home/{{username}}/.config/awesome" owner={{username}} group={{username}}
+  with_items:
     - variables.lua
 
 - name: Adding .xinitrc
