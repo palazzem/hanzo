@@ -9,9 +9,6 @@
   sudo_user: "{{username}}"
   git: repo=https://github.com/Shougo/neobundle.vim dest="/home/{{username}}/.nvim/bundle/neobundle.vim"
 
-- name: Installing NeoVim [AUR]
-  shell: yaourt -S neovim-git --noconfirm
-
 - name: Adding neovim dependency from pip system libraries
   pip: name=neovim
 

@@ -85,6 +85,7 @@ to the snippet below:
 
 .. code-block:: bash
 
+    $ yaourt -S neovim-git
     $ yaourt -S firefox-developer google-chrome
     $ yaourt -S awesome-themes-git
     $ yaourt -S downgrade
