@@ -45,7 +45,7 @@
   with_items:
     - p7zip
     - curl
-    - gvim
+    - vim
     - tar
     - zip
     - unzip
