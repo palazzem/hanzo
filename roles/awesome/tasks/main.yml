@@ -24,8 +24,11 @@
     - awesome-menu-update
     - lock-suspend
 
+- name: Creating Awesome config directory
+  file: state=directory dest="/home/{{username}}/.config/awesome/" owner={{username}} group={{username}}
+
 - name: Adding generic configurations
-  copy: src={{item}} dest="/home/{{username}}/.config/awesome" owner={{username}} group={{username}}
+  copy: src={{item}} dest="/home/{{username}}/.config/awesome/{{item}}" owner={{username}} group={{username}}
   with_items:
     - variables.lua
 
