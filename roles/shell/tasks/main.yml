@@ -18,4 +18,4 @@
   template: src=.zshrc.j2 dest="/home/{{username}}/.zshrc" owner={{username}} group={{username}}
 
 - name: Changing default shell
-  shell: "chsh -s /bin/zsh {{username}}"
+  user: name={{username}} shell=/bin/zsh
