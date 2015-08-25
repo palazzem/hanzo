@@ -5,6 +5,9 @@
 - name: Installing Virtualbox
   pacman: name=virtualbox state=present
 
+- name: Creating Virtualbox configuration file
+  file: state=touch path=/etc/modules-load.d/virtualbox.conf
+
 - name: Adding Virtualbox modules
   lineinfile: dest=/etc/modules-load.d/virtualbox.conf state=present line={{item}}
   with_items:
