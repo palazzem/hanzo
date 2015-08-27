@@ -14,3 +14,5 @@
 - name: Installing VLC
   pacman: name=vlc state=present
 
+- name: Installing ImageMagick
+  pacman: name=imagemagick state=present
