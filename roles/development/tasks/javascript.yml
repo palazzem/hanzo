@@ -18,18 +18,14 @@
   become_user: "{{username}}"
   command: /bin/bash /tmp/nvm-install.sh
 
-- name: Installing latest NodeJS 0.12.x
+- name: Installing latest NodeJS v5.6.0
   become_user: "{{username}}"
-  shell: source ~/.nvm/nvm.sh && nvm install 0.12
+  shell: source ~/.nvm/nvm.sh && nvm install v5.6.0
 
 - name: Default latest NodeJS Version
   become_user: "{{username}}"
-  shell: source ~/.nvm/nvm.sh && nvm alias default 0.12
+  shell: source ~/.nvm/nvm.sh && nvm alias default v5.6.0
 
 - name: Installing Frontend toolchain
   become_user: "{{username}}"
-  shell: source ~/.nvm/nvm.sh && npm install -g bower yo grunt-cli gulp karma-cli ember-cli coffee-script phantomjs protractor ionic cordova chdir="/home/{{username}}/"
-
-- name: Updating webdriver
-  become_user: "{{username}}"
-  shell: source ~/.nvm/nvm.sh && webdriver-manager update
+  shell: source ~/.nvm/nvm.sh && npm install -g bower yo grunt-cli gulp ember-cli phantomjs ionic cordova
