@@ -4,8 +4,3 @@
 
 - name: Installing Vagrant provisioning
   pacman: name=vagrant state=present
-
-- name: Adding Vagrant plugins
-  become_user: "{{username}}"
-  shell: vagrant plugin install vagrant-lxc
-#  shell: vagrant plugin install vagrant-libvirt vagrant-lxc
