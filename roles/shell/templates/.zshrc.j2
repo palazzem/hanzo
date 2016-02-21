@@ -83,9 +83,13 @@ export LC_ALL=en_US.UTF-8
 # Python
 source virtualenvwrapper_lazy.sh
 
-# Android
-export ANDROID_KEYSTORE="$HOME/.android/release_key/release.keystore"
-export ANDROID_KEY_ALIAS="{{fullname}}"
+# exports all installed python version (via Pythonz) to
+# the user PATH
+if [[ -s $HOME/.pythonz/etc/bashrc ]]
+then
+    source $HOME/.pythonz/etc/bashrc
+    PATH=$PATH:$(pythonz list -p | awk 'BEGIN {ORS=":"} /^ / {print $2"/bin"}')
+fi
 
 # Heroku
 export PATH="/usr/local/heroku/bin:$PATH"
