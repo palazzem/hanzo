@@ -6,10 +6,17 @@
   register: nvm
   stat: "path=/home/{{username}}/.nvm"
 
-- name: Installing Node Version Manager (NVM)
-  shell: curl https://raw.githubusercontent.com/creationix/nvm/v0.23.3/install.sh | bash
-  become_user: "{{username}}"
+- name: Downloading Node Version Manager (NVM)
   when: nvm.stat.exists == False
+  get_url:
+    url: https://raw.githubusercontent.com/creationix/nvm/v0.31.0/install.sh
+    dest: /tmp/nvm-install.sh
+    mode: 0444
+
+- name: Installing Node Version Manager (NVM)
+  when: nvm.stat.exists == False
+  become_user: "{{username}}"
+  command: /bin/bash /tmp/nvm-install.sh
 
 - name: Installing latest NodeJS 0.12.x
   become_user: "{{username}}"

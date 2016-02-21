@@ -2,29 +2,32 @@
 
 # Python
 
-- name: Checking Pythonz installation
-  register: pythonz
-  stat: path=/usr/local/pythonz
-
-- name: Installing Pythonz
-  become_user: "{{username}}"
-  when: pythonz.stat.exists == False
-  shell:
-    executable=/bin/bash
-    curl -kL https://raw.github.com/saghul/pythonz/master/pythonz-install | bash
-
-
 - name: Installing PIP
   pacman: name={{item}} state=present
   with_items:
     - python-pip
     - python2-pip
 
+- name: Checking Pythonz installation
+  register: pythonz
+  stat: path=/usr/local/pythonz
+
+- name: Downloading Pythonz installer
+  when: pythonz.stat.exists == False
+  get_url:
+    url: https://raw.github.com/saghul/pythonz/master/pythonz-install
+    dest: /tmp/pythonz-install.sh
+    mode: 0444
+
+- name: Installing Pythonz
+  when: pythonz.stat.exists == False
+  become_user: "{{username}}"
+  command: /bin/bash /tmp/pythonz-install.sh
+
 - name: Checking Python virtualenv installation
   register: virtualenvwrapper
   stat: path=/usr/bin/virtualenvwrapper.sh
 
 - name: Installing Python virtualenv
-  shell: pip install virtualenvwrapper
   when: virtualenvwrapper.stat.exists == False
-
+  shell: pip install virtualenvwrapper
