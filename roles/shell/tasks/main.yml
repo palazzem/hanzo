@@ -10,7 +10,7 @@
   stat: path="/home/{{username}}/.oh-my-zsh"
 
 - name: Installing Oh-my-ZSH
-  sudo_user: "{{username}}"
+  become_user: "{{username}}"
   when: zsh.stat.exists == False
   git: repo=https://github.com/robbyrussell/oh-my-zsh.git dest="/home/{{username}}/.oh-my-zsh"
 

@@ -36,6 +36,6 @@
   copy: src=.xinitrc dest="/home/{{username}}/" owner={{username}} group={{username}} backup=yes
 
 - name: Generating Awesome menu
-  sudo_user: "{{username}}"
+  become_user: "{{username}}"
   command: xdg_menu --format awesome --root-menu /etc/xdg/menus/arch-applications.menu > /home/{{username}}/.config/awesome/archmenu.lua
 

@@ -7,7 +7,7 @@
   stat: path=/usr/local/pythonz
 
 - name: Installing Pythonz
-  sudo_user: "{{username}}"
+  become_user: "{{username}}"
   when: pythonz.stat.exists == False
   shell:
     executable=/bin/bash

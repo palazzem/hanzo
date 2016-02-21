@@ -6,6 +6,6 @@
   pacman: name=vagrant state=present
 
 - name: Adding Vagrant plugins
-  sudo_user: "{{username}}"
+  become_user: "{{username}}"
   shell: vagrant plugin install vagrant-lxc
 #  shell: vagrant plugin install vagrant-libvirt vagrant-lxc

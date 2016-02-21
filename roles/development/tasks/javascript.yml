@@ -8,22 +8,22 @@
 
 - name: Installing Node Version Manager (NVM)
   shell: curl https://raw.githubusercontent.com/creationix/nvm/v0.23.3/install.sh | bash
-  sudo_user: "{{username}}"
+  become_user: "{{username}}"
   when: nvm.stat.exists == False
 
 - name: Installing latest NodeJS 0.12.x
-  sudo_user: "{{username}}"
+  become_user: "{{username}}"
   shell: source ~/.nvm/nvm.sh && nvm install 0.12
 
 - name: Default latest NodeJS Version
-  sudo_user: "{{username}}"
+  become_user: "{{username}}"
   shell: source ~/.nvm/nvm.sh && nvm alias default 0.12
 
 - name: Installing Frontend toolchain
-  sudo_user: "{{username}}"
+  become_user: "{{username}}"
   shell: source ~/.nvm/nvm.sh && npm install -g bower yo grunt-cli gulp karma-cli ember-cli coffee-script phantomjs protractor ionic cordova chdir="/home/{{username}}/"
 
 - name: Updating webdriver
-  sudo_user: "{{username}}"
+  become_user: "{{username}}"
   shell: source ~/.nvm/nvm.sh && webdriver-manager update
 

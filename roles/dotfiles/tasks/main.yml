@@ -3,7 +3,7 @@
 # Dotfiles
 
 - name: Cloning all dotfiles to the HOME directory
-  sudo_user: "{{username}}"
+  become_user: "{{username}}"
   git: repo=https://github.com/palazzem/dotfiles.git dest="/home/{{username}}/.dotfiles" accept_hostkey=yes
 
 - name: Removing old files (if any)
