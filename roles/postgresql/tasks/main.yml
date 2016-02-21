@@ -7,9 +7,6 @@
     - postgresql
     - python2-psycopg2
 
-- name: Create tmpfiles.d file for /run/postgresql
-  command: systemd-tmpfiles --create postgresql.conf
-
 - name: Create PostgreSQL data directory
   file: dest=/var/lib/postgres/data owner=postgres group=postgres mode=0700 state=directory
 
@@ -24,12 +21,5 @@
   become_user: postgres
   postgresql_user: user=devel password=123456 state=present
 
-- name: Starting PostgreSQL on boot
-  command: systemctl enable postgresql
-
-- name: Restarting Postgresql service
-  command: systemctl restart postgresql
-
 - name: Removing temporary packages
   pacman: name=python2-psycopg2 state=absent
-
