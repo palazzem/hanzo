@@ -10,8 +10,8 @@
   stat: path="/home/{{username}}/.oh-my-zsh"
 
 - name: Installing Oh-my-ZSH
-  become_user: "{{username}}"
   when: zsh.stat.exists == False
+  become_user: "{{username}}"
   git: repo=https://github.com/robbyrussell/oh-my-zsh.git dest="/home/{{username}}/.oh-my-zsh"
 
 - name: Adding .zshrc default configuration

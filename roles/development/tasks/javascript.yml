@@ -33,4 +33,3 @@
 - name: Updating webdriver
   become_user: "{{username}}"
   shell: source ~/.nvm/nvm.sh && webdriver-manager update
-

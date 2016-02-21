@@ -4,4 +4,3 @@
 
 - name: Installing system Ruby
   pacman: name=ruby state=present
-

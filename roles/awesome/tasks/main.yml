@@ -38,4 +38,3 @@
 - name: Generating Awesome menu
   become_user: "{{username}}"
   command: xdg_menu --format awesome --root-menu /etc/xdg/menus/arch-applications.menu > /home/{{username}}/.config/awesome/archmenu.lua
-
