@@ -2,8 +2,8 @@
 Hanzō
 =====
 
-    Hattori Hanzō: You must have big rats if you need Hattori Hanzo's steel. 
-    The Bride: ...Huge. 
+    | Hattori Hanzō: You must have big rats if you need Hattori Hanzo's steel.
+    | The Bride: ...Huge.
 
 Quick start guide
 -----------------
