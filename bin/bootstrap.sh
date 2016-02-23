@@ -32,13 +32,27 @@ set -e
 ### Variables
 ROOT_FOLDER=/root/ansible-devel/
 REPOSITORY=https://github.com/palazzem/ansible-devel.git
+DATA_STORE=/root/.ansible-devel
 
-### Requiring environment variables
-read -p "Provide your full name: " FULLNAME
-read -p "Provide your username: " USERNAME
-read -p "Provide your email: " EMAIL
+### Retrieving installation parameters
 
-# Installing dependencies
+if [ ! -f "$DATA_STORE" ]; then
+    # we don't have a previous run, so ask for developer's data...
+    read -p "Provide your full name: " FULLNAME
+    read -p "Provide your username: " USERNAME
+    read -p "Provide your email: " EMAIL
+
+    # ...and save them for the next run
+    echo "export FULLNAME=$FULLNAME" > $DATA_STORE
+    echo "export USERNAME=$USERNAME" >> $DATA_STORE
+    echo "export EMAIL=$EMAIL" >> $DATA_STORE
+else
+    # this is not the first time so we may load the content
+    # from the file
+    source "$DATA_STORE"
+fi
+
+### Installing dependencies
 echo "Installing dependencies..."
 pacman -S ansible git --noconfirm
 
@@ -51,20 +65,24 @@ else
     git pull
 fi
 
-# Proceeding with orchestration
+### The Orchestration
 echo "Starting orchestration..."
 ansible-playbook orchestrate.yml -i inventory --connection=local -e "fullname='$FULLNAME' email=$EMAIL username=$USERNAME"
 
+### Last messages
 echo "Configuration completed!"
-echo "The following command is *mandatory*:"
-echo "$ passwd $USERNAME"
-
-echo ""
 echo "You can also install the following packages:"
+echo "$ yaourt -S archey3"
 echo "$ yaourt -S firefox-developer google-chrome"
 echo "$ yaourt -S awesome-themes-git"
 echo "$ yaourt -S downgrade"
 echo "$ yaourt -S ttf-ms-fonts"
 echo "$ yaourt -S watchman"
+echo "$ yaourt -S gradle android-sdk android-sdk-platform-tools android-sdk-build-tools android-platform"
+echo "$ yaourt -S --tmp ~/ android-ndk"
 echo "$ yaourt -S mbpfan-git # (optional for Macbook laptops)"
+echo "$ yaourt -S blueman"
 
+echo ""
+echo "Bear in mind, the following command is **mandatory**:"
+echo "$ passwd $USERNAME"
