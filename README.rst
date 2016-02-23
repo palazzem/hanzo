@@ -11,7 +11,7 @@ Quick start guide
 This is an `Ansible`_ playbook that configures a new ArchLinux installation with some development tools.
 The easiest way to configure your system with this Ansible script, is to launch the automatic installer::
 
-    $ sh <(curl -L http://j.mp/arch-ansible)
+    $ sh <(curl -L http://j.mp/hattori-hanzo)
 
 A clean ArchLinux installation is recommended but not required. Anyway, **bear in mind** that this configuration
 **will overwrite** your settings.
