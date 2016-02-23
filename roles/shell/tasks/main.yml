@@ -14,8 +14,5 @@
   become_user: "{{username}}"
   git: repo=https://github.com/robbyrussell/oh-my-zsh.git dest="/home/{{username}}/.oh-my-zsh"
 
-- name: Adding .zshrc default configuration
-  template: src=.zshrc.j2 dest="/home/{{username}}/.zshrc" owner={{username}} group={{username}}
-
 - name: Changing default shell
   user: name={{username}} shell=/usr/bin/zsh
