@@ -1,74 +1,69 @@
-=============
-Ansible devel
-=============
+=====
+Hanzō
+=====
 
-This is an Ansible playbook that configures a newly ArchLinux installation with some development tools.
+    Hattori Hanzō: You must have big rats if you need Hattori Hanzo's steel. 
+    The Bride: ...Huge. 
 
 Quick start guide
 -----------------
 
-The easiest way to configure your system with this Ansible script, is to launch the automatic installer
-with the following command from your terminal:
-
-.. code-block:: bash
+This is an `Ansible`_ playbook that configures a new ArchLinux installation with some development tools.
+The easiest way to configure your system with this Ansible script, is to launch the automatic installer::
 
     $ sh <(curl -L http://j.mp/arch-ansible)
 
 A clean ArchLinux installation is recommended but not required. Anyway, **bear in mind** that this configuration
-may **overwrite** your settings.
+**will overwrite** your settings.
+
+.. _Ansible: https://www.ansible.com/
 
 Manual installation
 -------------------
 
-If you prefer a manual installation, you should install ``ansible`` and ``git`` packages using the
-ArchLinux default package manager (``pacman``). Simply, launch:
-
-.. code-block:: bash
+If you prefer a manual installation because you don't trust *hidden* scripts (and you shouldn't), you have to install
+``ansible`` and ``git`` packages using the ArchLinux default package manager (``pacman``). Simply, launch::
 
 	$ pacman -S ansible git
 
 Starting the orchestration
---------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Clone this repository and start the orchestration with:
-
-.. code-block:: bash
+Clone this repository and start the orchestration with::
 
 	$ git clone https://github.com/palazzem/ansible-devel.git
 	$ ansible-playbook orchestrate.yml -i inventory --connection=local -e "fullname=<name> email=<email> username=<name>"
 
-The command above, requires the following parameters list:
+The command above, requires the following parameters:
 
 * ``fullname`` is used inside the ``.gitconfig.j2`` template
 * ``email`` is used inside the ``.gitconfig.j2`` template
-* ``username`` is the name of created user
+* ``username`` is the name for the created user
 
 **NOTE:** These parameters are mandatory and if you don't provide any value, the Ansible script will not proceed with
 the orchestration.
 
-Script roles
-~~~~~~~~~~~~
+Ansible roles
+-------------
 
 The main script will go through the following roles:
 
-* system
-* shell
-* containers
-* postgresql
-* redis
-* development
-* extras
-* editors
-* awesome
-* dotfiles [tags='dotfiles']
+* ``system``
+* ``shell``
+* ``provisioning``
+* ``postgresql``
+* ``redis``
+* ``development``
+* ``extras``
+* ``editors``
+* ``awesome``
+* ``dotfiles``
 
-When the orchestration is completed, remember to set the user password:
-
-.. code-block:: bash
+When the orchestration is completed, remember to set the user password through::
 
     $ passwd <name>
 
-Then you can reboot the system.
+Then you can reboot your system.
 
 Other tools
 -----------
@@ -76,10 +71,8 @@ Other tools
 The Ansible script doesn't provide any extra tool or applications like IDEs, browsers, or Android SDK/NDK that I use
 regularly. Even if it's possible to orchestrate manual installations (for instance: wget the archive, untar, create
 applications shortcuts), I prefer to use the AUR repositories that take care of everything. Anyway, it's never a good
-idea to install packages from AUR repositories without looking at the PKGBUILD file, so I leave these manual installations
-to the snippet below:
-
-.. code-block:: bash
+idea to install packages from AUR repositories without looking at the ``PKGBUILD`` file, so I leave the installation
+to the snippet below::
 
     $ yaourt -S archey3
     $ yaourt -S firefox-developer google-chrome
@@ -94,9 +87,9 @@ to the snippet below:
 
 **NOTES:**
 
-* ``ttf-ms-fonts`` is used to solve some rendering problems related to ``awesome`` window manager and browsers
+* ``ttf-ms-fonts`` is used to solve some rendering problems related to ``awesome`` window manager
 * ``mbpfan-git`` could be useful only if you install this system in a Macbook notebook
-* the last command will install Android SDK in ``/opt/android-sdk`` so only the ``root`` user can add
+* the ``android-sdk`` package places the Android SDK in ``/opt/android-sdk`` so only the ``root`` user can add
   new SDK platforms. Bear in mind that you can follow these `recommendations`_ to properly configure your SDK
   folder. Furthermore, the ``android-ndk`` installation requires a lot of ``/tmp`` free space and if your
   configuration doesn't fulfill this requirement, you may provide the ``--tmp`` option and build the NDK in
