@@ -17,10 +17,6 @@ with the following command from your terminal:
 A clean ArchLinux installation is recommended but not required. Anyway, **bear in mind** that this configuration
 may **overwrite** your settings.
 
-**NOTE**: the above script will install a lot of system packages available in the ArchLinux official repositories.
-Anyway, there is an exception because it will install ``neovim-git`` package from the AUR repository. If you don't trust
-this package, *STOP NOW* from reading.
-
 Manual installation
 -------------------
 
@@ -86,7 +82,6 @@ to the snippet below:
 .. code-block:: bash
 
     $ yaourt -S archey3
-    $ yaourt -S neovim-git
     $ yaourt -S firefox-developer google-chrome
     $ yaourt -S awesome-themes-git
     $ yaourt -S downgrade

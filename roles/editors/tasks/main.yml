@@ -2,15 +2,18 @@
 
 # Code editors
 
-- name: Installing NeoVim requirements (according to this configuration)
-  pacman: name=the_silver_searcher state=present
+- name: Installing NeoVim
+  pacman: name=neovim state=present
+
+- name: Adding NeoVim (Python 3) support
+  pip: name=neovim
 
 - name: Installing NeoBundle
   become_user: "{{username}}"
   git: repo=https://github.com/Shougo/neobundle.vim dest="/home/{{username}}/.nvim/bundle/neobundle.vim"
 
-- name: Adding neovim dependency from pip system libraries
-  pip: name=neovim
+- name: Installing NeoVim requirements (according to this configuration)
+  pacman: name=the_silver_searcher state=present
 
 - name: Creating fonts folders
   file: path={{item}} state=directory owner="{{username}}" group="{{username}}"
@@ -18,7 +21,7 @@
     - "/home/{{username}}/.fonts/"
     - "/home/{{username}}/.config/fontconfig/conf.d/"
 
-- name: Downloading fonts
+- name: Downloading fonts for the NeoVim theme
   become_user: "{{username}}"
   get_url: url={{item.url}} dest={{item.dest}}
   with_items:
