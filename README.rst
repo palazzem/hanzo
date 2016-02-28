@@ -85,7 +85,7 @@ to the snippet below::
     $ yaourt -S rxvt-unicode-256xresources urxvt-perls urxvt-resize-font-git urxvt-vtwheel
 
     # fonts
-    $ yaourt -S ttf-ms-fonts ttf-font-awesome infinality-bundle
+    $ yaourt -S ttf-ms-fonts ttf-font-awesome infinality-bundle adobe-source-code-pro-fonts
     $ fc-cache -fr
 
     # audio manager

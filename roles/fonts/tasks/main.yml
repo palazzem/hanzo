@@ -17,6 +17,5 @@
   with_items:
     - ttf-dejavu
     - artwiz-fonts
-    - adobe-source-code-pro-fonts
   notify:
     - build font cache
