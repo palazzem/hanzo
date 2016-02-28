@@ -9,6 +9,9 @@
     - sxhkd
     - stalonetray
     - feh
+    - ranger
+    - w3m
+    - rofi
     - gvfs
     - gvfs-afc
     - gvfs-smb
