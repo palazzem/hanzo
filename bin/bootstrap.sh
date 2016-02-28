@@ -52,7 +52,10 @@ else
     source "$DATA_STORE"
 fi
 
-### Installing dependencies
+### System update and dependencies
+echo "Updating the system..."
+pacman -Syu --noconfirm
+
 echo "Installing dependencies..."
 pacman -S ansible git --noconfirm
 
