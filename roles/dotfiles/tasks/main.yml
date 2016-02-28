@@ -24,8 +24,8 @@
 - name: Creating symbolic links
   file: state=link src={{item.src}} dest={{item.dest}} owner={{username}} group={{username}}
   with_items:
-      - { src: "/home/{{username}}/.dotfiles/zsh/zshrc", dest: "/home/{{username}}/.zshrc" }
-      - { src: "/home/{{username}}/.dotfiles/nvim/nvimrc", dest: "/home/{{username}}/.config/nvim/init.vim" }
-      - { src: "/home/{{username}}/.dotfiles/awesome/rc.lua", dest: "/home/{{username}}/.config/awesome/rc.lua" }
-      - { src: "/home/{{username}}/.dotfiles/awesome/utils.lua", dest: "/home/{{username}}/.config/awesome/utils.lua" }
-      - { src: "/home/{{username}}/.dotfiles/awesome/widgets.lua", dest: "/home/{{username}}/.config/awesome/widgets.lua" }
+      - { src: "/home/{{username}}/.dotfiles/zshrc", dest: "/home/{{username}}/.zshrc" }
+      - { src: "/home/{{username}}/.dotfiles/config/nvim/nvimrc", dest: "/home/{{username}}/.config/nvim/init.vim" }
+      - { src: "/home/{{username}}/.dotfiles/config/awesome/rc.lua", dest: "/home/{{username}}/.config/awesome/rc.lua" }
+      - { src: "/home/{{username}}/.dotfiles/config/awesome/utils.lua", dest: "/home/{{username}}/.config/awesome/utils.lua" }
+      - { src: "/home/{{username}}/.dotfiles/config/awesome/widgets.lua", dest: "/home/{{username}}/.config/awesome/widgets.lua" }
