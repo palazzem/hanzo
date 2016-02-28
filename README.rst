@@ -74,16 +74,22 @@ applications shortcuts), I prefer to use the AUR repositories that take care of 
 idea to install packages from AUR repositories without looking at the ``PKGBUILD`` file, so I leave the installation
 to the snippet below::
 
-    $ yaourt -S archey3
+    # browsers
     $ yaourt -S firefox-developer google-chrome
-    $ yaourt -S awesome-themes-git
-    $ yaourt -S downgrade
-    $ yaourt -S ttf-ms-fonts
-    $ yaourt -S watchman
+
+    # window manager / shell
+    $ yaourt -S archey3 xdo-git lemonbar-xft-git
+
+    # fonts
+    $ yaourt -S ttf-ms-fonts ttf-font-awesome infinality-bundle
+
+    # Android
     $ yaourt -S gradle android-sdk android-sdk-platform-tools android-sdk-build-tools android-platform
     $ yaourt -S --tmp ~/ android-ndk
+
+    # generic stuff
+    $ yaourt -S downgrade blueman
     $ yaourt -S mbpfan-git # (optional for Macbook laptops)
-    $ yaourt -S blueman
 
 **NOTES:**
 
