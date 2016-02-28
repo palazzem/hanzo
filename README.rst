@@ -82,6 +82,7 @@ to the snippet below::
 
     # fonts
     $ yaourt -S ttf-ms-fonts ttf-font-awesome infinality-bundle
+    $ fc-cache -fr
 
     # Android
     $ yaourt -S gradle android-sdk android-sdk-platform-tools android-sdk-build-tools android-platform

@@ -25,9 +25,7 @@
   become_user: "{{username}}"
   get_url: url={{item.url}} dest={{item.dest}}
   with_items:
-      - { url: "https://github.com/powerline/powerline/raw/develop/font/PowerlineSymbols.otf", dest: "/home/{{username}}/.fonts/" }
-      - { url: "https://github.com/powerline/powerline/raw/develop/font/10-powerline-symbols.conf", dest: "/home/{{username}}/.config/fontconfig/conf.d/" }
-
-- name: Updating font cache
-  become_user: "{{username}}"
-  shell: fc-cache -vf "/home/{{username}}/.fonts/"
+    - { url: "https://github.com/powerline/powerline/raw/develop/font/PowerlineSymbols.otf", dest: "/home/{{username}}/.fonts/" }
+    - { url: "https://github.com/powerline/powerline/raw/develop/font/10-powerline-symbols.conf", dest: "/home/{{username}}/.config/fontconfig/conf.d/" }
+  notify:
+    - build font cache

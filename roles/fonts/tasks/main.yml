@@ -14,3 +14,5 @@
 
 - name: Installing community fonts
   pacman: name=ttf-dejavu, artwiz-fonts state=present
+  notify:
+    - build font cache
