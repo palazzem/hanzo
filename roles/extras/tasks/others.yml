@@ -9,7 +9,7 @@
   pacman: name=keepassx2 state=present
 
 - name: Installing Libreoffice
-  pacman: name=ttf-dejavu,artwiz-fonts,libreoffice-en-US,libreoffice-fresh state=present
+  pacman: name=libreoffice-en-US,libreoffice-fresh state=present
 
 - name: Installing VLC
   pacman: name=vlc state=present

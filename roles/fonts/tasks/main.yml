@@ -1,0 +1,16 @@
+---
+
+# fonts
+
+- name: Installing infinality-bundle repository
+  blockinfile:
+    dest: /etc/pacman.conf
+    block: |
+      [infinality-bundle]
+      Server = http://bohoomil.com/repo/$arch
+
+      [infinality-bundle-fonts]
+      Server = http://bohoomil.com/repo/fonts
+
+- name: Installing community fonts
+  pacman: name=ttf-dejavu, artwiz-fonts state=present

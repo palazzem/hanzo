@@ -24,4 +24,5 @@
     - extras
     - editors
     - bspwm
+    - fonts
     - { role: dotfiles, tags: ['dotfiles'] }
