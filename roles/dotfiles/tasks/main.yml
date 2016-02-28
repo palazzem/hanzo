@@ -13,12 +13,18 @@
     - "/home/{{username}}/.zshrc"
     - "/home/{{username}}/.config/nvim/init.vim"
     - "/home/{{username}}/.config/bspwm/bspwmrc"
+    - "/home/{{username}}/.local/bin/autostart"
+    - "/home/{{username}}/.local/bin/bspwm_panel"
+    - "/home/{{username}}/.local/bin/bspwm_panel_bar"
+    - "/home/{{username}}/.local/bin/panel_colors"
+    - "/home/{{username}}/.local/bin/panel_config"
 
 - name: Creating required directories
   file: state=directory name={{item}}
   with_items:
     - "/home/{{username}}/.config/nvim/"
     - "/home/{{username}}/.config/bspwm/"
+    - "/home/{{username}}/.local/bin/"
 
 - name: Creating symbolic links
   file: state=link src={{item.src}} dest={{item.dest}} owner={{username}} group={{username}}
@@ -27,3 +33,8 @@
       - { src: "/home/{{username}}/.dotfiles/zshrc", dest: "/home/{{username}}/.zshrc" }
       - { src: "/home/{{username}}/.dotfiles/config/nvim/nvimrc", dest: "/home/{{username}}/.config/nvim/init.vim" }
       - { src: "/home/{{username}}/.dotfiles/config/bspwm/bspwmrc", dest: "/home/{{username}}/.config/bspwm/bspwmrc" }
+      - { src: "/home/{{username}}/.dotfiles/local/bin/autostart", dest: "/home/{{username}}/.local/bin/autostart" }
+      - { src: "/home/{{username}}/.dotfiles/local/bin/bspwm_panel", dest: "/home/{{username}}/.local/bin/bspwm_panel" }
+      - { src: "/home/{{username}}/.dotfiles/local/bin/bspwm_panel_bar", dest: "/home/{{username}}/.local/bin/bspwm_panel_bar" }
+      - { src: "/home/{{username}}/.dotfiles/local/bin/panel_colors", dest: "/home/{{username}}/.local/bin/panel_colors" }
+      - { src: "/home/{{username}}/.dotfiles/local/bin/panel_config", dest: "/home/{{username}}/.local/bin/panel_config" }
