@@ -11,8 +11,11 @@
 - name: Installing Libreoffice
   pacman: name=libreoffice-en-US,libreoffice-fresh state=present
 
-- name: Installing VLC
-  pacman: name=vlc state=present
+- name: Installing MPV player
+  pacman: name={{item}} state=present
+  with_items:
+    - mpv
+    - youtube-dl
 
 - name: Installing ImageMagick
   pacman: name=imagemagick state=present
