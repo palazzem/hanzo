@@ -32,7 +32,7 @@ Starting the orchestration
 Clone this repository and start the orchestration with::
 
 	$ git clone https://github.com/palazzem/ansible-devel.git
-	$ ansible-playbook orchestrate.yml -i inventory --connection=local -e "fullname=<name> email=<email> username=<name>"
+	$ ansible-playbook orchestrate.yml -i inventory --connection=local -e "fullname=<name> username=<name> email=<email>"
 
 The command above, requires the following parameters:
 
