@@ -13,6 +13,10 @@
       Server = http://bohoomil.com/repo/fonts
 
 - name: Installing community fonts
-  pacman: name=ttf-dejavu, artwiz-fonts state=present
+  pacman: name={{item}} state=present
+  with_items:
+    - ttf-dejavu
+    - artwiz-fonts
+    - adobe-source-code-pro-fonts
   notify:
     - build font cache

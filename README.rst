@@ -77,8 +77,11 @@ to the snippet below::
     # browsers
     $ yaourt -S firefox-developer google-chrome
 
-    # window manager / shell
+    # window manager
     $ yaourt -S archey3 xdo-git lemonbar-xft-git
+
+    # terminal
+    $ yaourt -S rxvt-unicode-256xresources urxvt-perls urxvt-resize-font-git urxvt-vtwheel
 
     # fonts
     $ yaourt -S ttf-ms-fonts ttf-font-awesome infinality-bundle

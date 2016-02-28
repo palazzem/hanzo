@@ -76,8 +76,11 @@ echo
 echo "    # browsers"
 echo "    $ yaourt -S firefox-developer google-chrome"
 echo
-echo "    # window manager / shell"
+echo "    # window manager"
 echo "    $ yaourt -S archey3 xdo-git lemonbar-xft-git"
+echo
+echo "    # terminal"
+echo "    $ yaourt -S rxvt-unicode-256xresources urxvt-perls urxvt-resize-font-git urxvt-vtwheel"
 echo
 echo "    # fonts"
 echo "    $ yaourt -S ttf-ms-fonts ttf-font-awesome infinality-bundle"
