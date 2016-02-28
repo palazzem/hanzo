@@ -13,7 +13,7 @@
     - gvfs-mtp
     - pcmanfm
     - xarchiver
-    - xscreensaver
+    - xlockmore
 
 - name: Adding .xinitrc
   copy: src=.xinitrc dest="/home/{{username}}/" owner={{username}} group={{username}} backup=yes
