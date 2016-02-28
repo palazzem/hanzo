@@ -13,6 +13,7 @@
 - name: Adding Arch Linux User Repository (AUR)
   blockinfile:
     dest: /etc/pacman.conf
+    marker: "# {mark} SYSTEM MANAGED BLOCK (Ansible)"
     block: |
       [archlinuxfr]
       SigLevel = Never
