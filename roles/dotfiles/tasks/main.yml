@@ -9,6 +9,7 @@
 - name: Removing old files (if any)
   file: state=absent name={{item}}
   with_items:
+    - "/home/{{username}}/.xinitrc"
     - "/home/{{username}}/.zshrc"
     - "/home/{{username}}/.config/nvim/init.vim"
     - "/home/{{username}}/.config/awesome/rc.lua"
@@ -24,6 +25,7 @@
 - name: Creating symbolic links
   file: state=link src={{item.src}} dest={{item.dest}} owner={{username}} group={{username}}
   with_items:
+      - { src: "/home/{{username}}/.dotfiles/xinitrc", dest: "/home/{{username}}/.xinitrc" }
       - { src: "/home/{{username}}/.dotfiles/zshrc", dest: "/home/{{username}}/.zshrc" }
       - { src: "/home/{{username}}/.dotfiles/config/nvim/nvimrc", dest: "/home/{{username}}/.config/nvim/init.vim" }
       - { src: "/home/{{username}}/.dotfiles/config/awesome/rc.lua", dest: "/home/{{username}}/.config/awesome/rc.lua" }

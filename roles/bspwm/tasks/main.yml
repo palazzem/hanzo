@@ -16,8 +16,5 @@
     - xarchiver
     - xlockmore
 
-- name: Adding .xinitrc
-  copy: src=.xinitrc dest="/home/{{username}}/" owner={{username}} group={{username}} backup=yes
-
 - name: Be aware of the .local/bin folder
   file: path="/home/{{username}}/.local/bin" state=directory owner={{username}} group={{username}}
