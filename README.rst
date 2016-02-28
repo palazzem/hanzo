@@ -56,12 +56,13 @@ The main script will go through the following roles:
 * ``development``
 * ``extras``
 * ``editors``
-* ``awesome``
+* ``bspwm``
+* ``fonts``
 * ``dotfiles``
 
 When the orchestration is completed, remember to set the user password through::
 
-    $ passwd <name>
+    $ passwd <username>
 
 Then you can reboot your system.
 
