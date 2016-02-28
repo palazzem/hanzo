@@ -11,6 +11,7 @@
   with_items:
     - "/home/{{username}}/.xinitrc"
     - "/home/{{username}}/.Xresources"
+    - "/home/{{username}}/.stalonetrayrc"
     - "/home/{{username}}/.zshrc"
     - "/home/{{username}}/.config/nvim/init.vim"
     - "/home/{{username}}/.config/bspwm/bspwmrc"
@@ -36,6 +37,7 @@
   with_items:
       - { src: "/home/{{username}}/.dotfiles/xinitrc", dest: "/home/{{username}}/.xinitrc" }
       - { src: "/home/{{username}}/.dotfiles/Xresources", dest: "/home/{{username}}/.Xresources" }
+      - { src: "/home/{{username}}/.dotfiles/stalonetrayrc", dest: "/home/{{username}}/.stalonetrayrc" }
       - { src: "/home/{{username}}/.dotfiles/zshrc", dest: "/home/{{username}}/.zshrc" }
       - { src: "/home/{{username}}/.dotfiles/config/nvim/nvimrc", dest: "/home/{{username}}/.config/nvim/init.vim" }
       - { src: "/home/{{username}}/.dotfiles/config/bspwm/bspwmrc", dest: "/home/{{username}}/.config/bspwm/bspwmrc" }
