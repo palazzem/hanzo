@@ -30,8 +30,8 @@
 set -e
 
 ### Variables
-ROOT_FOLDER=/root/ansible-devel/
-REPOSITORY=https://github.com/palazzem/ansible-devel.git
+ROOT_FOLDER=/root/hanzo/
+REPOSITORY=https://github.com/palazzem/hanzo.git
 DATA_STORE=/root/.hanzo
 
 ### Retrieving installation parameters
