@@ -7,6 +7,7 @@
   with_items:
     - bspwm
     - sxhkd
+    - stalonetray
     - gvfs
     - gvfs-afc
     - gvfs-smb
