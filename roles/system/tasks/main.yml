@@ -42,6 +42,7 @@
     - bluez
     - dosfstools
     - ntfsprogs
+    - acpi
 
 - name: Installing support tools
   pacman: name={{item}} state=present
