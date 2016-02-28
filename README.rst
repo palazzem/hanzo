@@ -96,7 +96,7 @@ to the snippet below::
     $ yaourt -S --tmp ~/ android-ndk
 
     # generic stuff
-    $ yaourt -S downgrade blueman
+    $ yaourt -S downgrade
     $ yaourt -S mbpfan-git # (optional for Macbook laptops)
 
 **NOTES:**

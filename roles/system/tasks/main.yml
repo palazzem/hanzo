@@ -60,6 +60,7 @@
     - whois
     - htop
     - archey3
+    - blueman
 
 - name: Installing video drivers
   pacman: name={{item}} state=present
