@@ -23,5 +23,5 @@
     - development
     - extras
     - editors
-    - awesome
+    - bspwm
     - { role: dotfiles, tags: ['dotfiles'] }

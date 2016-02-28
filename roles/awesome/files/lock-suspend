@@ -1,5 +1,0 @@
-#! /bin/bash
-
-# suspend the system while using the screenlock
-xscreensaver-command -lock && systemctl suspend
-
