@@ -88,6 +88,9 @@ to the snippet below::
     $ yaourt -S ttf-ms-fonts ttf-font-awesome infinality-bundle
     $ fc-cache -fr
 
+    # audio manager
+    $ yaourt -S mopidy-spotify
+
     # Android
     $ yaourt -S gradle android-sdk android-sdk-platform-tools android-sdk-build-tools android-platform
     $ yaourt -S --tmp ~/ android-ndk

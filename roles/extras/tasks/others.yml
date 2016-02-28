@@ -16,3 +16,9 @@
 
 - name: Installing ImageMagick
   pacman: name=imagemagick state=present
+
+- name: Installing MPD server and client
+  pacman: name={{item}} state=present
+  with_items:
+    - mopidy
+    - ncmpcpp
