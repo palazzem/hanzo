@@ -2,9 +2,6 @@
 
 # Shell enhancement
 
-- name: Installing zsh
-  pacman: name=zsh state=present
-
 - name: Checking Oh-my-ZSH presence
   register: zsh
   stat: path="/home/{{username}}/.oh-my-zsh"
@@ -13,6 +10,3 @@
   when: zsh.stat.exists == False
   become_user: "{{username}}"
   git: repo=https://github.com/robbyrussell/oh-my-zsh.git dest="/home/{{username}}/.oh-my-zsh"
-
-- name: Changing default shell
-  user: name={{username}} shell=/usr/bin/zsh
