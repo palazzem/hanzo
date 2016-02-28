@@ -13,6 +13,7 @@
     - "/home/{{username}}/.Xresources"
     - "/home/{{username}}/.stalonetrayrc"
     - "/home/{{username}}/.zshrc"
+    - "/home/{{username}}/.wallpaper/background.png"
     - "/home/{{username}}/.config/nvim/init.vim"
     - "/home/{{username}}/.config/bspwm/bspwmrc"
     - "/home/{{username}}/.config/sxhkd/sxhkdrc"
@@ -26,6 +27,7 @@
 - name: Creating required directories
   file: state=directory name={{item}}
   with_items:
+    - "/home/{{username}}/.wallpaper/"
     - "/home/{{username}}/.config/nvim/"
     - "/home/{{username}}/.config/bspwm/"
     - "/home/{{username}}/.config/sxhkd/"
@@ -39,6 +41,7 @@
       - { src: "/home/{{username}}/.dotfiles/Xresources", dest: "/home/{{username}}/.Xresources" }
       - { src: "/home/{{username}}/.dotfiles/stalonetrayrc", dest: "/home/{{username}}/.stalonetrayrc" }
       - { src: "/home/{{username}}/.dotfiles/zshrc", dest: "/home/{{username}}/.zshrc" }
+      - { src: "/home/{{username}}/.dotfiles/wallpaper/background.png", dest: "/home/{{username}}/.wallpaper/background.png" }
       - { src: "/home/{{username}}/.dotfiles/config/nvim/nvimrc", dest: "/home/{{username}}/.config/nvim/init.vim" }
       - { src: "/home/{{username}}/.dotfiles/config/bspwm/bspwmrc", dest: "/home/{{username}}/.config/bspwm/bspwmrc" }
       - { src: "/home/{{username}}/.dotfiles/config/sxhkd/sxhkdrc", dest: "/home/{{username}}/.config/sxhkd/sxhkdrc" }
