@@ -59,6 +59,7 @@
     - dnsutils
     - whois
     - htop
+    - archey3
 
 - name: Installing video drivers
   pacman: name={{item}} state=present

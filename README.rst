@@ -79,7 +79,7 @@ to the snippet below::
     $ yaourt -S firefox-developer google-chrome
 
     # window manager
-    $ yaourt -S archey3 xdo-git lemonbar-xft-git
+    $ yaourt -S xdo-git lemonbar-xft-git
 
     # terminal
     $ yaourt -S rxvt-unicode-256xresources urxvt-perls urxvt-resize-font-git urxvt-vtwheel
