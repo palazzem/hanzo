@@ -85,7 +85,7 @@ to the snippet below::
     $ yaourt -S rxvt-unicode-256xresources urxvt-perls urxvt-resize-font-git urxvt-vtwheel
 
     # fonts
-    $ yaourt -S ttf-ms-fonts ttf-font-awesome infinality-bundle adobe-source-code-pro-fonts
+    $ yaourt -S ttf-ms-fonts ttf-font-awesome infinality-bundle
     $ fc-cache -fr
 
     # audio manager
@@ -102,6 +102,8 @@ to the snippet below::
 **NOTES:**
 
 * ``ttf-ms-fonts`` is used to solve some rendering problems related to ``awesome`` window manager
+* ``infinality-bundle`` requires adding a new key to Pacman KEYRING. you can find further information in the
+  `Infinality official page`_
 * ``mbpfan-git`` could be useful only if you install this system in a Macbook notebook
 * the ``android-sdk`` package places the Android SDK in ``/opt/android-sdk`` so only the ``root`` user can add
   new SDK platforms. Bear in mind that you can follow these `recommendations`_ to properly configure your SDK
@@ -109,6 +111,7 @@ to the snippet below::
   configuration doesn't fulfill this requirement, you may provide the ``--tmp`` option and build the NDK in
   your home folder.
 
+.. _Infinality official page: https://wiki.archlinux.org/index.php/Infinality#Infinality-bundle
 .. _recommendations: https://wiki.archlinux.org/index.php/android#Android_development
 
 What to do next
