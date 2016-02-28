@@ -25,7 +25,7 @@
     - "/home/{{username}}/.local/bin/panel_config"
 
 - name: Creating required directories
-  file: state=directory name={{item}}
+  file: state=directory name={{item}} owner={{username}} group={{username}}
   with_items:
     - "/home/{{username}}/.wallpaper/"
     - "/home/{{username}}/.config/nvim/"
