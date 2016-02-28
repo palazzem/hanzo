@@ -57,6 +57,7 @@
     - mlocate
     - dnsutils
     - whois
+    - htop
 
 - name: Installing video drivers
   pacman: name={{item}} state=present
