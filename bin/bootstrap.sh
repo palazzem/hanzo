@@ -76,25 +76,29 @@ ansible-playbook orchestrate.yml -i inventory --connection=local -e "fullname='$
 echo "Configuration completed!"
 echo "You can also install the following packages:"
 echo
+echo "    # window manager (required)"
+echo "    $ yaourt -S xdo-git lemonbar-xft-git sutils-git"
+echo
+echo "    # generic stuff"
+echo "    $ yaourt -S downgrade"
+echo "    $ yaourt -S mbpfan-git # (optional for Macbook laptops)"
+echo
 echo "    # browsers"
 echo "    $ yaourt -S firefox-developer google-chrome"
-echo
-echo "    # window manager"
-echo "    $ yaourt -S archey3 xdo-git lemonbar-xft-git"
 echo
 echo "    # terminal"
 echo "    $ yaourt -S rxvt-unicode-256xresources urxvt-perls urxvt-resize-font-git urxvt-vtwheel"
 echo
 echo "    # fonts"
 echo "    $ yaourt -S ttf-ms-fonts ttf-font-awesome infinality-bundle"
+echo "    $ fc-cache -fr"
+echo
+echo "    # audio manager"
+echo "    $ yaourt -S mopidy-spotify"
 echo
 echo "    # Android"
 echo "    $ yaourt -S gradle android-sdk android-sdk-platform-tools android-sdk-build-tools android-platform"
 echo "    $ yaourt -S --tmp ~/ android-ndk"
-echo
-echo "    # generic stuff"
-echo "    $ yaourt -S downgrade blueman"
-echo "    $ yaourt -S mbpfan-git # (optional for Macbook laptops)"
 echo
 echo "Bear in mind, the following command is **mandatory**:"
 echo "$ passwd $USERNAME"
