@@ -21,8 +21,8 @@ A clean ArchLinux installation is recommended but not required. Anyway, **bear i
 Manual installation
 -------------------
 
-If you prefer a manual installation because you don't trust *hidden* scripts (and you shouldn't), you have to install
-``ansible`` and ``git`` packages using the ArchLinux default package manager (``pacman``). Simply, launch::
+If you prefer a manual installation because you don't trust *hidden* scripts (and you should never trust hidden scripts),
+you have to install ``ansible`` and ``git`` packages using the ArchLinux default package manager (``pacman``). Simply, launch::
 
 	$ pacman -S ansible git
 
