@@ -2,11 +2,11 @@
 
 # Code editors
 
-- name: Installing NeoVim
-  pacman: name=neovim state=present
-
-- name: Adding NeoVim (Python 3) support
-  pip: name=neovim
+- name: Installing NeoVim with Python 3 support
+  pacman: name={{item}} state=present
+  with_items:
+    - neovim
+    - python-neovim
 
 - name: Installing NeoBundle
   become_user: "{{username}}"
