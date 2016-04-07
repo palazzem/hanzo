@@ -1,6 +1,0 @@
----
-
-# Vagrant configuration
-
-- name: Installing Vagrant provisioning
-  pacman: name=vagrant state=present

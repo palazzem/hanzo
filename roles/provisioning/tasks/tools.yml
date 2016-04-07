@@ -1,0 +1,9 @@
+---
+
+# Deployment tools configuration
+
+- name: Installing Vagrant provisioning
+  pacman: name=vagrant state=present
+
+- name: Installing Packer builder
+  unarchive: src=https://releases.hashicorp.com/packer/0.10.0/packer_0.10.0_linux_amd64.zip dest=/home/{{username}}/programs/packer/bin copy=no owner={{username}} group={{username}}
