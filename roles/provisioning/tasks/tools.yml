@@ -2,6 +2,11 @@
 
 # Deployment tools configuration
 
+- name: Creating required directories
+  file: state=directory name={{item}} owner={{username}} group={{username}}
+  with_items:
+    - "/home/{{username}}/programs/packer/bin/"
+
 - name: Installing Vagrant provisioning
   pacman: name=vagrant state=present
 
