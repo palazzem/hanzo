@@ -19,14 +19,15 @@
       SigLevel = Never
       Server = http://repo.archlinux.fr/$arch
 
-- name: Updating system packages
-  pacman: name=base-devel state=present update_cache=yes
+- name: Preparing the base system
+  pacman: name={{item}} state=present update_cache=yes force=yes upgrade=yes
+  with_items:
+    - linux
+    - linux-headers
 
 - name: Installing system packages
   pacman: name={{item}} state=present
   with_items:
-    - linux
-    - linux-headers
     - sudo
     - alsa-utils
     - openssh
