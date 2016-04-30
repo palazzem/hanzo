@@ -9,30 +9,31 @@ Quick start guide
 -----------------
 
 This is an `Ansible`_ playbook that configures a new ArchLinux installation with some development tools.
-The easiest way to configure your system with this Ansible script, is to launch the automatic installer::
+If you like living on the bleeding edge and *curlbombs* don't scare you, the automatic installer is the easiest
+way to configure your system with this playbook::
 
     $ sh <(curl -L http://j.mp/hattori-hanzo)
 
 A clean ArchLinux installation is recommended but not required. Anyway, **bear in mind** that this configuration
-**will overwrite** your settings.
+**will overwrite your system**.
 
 .. _Ansible: https://www.ansible.com/
 
 Manual installation
 -------------------
 
-If you prefer a manual installation because you don't trust *hidden* scripts (and you should never trust hidden scripts),
-you have to install ``ansible`` and ``git`` packages using the ArchLinux default package manager (``pacman``). Simply, launch::
+If you prefer a manual installation because you don't like *curlbombs* (and you shouldn't), you have to install ``ansible`` and
+``git`` packages using the ArchLinux default package manager (``pacman``). Simply, launch::
 
-	$ pacman -S ansible git
+    $ pacman -S ansible git base base-devel
 
 Starting the orchestration
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Clone this repository and start the orchestration with::
 
-	$ git clone https://github.com/palazzem/ansible-devel.git
-	$ ansible-playbook orchestrate.yml -i inventory --connection=local -e "fullname=<name> username=<name> email=<email>"
+    $ git clone https://github.com/palazzem/ansible-devel.git
+    $ ansible-playbook orchestrate.yml -i inventory --connection=local -e "fullname=<name> username=<name> email=<email>"
 
 The command above, requires the following parameters:
 
@@ -40,13 +41,13 @@ The command above, requires the following parameters:
 * ``email`` is used inside the ``.gitconfig.j2`` template
 * ``username`` is the name for the created user
 
-**NOTE:** These parameters are mandatory and if you don't provide any value, the Ansible script will not proceed with
+**NOTE:** These parameters are mandatory and if you don't provide any value, the Ansible playbook will not proceed with
 the orchestration.
 
 Ansible roles
 -------------
 
-The main script will go through the following roles:
+The playbook will go through the following roles:
 
 * ``system``
 * ``shell``
@@ -70,10 +71,10 @@ Then you can reboot your system.
 Other tools
 -----------
 
-The Ansible script doesn't provide any extra tool or applications like IDEs, browsers, or Android SDK/NDK that I use
+The Ansible playbook doesn't provide any extra tool or applications like IDEs, browsers, or Android SDK/NDK that I use
 regularly. Even if it's possible to orchestrate manual installations (for instance: wget the archive, untar, create
 applications shortcuts), I prefer to use the AUR repositories that take care of everything. Anyway, it's never a good
-idea to install packages from AUR repositories without looking at the ``PKGBUILD`` file, so I leave the installation
+idea installing packages from AUR repositories without looking at the ``PKGBUILD`` file, so I leave the last setup
 to the snippet below::
 
     # window manager (required)
@@ -102,7 +103,7 @@ to the snippet below::
 
 **NOTES:**
 
-* ``ttf-ms-fonts`` is used to solve some rendering problems related to ``awesome`` window manager
+* ``ttf-ms-fonts`` is used to solve some rendering problems related to window manager
 * ``infinality-bundle`` requires adding a new key to Pacman KEYRING. you can find further information in the
   `Infinality official page`_
 * ``mbpfan-git`` could be useful only if you install this system in a Macbook notebook
