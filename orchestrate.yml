@@ -17,6 +17,7 @@
   roles:
     - system
     - shell
+    - vm
     - provisioning
     - postgresql
     - redis

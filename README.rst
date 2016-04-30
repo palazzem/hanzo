@@ -50,6 +50,7 @@ The main script will go through the following roles:
 
 * ``system``
 * ``shell``
+* ``vm``
 * ``provisioning``
 * ``postgresql``
 * ``redis``
