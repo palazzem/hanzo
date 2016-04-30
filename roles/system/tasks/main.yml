@@ -25,6 +25,8 @@
 - name: Installing system packages
   pacman: name={{item}} state=present
   with_items:
+    - linux
+    - linux-headers
     - sudo
     - alsa-utils
     - openssh
