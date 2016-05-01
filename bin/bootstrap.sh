@@ -32,6 +32,7 @@ set -e
 ### Variables
 ROOT_FOLDER=/root/hanzo/
 REPOSITORY=https://github.com/palazzem/hanzo.git
+README=https://raw.githubusercontent.com/palazzem/hanzo/master/README.rst
 DATA_STORE=/root/.hanzo
 
 ### Retrieving installation parameters
@@ -71,34 +72,12 @@ fi
 ### The Orchestration
 echo "Starting orchestration..."
 ansible-playbook orchestrate.yml -i inventory --connection=local -e "fullname='$FULLNAME' email=$EMAIL username=$USERNAME"
+echo "Configuration completed!"
+
+### README with further instructions
+echo "Showing the latest version of README..."
+sleep 1 && curl -L "$README" && echo
 
 ### Last messages
-echo "Configuration completed!"
-echo "You can also install the following packages:"
-echo
-echo "    # window manager (required)"
-echo "    $ yaourt -S xdo-git lemonbar-xft-git sutils-git"
-echo
-echo "    # generic stuff"
-echo "    $ yaourt -S downgrade"
-echo "    $ yaourt -S mbpfan-git # (optional for Macbook laptops)"
-echo
-echo "    # browsers"
-echo "    $ yaourt -S firefox-developer google-chrome"
-echo
-echo "    # terminal"
-echo "    $ yaourt -S rxvt-unicode-256xresources urxvt-perls urxvt-resize-font-git urxvt-vtwheel"
-echo
-echo "    # fonts"
-echo "    $ yaourt -S ttf-ms-fonts ttf-font-awesome infinality-bundle"
-echo "    $ fc-cache -fr"
-echo
-echo "    # audio manager"
-echo "    $ yaourt -S mopidy-spotify"
-echo
-echo "    # Android"
-echo "    $ yaourt -S gradle android-sdk android-sdk-platform-tools android-sdk-build-tools android-platform"
-echo "    $ yaourt -S --tmp ~/ android-ndk"
-echo
-echo "Bear in mind, the following command is **mandatory**:"
+echo "Bear in mind that the following command is **mandatory**:"
 echo "$ passwd $USERNAME"
