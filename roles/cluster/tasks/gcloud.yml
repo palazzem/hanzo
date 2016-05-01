@@ -8,4 +8,4 @@
     - "/home/{{username}}/programs/google-cloud-sdk/"
 
 - name: Google Cloud SDK - installing
-  unarchive: src={{gcloud_version}} dest=/home/{{username}}/programs/google-cloud-sdk copy=no owner={{username}} group={{username}}
+  unarchive: src={{gcloud_version}} dest=/home/{{username}}/programs/ copy=no owner={{username}} group={{username}}
