@@ -14,6 +14,8 @@
 
 - hosts: default
   become: yes
+  vars_files:
+    - variables/versions.yml
   roles:
     - system
     - shell

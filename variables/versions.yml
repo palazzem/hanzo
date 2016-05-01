@@ -1,0 +1,9 @@
+---
+# list here all packages versions (where needed)
+gcloud_version: https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-107.0.0-linux-x86_64.tar.gz
+nvm_version: https://raw.githubusercontent.com/creationix/nvm/v0.31.0/install.sh
+node_version: v6.0.0
+packer_version: https://releases.hashicorp.com/packer/0.10.0/packer_0.10.0_linux_amd64.zip
+terraform_version: https://releases.hashicorp.com/terraform/0.6.15/terraform_0.6.15_linux_amd64.zip
+docker_machine_version: https://github.com/docker/machine/releases/download/v0.4.0/docker-machine_linux-amd64
+docker_compose_version: https://github.com/docker/compose/releases/download/1.4.0/docker-compose-Linux-x86_64

@@ -9,7 +9,7 @@
 - name: Downloading Node Version Manager (NVM)
   when: nvm.stat.exists == False
   get_url:
-    url: https://raw.githubusercontent.com/creationix/nvm/v0.31.0/install.sh
+    url: "{{nvm_version}}"
     dest: /tmp/nvm-install.sh
     mode: 0444
 
@@ -18,13 +18,13 @@
   become_user: "{{username}}"
   command: /bin/bash /tmp/nvm-install.sh
 
-- name: Installing latest NodeJS v5.6.0
+- name: Installing latest NodeJS
   become_user: "{{username}}"
-  shell: source ~/.nvm/nvm.sh && nvm install v5.6.0
+  shell: source ~/.nvm/nvm.sh && nvm install {{node_version}}
 
 - name: Default latest NodeJS Version
   become_user: "{{username}}"
-  shell: source ~/.nvm/nvm.sh && nvm alias default v5.6.0
+  shell: source ~/.nvm/nvm.sh && nvm alias default {{node_version}}
 
 # Ignoring errors because 'sometimes' NPM stops working
 - name: Installing Frontend toolchain

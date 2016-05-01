@@ -8,4 +8,4 @@
     - "/home/{{username}}/programs/google-cloud-sdk/"
 
 - name: Google Cloud SDK - installing
-  unarchive: src=https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-107.0.0-linux-x86_64.tar.gz dest=/home/{{username}}/programs/google-cloud-sdk copy=no owner={{username}} group={{username}}
+  unarchive: src={{gcloud_version}} dest=/home/{{username}}/programs/google-cloud-sdk copy=no owner={{username}} group={{username}}

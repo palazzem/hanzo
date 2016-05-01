@@ -9,7 +9,7 @@
   user: name={{username}} groups=docker append=yes
 
 - name: Installing Docker Machine
-  get_url: url=https://github.com/docker/machine/releases/download/v0.4.0/docker-machine_linux-amd64 dest=/usr/local/bin/docker-machine mode=0755
+  get_url: url={{docker_machine_version}} dest=/usr/local/bin/docker-machine mode=0755
 
 - name: Installing Docker Compose
-  get_url: url=https://github.com/docker/compose/releases/download/1.4.0/docker-compose-Linux-x86_64 dest=/usr/local/bin/docker-compose mode=0755
+  get_url: url={{docker_compose_version}} dest=/usr/local/bin/docker-compose mode=0755
