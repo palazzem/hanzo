@@ -48,7 +48,7 @@ Testing the provisioning
 ------------------------
 
 If you want to apply the playbook changes without touching your current configuration, a ``Vagrantfile``
-is available in the repository. It uses the ``terrywang/archlinux`` box and provisions the running instance
+is available in the repository. It uses the ``ogarcia/archlinux-x64`` box and provisions the running instance
 with this Ansible playbook. To launch the test, simply::
 
     $ vagrant up
