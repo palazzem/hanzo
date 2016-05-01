@@ -5,17 +5,23 @@ Hanzō
     | Hattori Hanzō: You must have big rats if you need Hattori Hanzo's steel.
     | The Bride: ...Huge.
 
+This `Ansible`_ playbook configures a new ArchLinux installation with some development tools. The goal of the
+playbook is to *inspire developers* that want to prepare programmatically their development machine. Obviously,
+this repository fits my current needs and it's unlikely that fits others requirements; for this reason feel free
+to provision a virtual machine, but be aware that you should forge your own playbook using this one only as a base.
+
+.. _Ansible: https://www.ansible.com/
+
 Quick start guide
 -----------------
 
-This is an `Ansible`_ playbook that configures a new ArchLinux installation with some development tools.
 If you like living on the bleeding edge and *curlbombs* don't scare you, the automatic installer is the easiest
-way to configure your system with this playbook::
+way to configure your system::
 
     $ sh <(curl -L http://j.mp/hattori-hanzo)
 
 A clean ArchLinux installation is recommended but not required. Anyway, **bear in mind** that this configuration
-**will overwrite your system**.
+**will overwrite the system**.
 
 You can split the above command using an MD5 hash check::
 
@@ -25,32 +31,30 @@ You can split the above command using an MD5 hash check::
     # outputs:
     # hanzo.sh: OK
 
-.. _Ansible: https://www.ansible.com/
-
 Manual installation
 -------------------
 
 If you prefer a manual installation because you don't like *curlbombs* (and you shouldn't), you have to install ``ansible`` and
 ``git`` packages using the ArchLinux default package manager (``pacman``). Simply, launch::
 
-    $ pacman -S ansible git base base-devel
+    $ pacman -S ansible git base base-devel --noconfirm
 
 Starting the orchestration
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Clone this repository and start the orchestration with::
 
-    $ git clone https://github.com/palazzem/ansible-devel.git
+    $ git clone https://github.com/palazzem/hanzo.git
     $ ansible-playbook orchestrate.yml -i inventory --connection=local -e "fullname=<name> username=<name> email=<email>"
 
 The command above, requires the following parameters:
 
 * ``fullname`` is used inside the ``.gitconfig.j2`` template
 * ``email`` is used inside the ``.gitconfig.j2`` template
-* ``username`` is the name for the created user
+* ``username`` is the created username
 
 **NOTE:** These parameters are mandatory and if you don't provide any value, the Ansible playbook will not proceed with
-the orchestration.
+the provisioning.
 
 Testing the provisioning
 ------------------------
@@ -62,6 +66,9 @@ with this Ansible playbook. To launch the test, simply::
     $ vagrant up
 
 At the ``SUDO password`` prompt, answer ``vagrant``. You may use this box even for testing some changes on the playbook.
+To repeat the provisioning, just::
+
+    $ vagrant provision
 
 Ansible roles
 -------------
@@ -86,7 +93,7 @@ When the orchestration is completed, remember to set the user password through::
 
     $ passwd <username>
 
-Then you can reboot your system.
+Then you can reboot the system.
 
 Other tools
 -----------
@@ -163,4 +170,16 @@ Known issues
 Contribute
 ----------
 
-Just fork this repository and make pull requests to support other platforms or development tools.
+This playbook provisions a machine with my current configuration. Because it's unlikely that you use exactly my
+current environment, you may use this repository as a base to forge your own configuration. Indeed, I'll be glad
+to accept any Pull Request that:
+
+* fixes the current playbook execution
+* improves the playbook styles or Ansible best practices
+* enhances or makes me aware of different methods to distribute the playbook
+* improves the ``README`` and the written English
+
+I will not accept any Pull Request that adds new development tools, but I will be grateful if you can discuss
+about it in the `issues tracker`_.
+
+.. _issues tracker: https://github.com/palazzem/hanzo/issues
