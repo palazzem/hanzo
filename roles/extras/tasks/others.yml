@@ -2,26 +2,16 @@
 
 # Some useful programs and tools
 
-- name: Installing GIMP
-  pacman: name=gimp state=present
-
-- name: Installing Keepassx2
-  pacman: name=keepassx2 state=present
-
-- name: Installing Libreoffice
-  pacman: name=libreoffice-en-US,libreoffice-fresh state=present
-
-- name: Installing MPV player
+- name: Installing consumer applications
   pacman: name={{item}} state=present
   with_items:
+    - transmission-cli
+    - gimp
+    - keepassx2
+    - libreoffice-en-US
+    - libreoffice-fresh
     - mpv
     - youtube-dl
-
-- name: Installing ImageMagick
-  pacman: name=imagemagick state=present
-
-- name: Installing MPD server and client
-  pacman: name={{item}} state=present
-  with_items:
+    - imagemagick
     - mopidy
     - ncmpcpp
