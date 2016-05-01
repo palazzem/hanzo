@@ -55,10 +55,10 @@ fi
 
 ### System update and dependencies
 echo "Updating the system..."
-pacman -Syu --noconfirm
+pacman -Syyu --noconfirm
 
 echo "Installing dependencies..."
-pacman -S ansible git base base-devel --noconfirm
+pacman -S ansible git --noconfirm
 
 echo "Cloning ansible-devel repository..."
 if [ ! -d "$ROOT_FOLDER" ]; then
