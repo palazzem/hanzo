@@ -1,6 +1,18 @@
+# inline script that fulfills the requirement of python
+# and allows vagrant user to execute sudo commands without
+# a password
+$script = <<SCRIPT
+pacman -Sy
+pacman -S python2 python3 git --noconfirm
+sudo grep -q '^%vagrant' /etc/sudoers || sudo echo "%vagrant ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+SCRIPT
+
 Vagrant.configure(2) do |config|
     # ArchLinux image
-    config.vm.box = "terrywang/archlinux"
+    config.vm.box = "ogarcia/archlinux-x64"
+
+    # shell provisioning
+    config.vm.provision "shell", inline: $script
 
     # Ansible provisioning
     config.vm.provision :ansible do |ansible|
