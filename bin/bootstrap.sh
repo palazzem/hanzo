@@ -44,9 +44,9 @@ if [ ! -f "$DATA_STORE" ]; then
     read -p "Provide your email: " EMAIL
 
     # ...and save them for the next run
-    echo "export FULLNAME=$FULLNAME" > $DATA_STORE
-    echo "export USERNAME=$USERNAME" >> $DATA_STORE
-    echo "export EMAIL=$EMAIL" >> $DATA_STORE
+    echo "export FULLNAME='$FULLNAME'" > $DATA_STORE
+    echo "export USERNAME='$USERNAME'" >> $DATA_STORE
+    echo "export EMAIL='$EMAIL'" >> $DATA_STORE
 else
     # this is not the first time so we may load the content
     # from the file
