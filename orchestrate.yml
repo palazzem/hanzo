@@ -27,6 +27,6 @@
     - provisioning
     - cluster
     - bspwm
-    - fonts
     - extras
+    - fonts
     - { role: dotfiles, tags: ['dotfiles'] }
