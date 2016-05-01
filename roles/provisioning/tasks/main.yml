@@ -6,6 +6,10 @@
   file: state=directory name={{item}} owner={{username}} group={{username}}
   with_items:
     - "/home/{{username}}/programs/packer/bin/"
+    - "/home/{{username}}/programs/terraform/bin/"
 
 - name: Installing Packer builder
   unarchive: src=https://releases.hashicorp.com/packer/0.10.0/packer_0.10.0_linux_amd64.zip dest=/home/{{username}}/programs/packer/bin copy=no owner={{username}} group={{username}}
+
+- name: Installing Terraform builder
+  unarchive: src=https://releases.hashicorp.com/terraform/0.6.15/terraform_0.6.15_linux_amd64.zip dest=/home/{{username}}/programs/terraform/bin copy=no owner={{username}} group={{username}}
