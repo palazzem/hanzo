@@ -88,6 +88,13 @@ applications shortcuts), I prefer to use the AUR repositories that take care of 
 idea installing packages from AUR repositories without looking at the ``PKGBUILD`` file, so I leave the last setup
 to the snippet below::
 
+    # add Infinality Bundle key with key fingerprint
+    # A924 4FB5 E93F 11F0 E975 337F AE68 66C7 962D DE58
+    $ pacman-key -r 962DDE58
+    $ pacman-key -f 962DDE58
+    $ pacman-key --lsign-key 962DDE58
+    $ pacman -Sy
+
     # window manager (required)
     $ yaourt -S xdo-git lemonbar-xft-git sutils-git
 
