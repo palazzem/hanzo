@@ -17,6 +17,14 @@ way to configure your system with this playbook::
 A clean ArchLinux installation is recommended but not required. Anyway, **bear in mind** that this configuration
 **will overwrite your system**.
 
+You can split the above command using an MD5 hash check::
+
+    $ curl -L http://j.mp/hattori-hanzo -o hanzo.sh
+    $ echo 86b0cd98c20dbbdb285160145897840d  hanzo.sh | md5sum -c -
+
+    # outputs:
+    # hanzo.sh: OK
+
 .. _Ansible: https://www.ansible.com/
 
 Manual installation
