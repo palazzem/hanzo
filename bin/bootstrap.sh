@@ -72,12 +72,9 @@ fi
 ### The Orchestration
 echo "Starting orchestration..."
 ansible-playbook orchestrate.yml -i inventory --connection=local -e "fullname='$FULLNAME' email=$EMAIL username=$USERNAME"
-echo "Configuration completed!"
-
-### README with further instructions
-echo "Showing the latest version of README..."
-sleep 1 && curl -L "$README" && echo
+echo "Configuration completed!\n"
 
 ### Last messages
-echo "Bear in mind that the following command is **mandatory**:"
+echo "Bear in mind that the following commands are **mandatory**:"
 echo "$ passwd $USERNAME"
+echo "$ chsh -s /bin/zsh $USERNAME"

@@ -97,7 +97,7 @@
   command: systemctl start ntpd
 
 - name: Adding default user
-  user: name={{username}} shell=/bin/zsh groups=wheel append=yes
+  user: name={{username}} groups=wheel append=yes
 
 - name: Creating a default SSH key
   user: name={{username}} generate_ssh_key=yes ssh_key_bits=4096 ssh_key_file=.ssh/id_rsa
