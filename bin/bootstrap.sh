@@ -58,7 +58,7 @@ echo "Updating the system..."
 pacman -Syyu --noconfirm
 
 echo "Installing dependencies..."
-pacman -S ansible git --noconfirm
+pacman -S python2-crypto ansible git --noconfirm
 
 echo "Cloning ansible-devel repository..."
 if [ ! -d "$ROOT_FOLDER" ]; then

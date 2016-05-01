@@ -26,7 +26,7 @@ A clean ArchLinux installation is recommended but not required. Anyway, **bear i
 You can split the above command using an MD5 hash check::
 
     $ curl -L http://j.mp/hattori-hanzo -o hanzo.sh
-    $ echo 5da9228968c0cf6d883a810a7a9aa879  hanzo.sh | md5sum -c -
+    $ echo 15af9d2f4d52c2eaec9ced10475b25a8  hanzo.sh | md5sum -c -
 
     # outputs:
     # hanzo.sh: OK
