@@ -70,15 +70,16 @@ The playbook will go through the following roles:
 
 * ``system``
 * ``shell``
-* ``vm``
-* ``provisioning``
+* ``development``
+* ``editors``
 * ``postgresql``
 * ``redis``
-* ``development``
-* ``extras``
-* ``editors``
+* ``vm``
+* ``provisioning``
+* ``cluster``
 * ``bspwm``
 * ``fonts``
+* ``extras``
 * ``dotfiles``
 
 When the orchestration is completed, remember to set the user password through::

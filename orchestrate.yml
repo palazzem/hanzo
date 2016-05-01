@@ -19,14 +19,14 @@
   roles:
     - system
     - shell
+    - development
+    - editors
+    - postgresql
+    - redis
     - vm
     - provisioning
     - cluster
-    - postgresql
-    - redis
-    - development
-    - extras
-    - editors
     - bspwm
     - fonts
+    - extras
     - { role: dotfiles, tags: ['dotfiles'] }
