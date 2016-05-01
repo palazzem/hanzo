@@ -19,6 +19,7 @@
     - shell
     - vm
     - provisioning
+    - cluster
     - postgresql
     - redis
     - development

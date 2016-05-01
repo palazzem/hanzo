@@ -112,6 +112,10 @@ to the snippet below::
     $ yaourt -S gradle android-sdk android-sdk-platform-tools android-sdk-build-tools android-platform
     $ yaourt -S --tmp ~/ android-ndk
 
+    # Google Cloud SDK
+    $ gcloud init
+    $ gcloud components install kubectl
+
 **NOTES:**
 
 * ``ttf-ms-fonts`` is used to solve some rendering problems related to window manager
