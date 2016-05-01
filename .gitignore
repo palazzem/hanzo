@@ -5,5 +5,11 @@
 # OSX
 .DS_Store
 
+# Vagrant
+.vagrant
+
+# ansible
+orchestrate.retry
+
 # IDE
 .idea/

@@ -44,6 +44,17 @@ The command above, requires the following parameters:
 **NOTE:** These parameters are mandatory and if you don't provide any value, the Ansible playbook will not proceed with
 the orchestration.
 
+Testing the provisioning
+------------------------
+
+If you want to apply the playbook changes without touching your current configuration, a ``Vagrantfile``
+is available in the repository. It uses the ``terrywang/archlinux`` box and provisions the running instance
+with this Ansible playbook. To launch the test, simply::
+
+    $ vagrant up
+
+At the ``SUDO password`` prompt, answer ``vagrant``. You may use this box even for testing some changes on the playbook.
+
 Ansible roles
 -------------
 
