@@ -34,6 +34,12 @@
     - "/home/{{username}}/.config/ranger/"
     - "/home/{{username}}/.local/bin/"
 
+- name: Creating files required for customizations
+  file: state=touch name={{item}} owner={{username}} group={{username}}
+  with_items:
+    - "/home/{{username}}/.Xcustom"
+    - "/home/{{username}}/.config/bspwm/custom_config"
+
 - name: Creating symbolic links
   file: state=link src={{item.src}} dest={{item.dest}} owner={{username}} group={{username}}
   with_items:
