@@ -16,13 +16,13 @@
     - "/home/{{username}}/.wallpaper/background.png"
     - "/home/{{username}}/.config/nvim/init.vim"
     - "/home/{{username}}/.config/bspwm/bspwmrc"
+    - "/home/{{username}}/.config/bspwm/panel_colors"
+    - "/home/{{username}}/.config/bspwm/panel_config"
     - "/home/{{username}}/.config/sxhkd/sxhkdrc"
     - "/home/{{username}}/.config/ranger/rc.conf"
     - "/home/{{username}}/.local/bin/bspwm_autostart"
     - "/home/{{username}}/.local/bin/bspwm_panel"
     - "/home/{{username}}/.local/bin/bspwm_panel_bar"
-    - "/home/{{username}}/.local/bin/panel_colors"
-    - "/home/{{username}}/.local/bin/panel_config"
 
 - name: Creating required directories
   file: state=directory name={{item}} owner={{username}} group={{username}}
@@ -50,10 +50,10 @@
       - { src: "/home/{{username}}/.dotfiles/wallpaper/background.png", dest: "/home/{{username}}/.wallpaper/background.png" }
       - { src: "/home/{{username}}/.dotfiles/config/nvim/nvimrc", dest: "/home/{{username}}/.config/nvim/init.vim" }
       - { src: "/home/{{username}}/.dotfiles/config/bspwm/bspwmrc", dest: "/home/{{username}}/.config/bspwm/bspwmrc" }
+      - { src: "/home/{{username}}/.dotfiles/config/bspwm/panel_colors", dest: "/home/{{username}}/.config/bspwm/panel_colors" }
+      - { src: "/home/{{username}}/.dotfiles/config/bspwm/panel_config", dest: "/home/{{username}}/.config/bspwm/panel_config" }
       - { src: "/home/{{username}}/.dotfiles/config/sxhkd/sxhkdrc", dest: "/home/{{username}}/.config/sxhkd/sxhkdrc" }
       - { src: "/home/{{username}}/.dotfiles/config/ranger/rc.conf", dest: "/home/{{username}}/.config/ranger/rc.conf" }
       - { src: "/home/{{username}}/.dotfiles/local/bin/bspwm_autostart", dest: "/home/{{username}}/.local/bin/bspwm_autostart" }
       - { src: "/home/{{username}}/.dotfiles/local/bin/bspwm_panel", dest: "/home/{{username}}/.local/bin/bspwm_panel" }
       - { src: "/home/{{username}}/.dotfiles/local/bin/bspwm_panel_bar", dest: "/home/{{username}}/.local/bin/bspwm_panel_bar" }
-      - { src: "/home/{{username}}/.dotfiles/local/bin/panel_colors", dest: "/home/{{username}}/.local/bin/panel_colors" }
-      - { src: "/home/{{username}}/.dotfiles/local/bin/panel_config", dest: "/home/{{username}}/.local/bin/panel_config" }
