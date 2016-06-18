@@ -47,7 +47,6 @@
   with_items:
       - { src: "/home/{{username}}/.dotfiles/xinitrc", dest: "/home/{{username}}/.xinitrc" }
       - { src: "/home/{{username}}/.dotfiles/Xresources", dest: "/home/{{username}}/.Xresources" }
-      - { src: "/home/{{username}}/.dotfiles/stalonetrayrc", dest: "/home/{{username}}/.stalonetrayrc" }
       - { src: "/home/{{username}}/.dotfiles/zshrc", dest: "/home/{{username}}/.zshrc" }
       - { src: "/home/{{username}}/.dotfiles/wallpaper/background.png", dest: "/home/{{username}}/.wallpaper/background.png" }
       - { src: "/home/{{username}}/.dotfiles/config/nvim/nvimrc", dest: "/home/{{username}}/.config/nvim/init.vim" }
