@@ -25,6 +25,8 @@
 - name: Preparing the base system
   pacman: name={{item}}
   with_items:
+    - base
+    - base-devel
     - linux
     - linux-headers
 

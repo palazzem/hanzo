@@ -37,7 +37,7 @@ Manual installation
 If you prefer a manual installation because you don't like *curlbombs* (and you shouldn't), you have to install ``ansible`` and
 ``git`` packages using the ArchLinux default package manager (``pacman``). Simply, launch::
 
-    $ pacman -S ansible git base base-devel --noconfirm
+    $ pacman -S ansible git --noconfirm
 
 Starting the orchestration
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
