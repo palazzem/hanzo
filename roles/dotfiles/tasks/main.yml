@@ -28,6 +28,7 @@
 - name: Creating required directories
   file: state=directory name={{item}} owner={{username}} group={{username}}
   with_items:
+    - "/home/{{username}}/pictures/"
     - "/home/{{username}}/.wallpaper/"
     - "/home/{{username}}/.config/nvim/"
     - "/home/{{username}}/.config/bspwm/"
