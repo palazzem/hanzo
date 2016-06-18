@@ -23,6 +23,7 @@
     - "/home/{{username}}/.local/bin/bspwm_autostart"
     - "/home/{{username}}/.local/bin/bspwm_panel"
     - "/home/{{username}}/.local/bin/bspwm_panel_bar"
+    - "/home/{{username}}/.local/bin/screenshot"
 
 - name: Creating required directories
   file: state=directory name={{item}} owner={{username}} group={{username}}
@@ -57,3 +58,4 @@
       - { src: "/home/{{username}}/.dotfiles/local/bin/bspwm_autostart", dest: "/home/{{username}}/.local/bin/bspwm_autostart" }
       - { src: "/home/{{username}}/.dotfiles/local/bin/bspwm_panel", dest: "/home/{{username}}/.local/bin/bspwm_panel" }
       - { src: "/home/{{username}}/.dotfiles/local/bin/bspwm_panel_bar", dest: "/home/{{username}}/.local/bin/bspwm_panel_bar" }
+      - { src: "/home/{{username}}/.dotfiles/local/bin/screenshot", dest: "/home/{{username}}/.local/bin/screenshot" }
