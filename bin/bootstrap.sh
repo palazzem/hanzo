@@ -63,9 +63,9 @@ pacman -S python2-crypto ansible git --noconfirm
 echo "Cloning ansible-devel repository..."
 if [ ! -d "$ROOT_FOLDER" ]; then
     git clone "$REPOSITORY" "$ROOT_FOLDER"
-    cd "$ROOT_FOLDER"
+    cd "$ROOT_FOLDER"/arch
 else
-    cd "$ROOT_FOLDER"
+    cd "$ROOT_FOLDER"/arch
     git pull
 fi
 
