@@ -1,0 +1,26 @@
+---
+
+# Dotfiles
+
+- name: Cloning all dotfiles to the HOME directory
+  git: repo=https://github.com/palazzem/dotfiles.git dest="/Users/{{username}}/.dotfiles" accept_hostkey=yes
+
+- name: Removing old files (if any)
+  file: state=absent name={{item}}
+  with_items:
+    - "/Users/{{username}}/.zshrc"
+    - "/Users/{{username}}/.wallpaper/background.png"
+    - "/Users/{{username}}/.config/nvim/init.vim"
+
+- name: Creating required directories
+  file: state=directory name={{item}} owner={{username}}
+  with_items:
+    - "/Users/{{username}}/.wallpaper/"
+    - "/Users/{{username}}/.config/nvim/"
+
+- name: Creating symbolic links
+  file: state=link src={{item.src}} dest={{item.dest}} owner={{username}}
+  with_items:
+      - { src: "/Users/{{username}}/.dotfiles/zshrc", dest: "/Users/{{username}}/.zshrc" }
+      - { src: "/Users/{{username}}/.dotfiles/wallpaper/background.png", dest: "/Users/{{username}}/.wallpaper/background.png" }
+      - { src: "/Users/{{username}}/.dotfiles/config/nvim/nvimrc", dest: "/Users/{{username}}/.config/nvim/init.vim" }
