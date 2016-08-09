@@ -11,6 +11,9 @@
     - cmake
     - vim
 
+- name: Installing Dash docs
+  homebrew_cask: name=dash state=present
+
 - name: Configuring .gitconfig
   template: src=gitconfig.j2 dest="/Users/{{username}}/.gitconfig" owner={{username}} mode=0644
 

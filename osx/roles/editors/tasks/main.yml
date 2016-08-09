@@ -9,3 +9,9 @@
 
 - name: Installing NeoBundle
   git: repo=https://github.com/Shougo/neobundle.vim dest="/Users/{{username}}/.nvim/bundle/neobundle.vim"
+
+- name: Installing Sublime Text
+  homebrew_cask: name=sublime-text state=present
+
+- name: Installing PyCharm Community Edition
+  homebrew_cask: name=pycharm-ce-eap state=present
