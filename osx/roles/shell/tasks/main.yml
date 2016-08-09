@@ -1,0 +1,11 @@
+---
+
+# Shell enhancement
+
+- name: Checking Oh-my-ZSH presence
+  register: zsh
+  stat: path="/Users/{{username}}/.oh-my-zsh"
+
+- name: Installing Oh-my-ZSH
+  when: zsh.stat.exists == False
+  git: repo=https://github.com/robbyrussell/oh-my-zsh.git dest="/Users/{{username}}/.oh-my-zsh"
