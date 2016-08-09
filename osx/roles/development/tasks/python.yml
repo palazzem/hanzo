@@ -21,13 +21,10 @@
 
 - name: Installing Pythonz
   when: pythonz.stat.exists == False
-  become_user: "{{username}}"
   command: /bin/bash /tmp/pythonz-install.sh
 
-- name: Checking Python virtualenv installation
-  register: virtualenvwrapper
-  stat: path=/usr/bin/virtualenvwrapper.sh
-
-- name: Installing Python virtualenv
-  when: virtualenvwrapper.stat.exists == False
-  shell: pip install virtualenvwrapper
+- name: Installing Python tools
+  pip: name={{item}}
+  with_items:
+    - virtualenvwrapper
+    - ipython
