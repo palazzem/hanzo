@@ -248,6 +248,10 @@ fi
 STRAP_SUCCESS="1"
 
 ### Starting hanzo.sh
+echo "--> Installing Ansible"
+brew install python
+pip install ansible
+
 echo "--> Installing hanzo.sh"
 if [ ! -d "$REPO_FOLDER" ]; then
     git clone "$REPOSITORY" "$REPO_FOLDER"
