@@ -1,0 +1,6 @@
+---
+
+# Heroku Toolbelt
+
+- name: Installing Heroku toolbelt
+  homebrew: name=heroku state=present

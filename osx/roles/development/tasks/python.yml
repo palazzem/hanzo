@@ -1,0 +1,30 @@
+---
+
+# Python
+
+- name: Installing system python
+  homebrew: name={{item}} state=present
+  with_items:
+    - python
+    - python3
+
+- name: Checking Pythonz installation
+  register: pythonz
+  stat: path=/usr/local/pythonz
+
+- name: Downloading Pythonz installer
+  when: pythonz.stat.exists == False
+  get_url:
+    url: https://raw.github.com/saghul/pythonz/master/pythonz-install
+    dest: /tmp/pythonz-install.sh
+    mode: 0444
+
+- name: Installing Pythonz
+  when: pythonz.stat.exists == False
+  command: /bin/bash /tmp/pythonz-install.sh
+
+- name: Installing Python tools
+  pip: name={{item}}
+  with_items:
+    - virtualenvwrapper
+    - ipython

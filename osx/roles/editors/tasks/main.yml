@@ -1,0 +1,23 @@
+---
+
+# Code editors
+
+- name: Installing NeoVim
+  homebrew: name={{item}} state=present
+  with_items:
+    - neovim/neovim/neovim
+
+- name: Installing NeoVim for Python 2.7
+  pip: name=neovim executable=pip2
+
+- name: Installing NeoVim for Python 3+
+  pip: name=neovim executable=pip3
+
+- name: Installing NeoBundle
+  git: repo=https://github.com/Shougo/neobundle.vim dest="/Users/{{username}}/.nvim/bundle/neobundle.vim"
+
+- name: Installing Sublime Text
+  homebrew_cask: name=sublime-text state=present
+
+- name: Installing PyCharm Community Edition
+  homebrew_cask: name=pycharm-ce-eap state=present

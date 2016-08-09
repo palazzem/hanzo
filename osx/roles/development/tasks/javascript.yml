@@ -1,0 +1,15 @@
+---
+
+# Javascript
+
+- name: Installing Node Version Manager
+  homebrew: name=nvm state=present
+
+- name: Installing latest NodeJS
+  shell: source ~/.nvm/nvm.sh && nvm install {{node_version}}
+
+- name: Default latest NodeJS Version
+  shell: source ~/.nvm/nvm.sh && nvm alias default {{node_version}}
+
+- name: Installing Frontend tools
+  shell: source ~/.nvm/nvm.sh && npm install -g npm bower gulp webpack nodemon phantomjs-prebuilt
