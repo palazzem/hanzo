@@ -1,0 +1,6 @@
+---
+
+# Ruby
+
+- name: Installing system Ruby
+  homebrew: name=ruby state=present

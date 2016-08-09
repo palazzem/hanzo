@@ -1,0 +1,23 @@
+---
+
+# Development configuration
+- name: Installing common development stuff
+  homebrew: name={{item}} state=present
+  with_items:
+    - git
+    - mercurial
+    - homebrew/gui/meld
+    - gdb
+    - cmake
+    - vim
+
+- name: Configuring .gitconfig
+  template: src=gitconfig.j2 dest="/Users/{{username}}/.gitconfig" owner={{username}} mode=0644
+
+# Includes development environments
+- include: python.yml
+- include: go.yml
+- include: javascript.yml
+- include: ruby.yml
+- include: java.yml
+- include: heroku.yml
