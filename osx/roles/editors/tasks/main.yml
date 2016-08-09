@@ -1,0 +1,11 @@
+---
+
+# Code editors
+
+- name: Installing NeoVim
+  homebrew: name={{item}} state=present
+  with_items:
+    - neovim/neovim/neovim
+
+- name: Installing NeoBundle
+  git: repo=https://github.com/Shougo/neobundle.vim dest="/Users/{{username}}/.nvim/bundle/neobundle.vim"
