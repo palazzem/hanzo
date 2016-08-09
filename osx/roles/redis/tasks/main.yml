@@ -1,0 +1,6 @@
+---
+
+# Redis
+
+- name: Installing Redis server
+  homebrew: name=redis state=present
