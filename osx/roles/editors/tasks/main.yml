@@ -7,6 +7,12 @@
   with_items:
     - neovim/neovim/neovim
 
+- name: Installing NeoVim for Python 2.7
+  pip: name=neovim executable=pip2
+
+- name: Installing NeoVim for Python 3+
+  pip: name=neovim executable=pip3
+
 - name: Installing NeoBundle
   git: repo=https://github.com/Shougo/neobundle.vim dest="/Users/{{username}}/.nvim/bundle/neobundle.vim"
 
