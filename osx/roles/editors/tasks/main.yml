@@ -20,4 +20,4 @@
   homebrew_cask: name=sublime-text state=present
 
 - name: Installing PyCharm Community Edition
-  homebrew_cask: name=pycharm-ce-eap state=present
+  homebrew_cask: name=pycharm-ce state=present
