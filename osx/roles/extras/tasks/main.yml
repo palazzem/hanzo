@@ -21,6 +21,7 @@
     - keepassx
     - libreoffice
     - amethyst
+    - dropbox
 
 - name: Configuring Ubersicht
   git: repo=https://github.com/herrbischoff/nerdbar.widget dest="/Users/{{username}}/Library/Application Support/Übersicht/widgets/nerdbar.widget"
