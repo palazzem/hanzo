@@ -23,3 +23,6 @@
 
 - name: Removing temporary packages
   pacman: name=python2-psycopg2 state=absent
+
+- name: Installing SQLite
+  homebrew: name=sqlite state=present
