@@ -1,8 +1,0 @@
----
-# Configuration of postgresql server
-
-- name: Installing PostgreSQL server
-  homebrew: name=postgresql state=present
-
-- name: Installing SQLite
-  homebrew: name=sqlite state=present

@@ -1,9 +1,0 @@
----
-
-# GoLang
-
-- name: Installing GoLang
-  homebrew: name=go state=present
-
-- name: Preparing Go folders
-  file: state=directory path="/Users/{{username}}/programs/go/bin" owner={{username}}

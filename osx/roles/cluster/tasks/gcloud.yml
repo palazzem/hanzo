@@ -1,6 +1,0 @@
----
-
-# Google Cloud SDK
-
-- name: Google Cloud SDK - installing
-  homebrew_cask: name=google-cloud-sdk state=present

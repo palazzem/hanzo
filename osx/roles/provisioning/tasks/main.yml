@@ -1,9 +1,0 @@
----
-
-# Deployment and provisioning tools
-
-- name: Installing HashiCorp tools
-  homebrew: name={{item}} state=present
-  with_items:
-    - terraform
-    - packer
