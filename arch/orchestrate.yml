@@ -21,8 +21,7 @@
     - shell
     - development
     - editors
-    - postgresql
-    - redis
+    - storages
     - vm
     - provisioning
     - cluster
