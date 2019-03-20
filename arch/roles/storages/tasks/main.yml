@@ -1,0 +1,6 @@
+---
+
+# Supported storages tools
+
+- name: Installing SQLite
+  homebrew: name=sqlite state=present
