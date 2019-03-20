@@ -33,44 +33,43 @@
 - name: Installing system packages
   pacman: name={{item}}
   with_items:
-    - sudo
-    - alsa-utils
-    - openssh
-    - yaourt
-    - wicd
-    - clang
-    - cmake
-    - mono
-    - unrar
-    - tree
-    - powertop
+    - acpi
+    - dosfstools
     - lib32-gcc-libs
     - lib32-ncurses
     - lib32-zlib
-    - ntp
-    - dosfstools
+    - mono
     - ntfsprogs
-    - acpi
+    - ntp
+    - powertop
+    - sudo
+    - tree
+    - tree
+    - wicd
+    - yaourt
     - zsh
 
 - name: Installing support tools
   pacman: name={{item}} state=present
   with_items:
-    - p7zip
-    - curl
-    - vim
-    - tar
-    - zip
-    - unzip
-    - wget
-    - mlocate
-    - dnsutils
-    - whois
-    - htop
+    - alsa-utils
     - archey3
     - blueman
     - bluez
+    - curl
+    - dnsutils
+    - fzf
+    - htop
+    - mlocate
+    - openssh
+    - p7zip
     - pulseaudio-bluetooth
+    - tar
+    - unrar
+    - unzip
+    - wget
+    - whois
+    - zip
 
 - name: Installing video drivers
   pacman: name={{item}} state=present

@@ -1,21 +1,22 @@
 ---
 
 # Development configuration
-- name: Installing common development stuff
+- name: Installing common development tools
   pacman: name={{item}} state=present
   with_items:
+    - clang
+    - cmake
+    - gdb
     - git
     - mercurial
-    - meld
-    - gdb
 
 - name: Configuring .gitconfig
   template: src=gitconfig.j2 dest="/home/{{username}}/.gitconfig" owner={{username}} group={{username}} mode=0644
 
 # Includes development environments
-- include: python.yml
 - include: go.yml
-- include: javascript.yml
-- include: ruby.yml
-- include: java.yml
 - include: heroku.yml
+- include: java.yml
+- include: javascript.yml
+- include: python.yml
+- include: ruby.yml

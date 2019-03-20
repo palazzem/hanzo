@@ -1,6 +1,0 @@
----
-
-# Vagrant development environments
-
-- name: Installing Vagrant
-  homebrew_cask: name=vagrant state=present
