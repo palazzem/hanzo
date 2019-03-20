@@ -25,7 +25,6 @@
     - orchestrators
     - provisioning
     - cluster
-    - bspwm
     - extras
     - fonts
     - { role: dotfiles, tags: ['dotfiles'] }
