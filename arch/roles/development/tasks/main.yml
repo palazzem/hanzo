@@ -13,9 +13,8 @@
 - name: Configuring .gitconfig
   template: src=gitconfig.j2 dest="/home/{{username}}/.gitconfig" owner={{username}} group={{username}} mode=0644
 
-# Includes development environments
+# Supported Languages
 - include: go.yml
-- include: heroku.yml
 - include: java.yml
 - include: javascript.yml
 - include: python.yml
