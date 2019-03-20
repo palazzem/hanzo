@@ -1,7 +1,0 @@
----
-
-# Virtualization / Container tools
-
-- include: docker.yml
-- include: vagrant.yml
-- include: vbox.yml

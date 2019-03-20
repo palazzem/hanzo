@@ -22,7 +22,7 @@
     - development
     - editors
     - storages
-    - vm
+    - orchestrators
     - provisioning
     - cluster
     - bspwm
