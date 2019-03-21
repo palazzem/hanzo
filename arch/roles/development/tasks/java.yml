@@ -2,11 +2,10 @@
 
 # Java
 
-- name: Installing OpenJDK 8
-  pacman: name=jdk-openjdk state=present
-
-- name: Installing Java tools
-  pacman: name={{item}} state=present
-  with_items:
-    - maven
-    - apache-ant
+- name: Installing latest OpenJDK with tools
+  pacman:
+    state: latest
+    name:
+      - jdk-openjdk
+      - maven
+      - apache-ant

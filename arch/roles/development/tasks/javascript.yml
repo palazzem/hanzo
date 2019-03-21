@@ -15,19 +15,23 @@
 
 - name: Installing Node Version Manager (NVM)
   when: nvm.stat.exists == False
+  become: yes
   become_user: "{{username}}"
   command: /bin/bash /tmp/nvm-install.sh
 
 - name: Installing latest NodeJS
+  become: yes
   become_user: "{{username}}"
   shell: source ~/.nvm/nvm.sh && nvm install {{node_version}}
 
 - name: Default latest NodeJS Version
+  become: yes
   become_user: "{{username}}"
   shell: source ~/.nvm/nvm.sh && nvm alias default {{node_version}}
 
 # Ignoring errors because 'sometimes' NPM stops working
 - name: Installing Frontend toolchain
+  become: yes
   become_user: "{{username}}"
   ignore_errors: yes
   shell: source ~/.nvm/nvm.sh && npm install -g npm bower gulp webpack phantomjs-prebuilt

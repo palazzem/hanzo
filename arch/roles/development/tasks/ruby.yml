@@ -3,4 +3,4 @@
 # Ruby
 
 - name: Installing system Ruby
-  pacman: name=ruby state=present
+  pacman: name=ruby state=latest

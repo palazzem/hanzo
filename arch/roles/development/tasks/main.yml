@@ -2,13 +2,14 @@
 
 # Development configuration
 - name: Installing common development tools
-  pacman: name={{item}} state=present
-  with_items:
-    - clang
-    - cmake
-    - gdb
-    - git
-    - mercurial
+  pacman:
+    state: latest
+    name:
+      - clang
+      - cmake
+      - gdb
+      - git
+      - mercurial
 
 - name: Configuring .gitconfig
   template: src=gitconfig.j2 dest="/home/{{username}}/.gitconfig" owner={{username}} group={{username}} mode=0644
