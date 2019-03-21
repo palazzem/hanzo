@@ -18,32 +18,28 @@
   pacman:
     state: latest
     name:
-      - dosfstools
-      - mono
-      - ntfsprogs
-      - ntp
-      - sudo
-      - tree
-      - zsh
-
-- name: Installing support tools
-  pacman:
-    state: latest
-    name:
       - archey3
       - curl
       - dnsutils
+      - dosfstools
       - fzf
+      - git
       - htop
       - mlocate
+      - mono
+      - ntfsprogs
+      - ntp
       - openssh
       - p7zip
+      - sudo
       - tar
+      - tree
       - unrar
       - unzip
       - wget
       - whois
       - zip
+      - zsh
 
 - name: Starting NTP daemon at boot time
   command: systemctl enable ntpd
