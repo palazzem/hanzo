@@ -8,5 +8,6 @@
 
 - name: Installing Oh-my-ZSH
   when: zsh.stat.exists == False
+  become: yes
   become_user: "{{username}}"
   git: repo=https://github.com/robbyrussell/oh-my-zsh.git dest="/home/{{username}}/.oh-my-zsh"
