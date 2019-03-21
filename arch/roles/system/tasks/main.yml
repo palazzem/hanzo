@@ -2,23 +2,6 @@
 
 # Contains common plays that must be run as first task
 
-- name: Adding multilib repository (32bit)
-  replace: dest=/etc/pacman.conf regexp="{{item.regexp}}" replace="{{item.line}}"
-  with_items:
-    - {
-        regexp: "^#\\[multilib\\]\n#Include.*",
-        line: "[multilib]\nInclude = /etc/pacman.d/mirrorlist"
-    }
-
-- name: Adding Arch Linux User Repository (AUR)
-  blockinfile:
-    dest: /etc/pacman.conf
-    marker: "# {mark} SYSTEM MANAGED BLOCK (Ansible)"
-    block: |
-      [archlinuxfr]
-      SigLevel = Never
-      Server = http://repo.archlinux.fr/$arch
-
 - name: Update cache list
   pacman: update_cache=yes force=yes
 
