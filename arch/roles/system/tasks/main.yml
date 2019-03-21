@@ -23,70 +23,75 @@
   pacman: update_cache=yes force=yes
 
 - name: Preparing the base system
-  pacman: name={{item}}
-  with_items:
-    - base
-    - base-devel
-    - linux
-    - linux-headers
+  pacman:
+    state: latest
+    name:
+      - base
+      - base-devel
+      - linux
+      - linux-headers
 
 - name: Installing system packages
-  pacman: name={{item}}
-  with_items:
-    - acpi
-    - dosfstools
-    - lib32-gcc-libs
-    - lib32-ncurses
-    - lib32-zlib
-    - mono
-    - ntfsprogs
-    - ntp
-    - powertop
-    - sudo
-    - tree
-    - tree
-    - wicd
-    - yaourt
-    - zsh
+  pacman:
+    state: latest
+    name:
+      - acpi
+      - dosfstools
+      - lib32-gcc-libs
+      - lib32-ncurses
+      - lib32-zlib
+      - mono
+      - ntfsprogs
+      - ntp
+      - powertop
+      - sudo
+      - tree
+      - tree
+      - wicd
+      - yaourt
+      - zsh
 
 - name: Installing support tools
-  pacman: name={{item}} state=present
-  with_items:
-    - alsa-utils
-    - archey3
-    - blueman
-    - bluez
-    - curl
-    - dnsutils
-    - fzf
-    - htop
-    - mlocate
-    - openssh
-    - p7zip
-    - pulseaudio-bluetooth
-    - tar
-    - unrar
-    - unzip
-    - wget
-    - whois
-    - zip
+  pacman:
+    state: latest
+    name:
+      - alsa-utils
+      - archey3
+      - blueman
+      - bluez
+      - curl
+      - dnsutils
+      - fzf
+      - htop
+      - mlocate
+      - openssh
+      - p7zip
+      - pulseaudio-bluetooth
+      - tar
+      - unrar
+      - unzip
+      - wget
+      - whois
+      - zip
 
 - name: Installing video drivers
-  pacman: name={{item}} state=present
-  with_items:
-    - xf86-video-intel
-    - xf86-video-fbdev
-    - xf86-video-vesa
-    - xf86-input-synaptics
+  pacman:
+    state: latest
+    name:
+      - xf86-video-intel
+      - xf86-video-fbdev
+      - xf86-video-vesa
+      - xf86-input-synaptics
 
 - name: Installing X
-  pacman: name={{item}} state=present
-  with_items:
-    - xorg-server
-    - xorg-server-utils
-    - xorg-xinit
-    - xorg-apps
-    - mesa
+  pacman:
+    state: latest
+    name:
+      - xorg-server
+      - xorg-server-utils
+      - xorg-xinit
+      - xorg-apps
+      - mesa
 
 - name: Providing synaptics configuration
   copy: src=50-synaptics.conf dest=/etc/X11/xorg.conf.d/ owner=root group=root
