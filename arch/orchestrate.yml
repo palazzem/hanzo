@@ -9,6 +9,7 @@
         email: "{{ lookup('env', 'EMAIL') | default(false, True) }}"
         fullname: "{{ lookup('env', 'FULLNAME') | default(false, True) }}"
         username: "{{ lookup('env', 'USERNAME') | default(false, True) }}"
+        ssh_password: "{{ lookup('env', 'SSH_PASSWORD') | default(false, True) }}"
     - name: Checking required variables
       fail:
         msg: "Variable '{{item}}' is not defined."
@@ -16,6 +17,7 @@
       with_items:
         - email
         - fullname
+        - ssh_password
         - username
 
 - hosts: localhost
