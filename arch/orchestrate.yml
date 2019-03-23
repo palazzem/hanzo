@@ -2,17 +2,25 @@
 
 # Overview: configuring a developer machine in just minutes
 
-- hosts: default
+- hosts: localhost
   tasks:
+    - name: Configure the environment
+      set_fact:
+        email: "{{ lookup('env', 'EMAIL') | default(false, True) }}"
+        fullname: "{{ lookup('env', 'FULLNAME') | default(false, True) }}"
+        username: "{{ lookup('env', 'USERNAME') | default(false, True) }}"
+        ssh_password: "{{ lookup('env', 'SSH_PASSWORD') | default(false, True) }}"
     - name: Checking required variables
-      fail: msg="Variable '{{item}}' is not defined."
-      when: "{{item}} is not defined"
+      fail:
+        msg: "Variable '{{item}}' is not defined."
+      when: not vars[item]
       with_items:
-        - fullname
         - email
+        - fullname
+        - ssh_password
         - username
 
-- hosts: default
+- hosts: localhost
   become: yes
   vars_files:
     - variables/versions.yml

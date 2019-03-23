@@ -3,10 +3,11 @@
 # Python
 
 - name: Installing PIP
-  pacman: name={{item}} state=present
-  with_items:
-    - python-pip
-    - python2-pip
+  pacman:
+    state: latest
+    name:
+      - python-pip
+      - python2-pip
 
 - name: Checking Pythonz installation
   register: pythonz
@@ -21,11 +22,12 @@
 
 - name: Installing Pythonz
   when: pythonz.stat.exists == False
+  become: yes
   become_user: "{{username}}"
   command: /bin/bash /tmp/pythonz-install.sh
 
 - name: Installing Python tools
-  pip: name={{item}}
-  with_items:
-    - ipython
-    - virtualenvwrapper
+  pip:
+    name:
+      - ipython
+      - virtualenvwrapper

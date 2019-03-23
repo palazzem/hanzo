@@ -1,13 +1,14 @@
 ---
 
-# fonts
+# Fonts
 
 - name: Installing community fonts
-  pacman: name={{item}} state=present
-  with_items:
-    - ttf-dejavu
-    - artwiz-fonts
-    - adobe-source-code-pro-fonts
+  pacman:
+    state: latest
+    name:
+      - ttf-dejavu
+      - artwiz-fonts
+      - adobe-source-code-pro-fonts
   notify:
     - build font cache
 

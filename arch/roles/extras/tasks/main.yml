@@ -2,4 +2,16 @@
 
 # Extras
 
-- include: others.yml
+- name: Installing consumer applications
+  pacman:
+    state: latest
+    name:
+      - gimp
+      - imagemagick
+      - libreoffice-en-US
+      - libreoffice-fresh
+      - mopidy
+      - mpv
+      - ncmpcpp
+      - transmission-cli
+      - youtube-dl

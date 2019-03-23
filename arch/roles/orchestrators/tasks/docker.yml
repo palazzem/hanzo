@@ -3,13 +3,7 @@
 # Docker
 
 - name: Installing docker containers
-  pacman: name=docker state=present
+  pacman: name=docker state=latest
 
 - name: Adding default user to docker group
   user: name={{username}} groups=docker append=yes
-
-- name: Installing Docker Machine
-  get_url: url={{docker_machine_version}} dest=/usr/local/bin/docker-machine mode=0755
-
-- name: Installing Docker Compose
-  get_url: url={{docker_compose_version}} dest=/usr/local/bin/docker-compose mode=0755

@@ -3,12 +3,14 @@
 # Code editors
 
 - name: Installing NeoVim with Python 3 support
-  pacman: name={{item}} state=present
-  with_items:
-    - neovim
-    - python-neovim
+  pacman:
+    state: latest
+    name:
+      - neovim
+      - python-neovim
 
 - name: Installing NeoBundle
+  become: yes
   become_user: "{{username}}"
   git: repo=https://github.com/Shougo/neobundle.vim dest="/home/{{username}}/.nvim/bundle/neobundle.vim"
 
@@ -22,6 +24,7 @@
     - "/home/{{username}}/.config/fontconfig/conf.d/"
 
 - name: Downloading fonts for the NeoVim theme
+  become: yes
   become_user: "{{username}}"
   get_url: url={{item.url}} dest={{item.dest}}
   with_items:
