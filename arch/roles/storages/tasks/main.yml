@@ -3,4 +3,4 @@
 # Supported storages tools
 
 - name: Installing SQLite
-  homebrew: name=sqlite state=present
+  pacman: name=sqlite state=latest
