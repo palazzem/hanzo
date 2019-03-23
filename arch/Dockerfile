@@ -11,7 +11,10 @@ ENV SSH_PASSWORD som3th!ng
 RUN pacman -Syu --noconfirm \
   && pacman --noconfirm -S \
      sudo \
-     ansible
+     git \
+     ansible \
+  && mkdir -p /usr/share/ansible/plugins/modules \
+  && git clone https://github.com/kewlfft/ansible-aur.git /usr/share/ansible/plugins/modules
 COPY . /root/hanzo
 WORKDIR /root/hanzo
 
