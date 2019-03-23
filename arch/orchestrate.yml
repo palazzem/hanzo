@@ -24,15 +24,19 @@
   become: yes
   vars_files:
     - variables/versions.yml
-  roles:
-    - system
-    - shell
-    - development
-    - editors
-    - storages
-    - orchestrators
-    - provisioning
-    - cluster
-    - extras
-    - fonts
-    - { role: dotfiles, tags: ['dotfiles'] }
+  tasks:
+    - block:
+        - include_role: name=system
+        - include_role: name=aur
+        - include_role: name=shell
+        - include_role: name=development
+        - include_role: name=editors
+        - include_role: name=storages
+        - include_role: name=orchestrators
+        - include_role: name=provisioning
+        - include_role: name=cluster
+        - include_role: name=extras
+        - include_role: name=fonts
+        - include_role: name=dotfiles
+      always:
+        - include_role: name=cleanup
