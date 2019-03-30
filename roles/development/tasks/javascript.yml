@@ -1,6 +1,6 @@
 ---
 
-# Javascript
+# JavaScript and Node
 
 - name: Installing Node
   pacman:

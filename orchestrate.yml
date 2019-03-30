@@ -6,10 +6,10 @@
   tasks:
     - name: Configure the environment
       set_fact:
-        email: "{{ lookup('env', 'EMAIL') | default(false, True) }}"
-        fullname: "{{ lookup('env', 'FULLNAME') | default(false, True) }}"
-        username: "{{ lookup('env', 'USERNAME') | default(false, True) }}"
-        ssh_password: "{{ lookup('env', 'SSH_PASSWORD') | default(false, True) }}"
+        email: "{{ lookup('env', 'HANZO_EMAIL') | default(false, True) }}"
+        fullname: "{{ lookup('env', 'HANZO_FULLNAME') | default(false, True) }}"
+        username: "{{ lookup('env', 'HANZO_USERNAME') | default(false, True) }}"
+        ssh_password: "{{ lookup('env', 'HANZO_SSH_PASSWORD') | default(false, True) }}"
     - name: Checking required variables
       fail:
         msg: "Variable '{{item}}' is not defined."
@@ -22,8 +22,6 @@
 
 - hosts: localhost
   become: yes
-  vars_files:
-    - variables/versions.yml
   tasks:
     - block:
         - include_role: name=system

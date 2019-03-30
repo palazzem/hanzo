@@ -2,10 +2,10 @@ FROM archlinux/base
 LABEL maintainer="hello@palazzetti.me"
 
 # Configure testing environment
-ENV FULLNAME test
-ENV USERNAME test
-ENV EMAIL test@example.com
-ENV SSH_PASSWORD som3th!ng
+ENV HANZO_FULLNAME test
+ENV HANZO_USERNAME test
+ENV HANZO_EMAIL test@example.com
+ENV HANZO_SSH_PASSWORD som3th!ng
 
 # Install Hanzo with requirements
 RUN pacman -Syu --noconfirm \

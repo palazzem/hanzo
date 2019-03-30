@@ -53,10 +53,10 @@ Starting the orchestration
 Clone this repository and start the orchestration with::
 
    # Mandatory Environment Variables
-   $ export FULLNAME test
-   $ export USERNAME test
-   $ export EMAIL test@example.com
-   $ export SSH_PASSWORD som3th!ng
+   $ export HANZO_FULLNAME test
+   $ export HANZO_USERNAME test
+   $ export HANZO_EMAIL test@example.com
+   $ export HANZO_SSH_PASSWORD som3th!ng
 
    # Starts the provisioning
    $ git clone https://github.com/palazzem/hanzo.git
@@ -64,10 +64,10 @@ Clone this repository and start the orchestration with::
 
 The command above, requires the following parameters:
 
-* ``FULLNAME`` is used inside the ``.gitconfig.j2`` template
-* ``EMAIL`` is used inside the ``.gitconfig.j2`` template
-* ``USERNAME`` is the created username
-* ``SSH_PASSWORD`` is used to encrypt your newly generated SSH private key
+* ``HANZO_FULLNAME`` is used inside the ``.gitconfig.j2`` template
+* ``HANZO_EMAIL`` is used inside the ``.gitconfig.j2`` template
+* ``HANZO_USERNAME`` is the created username
+* ``HANZO_SSH_PASSWORD`` is used to encrypt your newly generated SSH private key
 
 **NOTE:** These parameters are mandatory and if you don't provide any value, Ansible aborts the provisioning.
 
