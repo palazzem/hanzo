@@ -3,7 +3,11 @@
 # Docker
 
 - name: Installing docker containers
-  pacman: name=docker state=latest
+  pacman:
+    state: latest
+    name:
+      - docker
+      - docker-compose
 
 - name: Adding default user to docker group
   user: name={{username}} groups=docker append=yes
