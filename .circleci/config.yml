@@ -1,15 +1,9 @@
 version: 2
 jobs:
   build:
-    docker:
-        - image: docker:latest
+    machine: true
     steps:
       - checkout
-
-      - setup_remote_docker:
-          docker_layer_caching: false
-
       # Build the docker container that will be orchestrated with Hanzo.
       # For more details check: https://github.com/palazzem/hanzo/blob/master/Dockerfile#L21-L23
-      - run: |
-          docker build -t hanzo:test .
+      - run: docker build -t hanzo:test .
