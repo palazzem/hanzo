@@ -1,6 +1,6 @@
 ---
 
-# Shell enhancement
+# Install ZSH
 
 - name: Checking Oh-my-ZSH presence
   register: zsh

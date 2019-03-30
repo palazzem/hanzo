@@ -1,4 +1,0 @@
----
-# list here all packages versions (where needed)
-nvm_version: https://raw.githubusercontent.com/creationix/nvm/v0.31.0/install.sh
-node_version: v6.0.0

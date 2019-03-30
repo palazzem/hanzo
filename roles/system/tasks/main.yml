@@ -1,6 +1,6 @@
 ---
 
-# Contains common plays that must be run as first task
+# System tasks that must run as a first role
 
 - name: Update cache list
   pacman: update_cache=yes force=yes

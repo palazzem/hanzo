@@ -1,6 +1,6 @@
 ---
 
-# GoLang
+# Go
 
 - name: Installing GoLang
   pacman: name=go state=latest
