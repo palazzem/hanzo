@@ -29,52 +29,38 @@
 
 set -e
 
-### Variables
+# Variables
 ROOT_FOLDER=/root/hanzo/
 REPOSITORY=https://github.com/palazzem/hanzo.git
-README=https://raw.githubusercontent.com/palazzem/hanzo/master/README.rst
-DATA_STORE=/root/.hanzo
 
-### Retrieving installation parameters
+# Prompt for mandatory parameters
+read -p "Provide your full name: " HANZO_FULLNAME
+read -p "Provide your username: " HANZO_USERNAME
+read -p "Provide your email: " HANZO_EMAIL
+read -s "Provide your SSH password (encrypt private key): " HANZO_SSH_PASSWORD
 
-if [ ! -f "$DATA_STORE" ]; then
-    # we don't have a previous run, so ask for developer's data...
-    read -p "Provide your full name: " FULLNAME
-    read -p "Provide your username: " USERNAME
-    read -p "Provide your email: " EMAIL
+# System update and dependencies
+echo "Updating the system..."; pacman -Syyu --noconfirm
+echo "Installing dependencies..."; pacman -S sudo git ansible --noconfirm
 
-    # ...and save them for the next run
-    echo "export FULLNAME='$FULLNAME'" > $DATA_STORE
-    echo "export USERNAME='$USERNAME'" >> $DATA_STORE
-    echo "export EMAIL='$EMAIL'" >> $DATA_STORE
-else
-    # this is not the first time so we may load the content
-    # from the file
-    source "$DATA_STORE"
-fi
-
-### System update and dependencies
-echo "Updating the system..."
-pacman -Syyu --noconfirm
-
-echo "Installing dependencies..."
-pacman -S python2-crypto ansible git --noconfirm
-
-echo "Cloning ansible-devel repository..."
+# Install/Update Hanzo
+echo "Preparing Hanzo..."
 if [ ! -d "$ROOT_FOLDER" ]; then
     git clone "$REPOSITORY" "$ROOT_FOLDER"
-    cd "$ROOT_FOLDER"/arch
+    cd "$ROOT_FOLDER"
 else
-    cd "$ROOT_FOLDER"/arch
+    cd "$ROOT_FOLDER"
     git pull
 fi
 
-### The Orchestration
+# Orchestration
 echo "Starting orchestration..."
-ansible-playbook orchestrate.yml -i inventory --connection=local -e "fullname='$FULLNAME' email=$EMAIL username=$USERNAME"
-echo "Configuration completed!\n"
+ansible-playbook orchestrate.yml --connection=local
 
-### Last messages
-echo "Bear in mind that the following commands are **mandatory**:"
-echo "$ passwd $USERNAME"
-echo "$ chsh -s /bin/zsh $USERNAME"
+# Post-install script
+echo "=================="
+echo "Post-install steps"
+echo "==================\n"
+
+passwd $HANZO_USERNAME
+chsh -s /bin/zsh $HANZO_USERNAME
