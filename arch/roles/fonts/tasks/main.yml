@@ -11,14 +11,3 @@
       - adobe-source-code-pro-fonts
   notify:
     - build font cache
-
-- name: Installing infinality-bundle repository
-  blockinfile:
-    dest: /etc/pacman.conf
-    marker: "# {mark} FONTS MANAGED BLOCK (Ansible)"
-    block: |
-      [infinality-bundle]
-      Server = http://bohoomil.com/repo/$arch
-
-      [infinality-bundle-fonts]
-      Server = http://bohoomil.com/repo/fonts
