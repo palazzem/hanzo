@@ -2,60 +2,16 @@
 
 # Dotfiles
 
-- name: Cloning all dotfiles to the HOME directory
-  become_user: "{{username}}"
+- name: Cloning dotfiles
+  become_user: "{{ username }}"
   git: repo=https://github.com/palazzem/dotfiles.git dest="/home/{{username}}/.dotfiles" accept_hostkey=yes
 
 - name: Removing old files (if any)
   file: state=absent name={{item}}
   with_items:
-    - "/home/{{username}}/.xinitrc"
-    - "/home/{{username}}/.Xresources"
-    - "/home/{{username}}/.stalonetrayrc"
     - "/home/{{username}}/.zshrc"
-    - "/home/{{username}}/.wallpaper/background.png"
-    - "/home/{{username}}/.config/nvim/init.vim"
-    - "/home/{{username}}/.config/bspwm/bspwmrc"
-    - "/home/{{username}}/.config/bspwm/panel_colors"
-    - "/home/{{username}}/.config/bspwm/panel_config"
-    - "/home/{{username}}/.config/sxhkd/sxhkdrc"
-    - "/home/{{username}}/.config/ranger/rc.conf"
-    - "/home/{{username}}/.local/bin/bspwm_autostart"
-    - "/home/{{username}}/.local/bin/bspwm_panel"
-    - "/home/{{username}}/.local/bin/bspwm_panel_bar"
-    - "/home/{{username}}/.local/bin/screenshot"
-
-- name: Creating required directories
-  file: state=directory name={{item}} owner={{username}} group={{username}}
-  with_items:
-    - "/home/{{username}}/pictures/"
-    - "/home/{{username}}/.wallpaper/"
-    - "/home/{{username}}/.config/nvim/"
-    - "/home/{{username}}/.config/bspwm/"
-    - "/home/{{username}}/.config/sxhkd/"
-    - "/home/{{username}}/.config/ranger/"
-    - "/home/{{username}}/.local/bin/"
-
-- name: Creating files required for customizations
-  file: state=touch name={{item}} owner={{username}} group={{username}}
-  with_items:
-    - "/home/{{username}}/.Xcustom"
-    - "/home/{{username}}/.config/bspwm/custom_config"
 
 - name: Creating symbolic links
   file: state=link src={{item.src}} dest={{item.dest}} owner={{username}} group={{username}}
   with_items:
-      - { src: "/home/{{username}}/.dotfiles/xinitrc", dest: "/home/{{username}}/.xinitrc" }
-      - { src: "/home/{{username}}/.dotfiles/Xresources", dest: "/home/{{username}}/.Xresources" }
       - { src: "/home/{{username}}/.dotfiles/zshrc", dest: "/home/{{username}}/.zshrc" }
-      - { src: "/home/{{username}}/.dotfiles/wallpaper/background.png", dest: "/home/{{username}}/.wallpaper/background.png" }
-      - { src: "/home/{{username}}/.dotfiles/config/nvim/nvimrc", dest: "/home/{{username}}/.config/nvim/init.vim" }
-      - { src: "/home/{{username}}/.dotfiles/config/bspwm/bspwmrc", dest: "/home/{{username}}/.config/bspwm/bspwmrc" }
-      - { src: "/home/{{username}}/.dotfiles/config/bspwm/panel_colors", dest: "/home/{{username}}/.config/bspwm/panel_colors" }
-      - { src: "/home/{{username}}/.dotfiles/config/bspwm/panel_config", dest: "/home/{{username}}/.config/bspwm/panel_config" }
-      - { src: "/home/{{username}}/.dotfiles/config/sxhkd/sxhkdrc", dest: "/home/{{username}}/.config/sxhkd/sxhkdrc" }
-      - { src: "/home/{{username}}/.dotfiles/config/ranger/rc.conf", dest: "/home/{{username}}/.config/ranger/rc.conf" }
-      - { src: "/home/{{username}}/.dotfiles/local/bin/bspwm_autostart", dest: "/home/{{username}}/.local/bin/bspwm_autostart" }
-      - { src: "/home/{{username}}/.dotfiles/local/bin/bspwm_panel", dest: "/home/{{username}}/.local/bin/bspwm_panel" }
-      - { src: "/home/{{username}}/.dotfiles/local/bin/bspwm_panel_bar", dest: "/home/{{username}}/.local/bin/bspwm_panel_bar" }
-      - { src: "/home/{{username}}/.dotfiles/local/bin/screenshot", dest: "/home/{{username}}/.local/bin/screenshot" }
