@@ -2,10 +2,13 @@
 
 # Google Cloud SDK
 
-- name: Google Cloud SDK - creating required directories
-  file: state=directory name={{item}} owner={{username}} group={{username}}
-  with_items:
-    - "/home/{{username}}/programs/google-cloud-sdk/"
+- name: Download Google Cloud SDK installer
+  get_url:
+    url: https://sdk.cloud.google.com
+    dest: /tmp/gcloud_installer.sh
 
-- name: Google Cloud SDK - installing
-  unarchive: src={{gcloud_version}} dest=/home/{{username}}/programs/ copy=no owner={{username}} group={{username}}
+- name: Install Google Cloud SDK
+  shell: bash /tmp/gcloud_installer.sh --disable-prompts --install-dir=/opt/gcloud
+
+- name: Clean temporary files
+  file: path=/tmp/gcloud_installer.sh state=absent

@@ -1,5 +1,4 @@
 ---
 # list here all packages versions (where needed)
-gcloud_version: https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-107.0.0-linux-x86_64.tar.gz
 nvm_version: https://raw.githubusercontent.com/creationix/nvm/v0.31.0/install.sh
 node_version: v6.0.0
