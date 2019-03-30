@@ -37,7 +37,8 @@ REPOSITORY=https://github.com/palazzem/hanzo.git
 read -p "Provide your full name: " HANZO_FULLNAME
 read -p "Provide your username: " HANZO_USERNAME
 read -p "Provide your email: " HANZO_EMAIL
-read -s "Provide your SSH password (encrypt private key): " HANZO_SSH_PASSWORD
+echo -n "Provide your SSH password (encrypt private key): "
+read -s HANZO_SSH_PASSWORD
 
 # System update and dependencies
 echo "Updating the system..."; pacman -Syyu --noconfirm
