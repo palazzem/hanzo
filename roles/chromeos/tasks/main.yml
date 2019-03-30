@@ -1,0 +1,35 @@
+---
+
+# ChromeOS dependencies so that UI applications can be used
+
+- name: Installing Wayland
+  pacman:
+    state: latest
+    name:
+      - wayland
+      - xorg-server-xwayland
+
+- name: Installing Containers Guest Tools
+  aur:
+    name: cros-container-guest-tools-git
+  become: yes
+  become_user: aur_builder
+
+- name: Fixing xkeyboard-config 2.24 break the sommelier-x service
+  replace:
+    dest: /usr/share/X11/xkb/keycodes/evdev
+    regexp: "{{ item.regexp }}"
+    replace: "{{ item.replace }}"
+  with_items:
+    - { regexp: '<I372>.*', replace: '// <I372> = 372;' }
+    - { regexp: '<I374>.*', replace: '// <I374> = 374;' }
+
+- name: Enabling Sommelier 1/2
+  become: true
+  become_user: "{{ username }}"
+  shell: systemctl --user enable sommelier@0
+
+- name: Enabling Sommelier 2/2
+  become: true
+  become_user: "{{ username }}"
+  shell: systemctl --user enable sommelier-x@0

@@ -36,5 +36,6 @@
         - include_role: name=extras
         - include_role: name=fonts
         - include_role: name=dotfiles
+        - include_role: name=chromeos
       always:
         - include_role: name=cleanup
