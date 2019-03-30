@@ -2,36 +2,16 @@
 
 # Javascript
 
-- name: Checking previous NVM installation
-  register: nvm
-  stat: "path=/home/{{username}}/.nvm"
+- name: Installing Node
+  pacman:
+    state: latest
+    name:
+      - nodejs
 
-- name: Downloading Node Version Manager (NVM)
-  when: nvm.stat.exists == False
-  get_url:
-    url: "{{nvm_version}}"
-    dest: /tmp/nvm-install.sh
-    mode: 0444
-
-- name: Installing Node Version Manager (NVM)
-  when: nvm.stat.exists == False
+- name: Installing 'nodenv'
+  aur:
+    name:
+      - nodenv
+      - nodenv-node-build-git
   become: yes
-  become_user: "{{username}}"
-  command: /bin/bash /tmp/nvm-install.sh
-
-- name: Installing latest NodeJS
-  become: yes
-  become_user: "{{username}}"
-  shell: source ~/.nvm/nvm.sh && nvm install {{node_version}}
-
-- name: Default latest NodeJS Version
-  become: yes
-  become_user: "{{username}}"
-  shell: source ~/.nvm/nvm.sh && nvm alias default {{node_version}}
-
-# Ignoring errors because 'sometimes' NPM stops working
-- name: Installing Frontend toolchain
-  become: yes
-  become_user: "{{username}}"
-  ignore_errors: yes
-  shell: source ~/.nvm/nvm.sh && npm install -g npm bower gulp webpack phantomjs-prebuilt
+  become_user: aur_builder
