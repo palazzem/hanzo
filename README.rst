@@ -5,11 +5,33 @@ Hanzō
     | Hattori Hanzō: You must have big rats if you need Hattori Hanzo's steel.
     | The Bride: ...Huge.
 
+.. image:: https://circleci.com/gh/palazzem/hanzo/tree/master.svg?style=svg
+    :target: https://circleci.com/gh/palazzem/hanzo/tree/master
+
 This `Ansible`_ playbook configures a new ArchLinux installation with some development tools. The goal of the
 playbook is *inspiring developers* to prepare programmatically their development environment. This repository targets
 my requirements and it's very unlikely it can be used in a general purpose sense.
 
 .. _Ansible: https://www.ansible.com/
+
+ChromeOS requirements
+---------------------
+
+If you're not using a ChromeOS device, you can skip this section. Otherwise you need to replace the default LXC
+container with a new one for ArchLinux.
+
+To replace the default LXC container, use the following steps:
+
+* Enable Linux support on ChromeOS
+* Open ``crosh`` using ``CTRL`` + ``ALT`` + ``T``
+* Bootstrap a new ArchLinux container as a default container::
+
+   $ vsh termina
+   $ lxc delete penguin --force
+   $ run_container.sh --container_name penguin --user <username> --lxd_image archlinux/current --lxd_remote https://us.images.linuxcontainers.org/
+   $ lxc exec penguin -- bash
+
+**NOTE**: ``<username>`` MUST be your Gmail account (without ``@gmail.com``) otherwise the integration will not work.
 
 Quick start guide
 -----------------
