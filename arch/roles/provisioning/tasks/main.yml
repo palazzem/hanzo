@@ -2,14 +2,9 @@
 
 # Deployment and provisioning tools
 
-- name: Creating required directories
-  file: state=directory name={{item}} owner={{username}} group={{username}}
-  with_items:
-    - "/home/{{username}}/programs/packer/bin/"
-    - "/home/{{username}}/programs/terraform/bin/"
-
-- name: Installing Packer builder
-  unarchive: src={{packer_version}} dest=/home/{{username}}/programs/packer/bin copy=no owner={{username}} group={{username}}
-
-- name: Installing Terraform builder
-  unarchive: src={{terraform_version}} dest=/home/{{username}}/programs/terraform/bin copy=no owner={{username}} group={{username}}
+- name: Installing provisioning tools
+  pacman:
+    state: latest
+    name:
+      - packer
+      - terraform
