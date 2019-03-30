@@ -1,0 +1,10 @@
+---
+
+# NeoVim
+
+- name: Installing NeoVim
+  pacman:
+    state: latest
+    name:
+      - neovim
+      - python-neovim

@@ -1,34 +1,6 @@
 ---
 
-# Code editors
+# Code Editors
 
-- name: Installing NeoVim with Python 3 support
-  pacman:
-    state: latest
-    name:
-      - neovim
-      - python-neovim
-
-- name: Installing NeoBundle
-  become: yes
-  become_user: "{{username}}"
-  git: repo=https://github.com/Shougo/neobundle.vim dest="/home/{{username}}/.nvim/bundle/neobundle.vim"
-
-- name: Installing NeoVim requirements (according to this configuration)
-  pacman: name=the_silver_searcher state=present
-
-- name: Creating fonts folders
-  file: path={{item}} state=directory owner="{{username}}" group="{{username}}"
-  with_items:
-    - "/home/{{username}}/.fonts/"
-    - "/home/{{username}}/.config/fontconfig/conf.d/"
-
-- name: Downloading fonts for the NeoVim theme
-  become: yes
-  become_user: "{{username}}"
-  get_url: url={{item.url}} dest={{item.dest}}
-  with_items:
-    - { url: "https://github.com/powerline/powerline/raw/develop/font/PowerlineSymbols.otf", dest: "/home/{{username}}/.fonts/" }
-    - { url: "https://github.com/powerline/powerline/raw/develop/font/10-powerline-symbols.conf", dest: "/home/{{username}}/.config/fontconfig/conf.d/" }
-  notify:
-    - build font cache
+- include: neovim.yml
+- include: emacs.yml
