@@ -37,6 +37,7 @@
       - unrar
       - unzip
       - wget
+      - which
       - whois
       - zip
       - zsh
