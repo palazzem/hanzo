@@ -56,6 +56,7 @@ git clone "$REPOSITORY" "$ROOT_FOLDER" 2> /dev/null || (cd "$ROOT_FOLDER" ; git 
 
 # Orchestration
 echo "Starting orchestration..."
+cd "$ROOT_FOLDER"
 ansible-playbook orchestrate.yml --connection=local
 
 # Post-install script
