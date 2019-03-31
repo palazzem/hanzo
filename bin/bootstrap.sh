@@ -30,7 +30,7 @@
 set -e
 
 # Variables
-ROOT_FOLDER=/root/hanzo/
+ROOT_FOLDER=/root/.hanzo/
 REPOSITORY=https://github.com/palazzem/hanzo.git
 
 # Prompt for mandatory parameters
@@ -42,7 +42,10 @@ read -s HANZO_SSH_PASSWORD; export HANZO_SSH_PASSWORD
 
 # System update and dependencies
 echo "Updating the system..."; pacman -Syyu --noconfirm
-echo "Installing dependencies..."; pacman -S sudo git ansible --noconfirm
+echo "Installing dependencies..."
+pacman -S sudo git ansible --noconfirm
+mkdir -p /usr/share/ansible/plugins/modules
+git clone https://github.com/kewlfft/ansible-aur.git /usr/share/ansible/plugins/modules
 
 # Install/Update Hanzo
 echo "Preparing Hanzo..."
