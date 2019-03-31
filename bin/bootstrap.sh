@@ -30,7 +30,8 @@
 set -e
 
 # Variables
-AUR_MODULE_PATH=/usr/share/ansible/plugins/modules
+ANSIBLE_MODULE_PATH=/usr/share/ansible/plugins/modules
+AUR_MODULE_PATH="$ANSIBLE_MODULE_PATH/aur"
 AUR_MODULE_REPO=https://github.com/kewlfft/ansible-aur.git
 REPOSITORY=https://github.com/palazzem/hanzo.git
 ROOT_FOLDER=/root/.hanzo/
@@ -47,8 +48,8 @@ echo "Updating the system..."; pacman -Syyu --noconfirm
 
 echo "Installing dependencies..."
 pacman -S sudo git ansible --noconfirm
-mkdir -p /usr/share/ansible/plugins/modules
-git clone "$AUR_MODULE_REPO" "$AUR_MODULE_PATH/aur" 2> /dev/null || (cd "$AUR_MODULE_PATH" ; git pull)
+mkdir -p $ANSIBLE_MODULE_PATH
+git clone "$AUR_MODULE_REPO" "$AUR_MODULE_PATH" 2> /dev/null || (cd "$AUR_MODULE_PATH" ; git pull)
 
 # Install/Update Hanzo
 echo "Preparing Hanzo..."
