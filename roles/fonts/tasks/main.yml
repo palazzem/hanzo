@@ -18,5 +18,3 @@
   aur:
     name:
       - ttf-symbola
-  notify:
-    - build font cache

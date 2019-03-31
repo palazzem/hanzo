@@ -6,7 +6,7 @@
   pacman:
     state: latest
     name:
-      - termite
+      - sakura
       - zsh
 
 - name: Checking Oh-my-ZSH presence

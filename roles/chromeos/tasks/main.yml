@@ -34,6 +34,18 @@
   file: state=link src={{item.src}} dest={{item.dest}}
   with_items:
       - { src: "/home/{{username}}/.dotfiles/config/mime.types", dest: "/etc/mime.types" }
+
+# ChromeOS binaries are available only when the LXC container is mounted in the
+# `termina` VM (in ChromeOS). This test is required otherwise our CI fails because
+# the binaries are not available.
+- name: Checking ChromeOS mounted binaries
+  register: cros
+  stat: path=/opt/google/cros-containers/bin/
+
+- name: Symlink ChromeOS binaries
+  file: state=link src={{item.src}} dest={{item.dest}}
+  when: cros.stat.exists == True
+  with_items:
       - { src: "/opt/google/cros-containers/bin/sommelier", dest: "/usr/bin/sommelier" }
 
 # Sommelier is enabled via symlink because `systemctl` cannot be used
