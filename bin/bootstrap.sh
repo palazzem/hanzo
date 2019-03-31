@@ -34,11 +34,11 @@ ROOT_FOLDER=/root/hanzo/
 REPOSITORY=https://github.com/palazzem/hanzo.git
 
 # Prompt for mandatory parameters
-read -p "Provide your full name: " HANZO_FULLNAME
-read -p "Provide your username: " HANZO_USERNAME
-read -p "Provide your email: " HANZO_EMAIL
+read -p "Provide your full name: " HANZO_FULLNAME; export HANZO_FULLNAME
+read -p "Provide your username: " HANZO_USERNAME; export HANZO_USERNAME
+read -p "Provide your email: " HANZO_EMAIL; export HANZO_EMAIL
 echo -n "Provide your SSH password (encrypt private key): "
-read -s HANZO_SSH_PASSWORD
+read -s HANZO_SSH_PASSWORD; export HANZO_SSH_PASSWORD
 
 # System update and dependencies
 echo "Updating the system..."; pacman -Syyu --noconfirm
@@ -61,7 +61,7 @@ ansible-playbook orchestrate.yml --connection=local
 # Post-install script
 echo "=================="
 echo "Post-install steps"
-echo "==================\n"
+echo "=================="
 
 passwd $HANZO_USERNAME
 chsh -s /bin/zsh $HANZO_USERNAME
