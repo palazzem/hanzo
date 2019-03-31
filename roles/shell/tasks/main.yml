@@ -2,6 +2,13 @@
 
 # Install ZSH
 
+- name: Installing Shell packages
+  pacman:
+    state: latest
+    name:
+      - termite
+      - zsh
+
 - name: Checking Oh-my-ZSH presence
   register: zsh
   stat: path="/home/{{username}}/.oh-my-zsh"

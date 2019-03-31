@@ -40,7 +40,6 @@
       - which
       - whois
       - zip
-      - zsh
 
 - name: Starting NTP daemon at boot time
   command: systemctl enable ntpd
@@ -59,3 +58,12 @@
 
 - name: Adding 'wheel' group to sudoers
   lineinfile: "dest=/etc/sudoers state=present regexp='^%wheel' line='%wheel ALL=(ALL) ALL'"
+
+- name: Set en_US.UTF8 locale
+  replace:
+    dest: /etc/locale.gen
+    regexp: "^#en_US.UTF-8 UTF-8"
+    replace: "en_US.UTF-8 UTF-8"
+
+- name: Generate locale
+  command: locale-gen

@@ -30,8 +30,10 @@
 set -e
 
 # Variables
-ROOT_FOLDER=/root/hanzo/
+AUR_MODULE_PATH=/usr/share/ansible/plugins/modules
+AUR_MODULE_REPO=https://github.com/kewlfft/ansible-aur.git
 REPOSITORY=https://github.com/palazzem/hanzo.git
+ROOT_FOLDER=/root/.hanzo/
 
 # Prompt for mandatory parameters
 read -p "Provide your full name: " HANZO_FULLNAME; export HANZO_FULLNAME
@@ -42,17 +44,15 @@ read -s HANZO_SSH_PASSWORD; export HANZO_SSH_PASSWORD
 
 # System update and dependencies
 echo "Updating the system..."; pacman -Syyu --noconfirm
-echo "Installing dependencies..."; pacman -S sudo git ansible --noconfirm
+
+echo "Installing dependencies..."
+pacman -S sudo git ansible --noconfirm
+mkdir -p /usr/share/ansible/plugins/modules
+git clone "$AUR_MODULE_REPO" "$AUR_MODULE_PATH/aur" 2> /dev/null || (cd "$AUR_MODULE_PATH" ; git pull)
 
 # Install/Update Hanzo
 echo "Preparing Hanzo..."
-if [ ! -d "$ROOT_FOLDER" ]; then
-    git clone "$REPOSITORY" "$ROOT_FOLDER"
-    cd "$ROOT_FOLDER"
-else
-    cd "$ROOT_FOLDER"
-    git pull
-fi
+git clone "$REPOSITORY" "$ROOT_FOLDER" 2> /dev/null || (cd "$ROOT_FOLDER" ; git pull)
 
 # Orchestration
 echo "Starting orchestration..."
