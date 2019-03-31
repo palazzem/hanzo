@@ -35,6 +35,6 @@
     state: link
     src: '{{ item.src }}'
     dest: '{{ item.dest }}'
-  with_tiems:
+  with_items:
     - { src: '/usr/lib/systemd/user/sommelier@.service', dest: '/home/{{username}}/.config/systemd/user/default.target.wants/sommelier@0.service'}
     - { src: '/usr/lib/systemd/user/sommelier-x@.service', dest: '/home/{{username}}/.config/systemd/user/default.target.wants/sommelier-x@0.service'}
