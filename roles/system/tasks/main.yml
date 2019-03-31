@@ -40,7 +40,6 @@
       - which
       - whois
       - zip
-      - zsh
 
 - name: Starting NTP daemon at boot time
   command: systemctl enable ntpd
