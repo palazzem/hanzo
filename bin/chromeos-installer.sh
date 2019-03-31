@@ -29,18 +29,15 @@
 
 set -e
 
-# Variables
-BOOTSTRAP_SCRIPT=https://raw.githubusercontent.com/palazzem/hanzo/master/bin/bootstrap.sh
-
 # Prompt for mandatory parameters
 read -p "Provide your Google account username: " GOOGLE_USERNAME
 
 # Create a fresh ArchLinux LXC container
-lxc delete penguin --force
+lxc delete penguin --force || true
 run_container.sh --container_name penguin --user $GOOGLE_USERNAME --lxd_image archlinux/current --lxd_remote https://us.images.linuxcontainers.org/
 
 # Launch Hanzo bootstrap
-lxc exec penguin -- sh <(curl -L $BOOTSTRAP_SCRIPT)
+lxc exec penguin -- sh -c "curl -L https://raw.githubusercontent.com/palazzem/hanzo/master/bin/bootstrap.sh > /tmp/hanzo-installer.sh; bash /tmp/hanzo-installer.sh"
 
 # Stop the container so it's ready for use at the next start
 lxc stop penguin
