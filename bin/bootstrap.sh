@@ -30,8 +30,10 @@
 set -e
 
 # Variables
-ROOT_FOLDER=/root/.hanzo/
+AUR_MODULE_PATH=/usr/share/ansible/plugins/modules
+AUR_MODULE_REPO=https://github.com/kewlfft/ansible-aur.git
 REPOSITORY=https://github.com/palazzem/hanzo.git
+ROOT_FOLDER=/root/.hanzo/
 
 # Prompt for mandatory parameters
 read -p "Provide your full name: " HANZO_FULLNAME; export HANZO_FULLNAME
@@ -45,7 +47,12 @@ echo "Updating the system..."; pacman -Syyu --noconfirm
 echo "Installing dependencies..."
 pacman -S sudo git ansible --noconfirm
 mkdir -p /usr/share/ansible/plugins/modules
-git clone https://github.com/kewlfft/ansible-aur.git /usr/share/ansible/plugins/modules
+if [ ! -d "$AUR_MODULE_PATH" ]; then
+    git clone "$AUR_MODULE_REPO" "$AUR_MODULE_PATH"
+else
+    cd "$AUR_MODULE_PATH"
+    git pull
+fi
 
 # Install/Update Hanzo
 echo "Preparing Hanzo..."
