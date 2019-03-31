@@ -14,48 +14,38 @@ my requirements and it's very unlikely it can be used in a general purpose sense
 
 .. _Ansible: https://www.ansible.com/
 
-ChromeOS requirements
----------------------
-
-If you're not using a ChromeOS device, you can skip this section. Otherwise you need to replace the default LXC
-container with a new one for ArchLinux.
-
-To replace the default LXC container, use the following steps:
-
-* Enable Linux support on ChromeOS
-* Open ``crosh`` using ``CTRL`` + ``ALT`` + ``T``
-* Bootstrap a new ArchLinux container as a default container::
-
-   $ vsh termina
-   $ lxc delete penguin --force
-   $ run_container.sh --container_name penguin --user <username> --lxd_image archlinux/current --lxd_remote https://us.images.linuxcontainers.org/
-   $ lxc exec penguin -- bash
-
-**NOTE**: ``<username>`` MUST be your Gmail account (without ``@gmail.com``) otherwise the integration will not work.
-
-Quick start guide
------------------
+Quickstart
+----------
 
 If you like living on the bleeding edge and *curlbombs* don't scare you, the automatic installer is the easiest
 way to configure your system::
 
     $ sh <(curl -L http://j.mp/hattori-hanzo)
 
-A clean ArchLinux installation is recommended but not required. Anyway, **bear in mind** that this configuration
-**WILL OVERWRITE ENTIRELY your system**.
+A clean ArchLinux installation is recommended but not required. Anyway, bear in mind it **WILL OVERWRITE ENTIRELY**
+your system.
 
 If you use this approach, nothing else is required and you can enjoy your new system!
 
-Alternative Installer
-~~~~~~~~~~~~~~~~~~~~~
+ChromeOS Installer
+~~~~~~~~~~~~~~~~~~
 
-You can split the above command using an MD5 hash check::
+If you're not using a ChromeOS device, you can skip this section.
+ChromeOS installer will replace the default LXC container with a new ArchLinux container configured with Hanzo. If
+you're using actively the default ChromeOS container, bear in mind it **WILL BE REMOVED** from your system
 
-    $ curl -L http://j.mp/hattori-hanzo -o hanzo.sh
-    $ echo 15af9d2f4d52c2eaec9ced10475b25a8  hanzo.sh | md5sum -c -
+To start the configuration, follow these steps:
 
-    # outputs:
-    # hanzo.sh: OK
+* Enable Linux support on your ChromeOS system
+* Open ``crosh`` using ``CTRL`` + ``ALT`` + ``T``
+* Access the ``termina`` VM and launch the ChromeOS installer::
+
+   $ vsh termina
+   $ sh <(curl -L http:/j.mp/hattori-hanzo-chromeos)
+
+* Hanzo is launched automatically and nothing else is required. Enjoy your new system!
+
+**NOTE**: Your Google account username MUST be your Gmail account (without ``@gmail.com``) otherwise the integration will not work.
 
 Manual installation
 -------------------
@@ -67,7 +57,7 @@ To use this playbook the following requirements must be installed::
    $ mkdir -p /usr/share/ansible/plugins/modules
 
    # Enables AUR Ansible module
-   $ git clone https://github.com/kewlfft/ansible-aur.git /usr/share/ansible/plugins/modules
+   $ git clone https://github.com/kewlfft/ansible-aur.git /usr/share/ansible/plugins/modules/aur
 
 Starting the orchestration
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
