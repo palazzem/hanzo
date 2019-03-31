@@ -11,3 +11,12 @@
       - adobe-source-code-pro-fonts
   notify:
     - build font cache
+
+- name: Installing AUR fonts
+  become: yes
+  become_user: aur_builder
+  aur:
+    name:
+      - ttf-symbola
+  notify:
+    - build font cache
