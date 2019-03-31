@@ -41,7 +41,8 @@ To start the configuration, follow these steps:
 * Access the ``termina`` VM and launch the ChromeOS installer::
 
    $ vsh termina
-   $ sh <(curl -L http:/j.mp/hattori-hanzo-chromeos)
+   $ curl -L http:/j.mp/hattori-hanzo-chromeos > /tmp/hanzo-installer.sh
+   $ bash /tmp/hanzo-installer.sh
 
 * Hanzo is launched automatically and nothing else is required. Enjoy your new system!
 
