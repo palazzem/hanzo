@@ -24,12 +24,17 @@
     - { regexp: '<I372>.*', replace: '// <I372> = 372;' }
     - { regexp: '<I374>.*', replace: '// <I374> = 374;' }
 
-- name: Enabling Sommelier 1/2
+# Sommelier is enabled via symlink because `systemctl` cannot be used
+# when commands are executed directly on the LXC container, without
+# a proper login. To make it work via `systemctl` it's required to
+# access via `lxc console`.
+- name: Enabling Sommelier via systemctl
   become: true
   become_user: "{{ username }}"
-  shell: systemctl --user enable sommelier@0
-
-- name: Enabling Sommelier 2/2
-  become: true
-  become_user: "{{ username }}"
-  shell: systemctl --user enable sommelier-x@0
+  file:
+    state: link
+    src: '{{ item.src }}'
+    dest: '{{ item.dest }}'
+  with_tiems:
+    - { src: '/usr/lib/systemd/user/sommelier@.service', dest: '/home/{{username}}/.config/systemd/user/default.target.wants/sommelier@0.service'}
+    - { src: '/usr/lib/systemd/user/sommelier-x@.service', dest: '/home/{{username}}/.config/systemd/user/default.target.wants/sommelier-x@0.service'}
