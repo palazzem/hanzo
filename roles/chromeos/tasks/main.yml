@@ -28,6 +28,9 @@
 # when commands are executed directly on the LXC container, without
 # a proper login. To make it work via `systemctl` it's required to
 # access via `lxc console`.
+- name: Creating 'default.target.wants' folder for systemd
+  file: path="/home/{{username}}/.config/systemd/user/default.target.wants" owner={{username}} group={{username}} state=directory
+
 - name: Enabling Sommelier via systemctl
   become: true
   become_user: "{{ username }}"
