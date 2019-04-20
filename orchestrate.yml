@@ -27,6 +27,7 @@
         - include_role: name=system
         - include_role: name=aur
         - include_role: name=shell
+        - include_role: name=security
         - include_role: name=development
         - include_role: name=editors
         - include_role: name=storages
