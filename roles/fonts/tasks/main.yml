@@ -7,7 +7,6 @@
     state: latest
     name:
       - ttf-dejavu
-      - artwiz-fonts
       - adobe-source-code-pro-fonts
   notify:
     - build font cache
@@ -18,3 +17,4 @@
   aur:
     name:
       - ttf-symbola
+      - artwiz-fonts
