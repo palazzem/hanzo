@@ -25,6 +25,7 @@
       - fzf
       - git
       - htop
+      - httpie
       - mlocate
       - mono
       - ntfsprogs
