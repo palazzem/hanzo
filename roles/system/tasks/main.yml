@@ -1,18 +1,5 @@
 ---
-
-# System tasks that must run as a first role
-
-- name: Update cache list
-  pacman: update_cache=yes force=yes
-
-- name: Preparing the base system
-  pacman:
-    state: latest
-    name:
-      - base
-      - base-devel
-      - linux
-      - linux-headers
+# Installing system packages
 
 - name: Installing system packages
   pacman:
@@ -41,6 +28,13 @@
       - which
       - whois
       - zip
+
+- name: Installing system packages (AUR)
+  become: yes
+  become_user: aur_builder
+  aur:
+    name:
+      - downgrade
 
 - name: Starting NTP daemon at boot time
   command: systemctl enable ntpd
