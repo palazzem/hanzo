@@ -70,3 +70,9 @@
 
 - name: Generate locale
   command: locale-gen
+
+- name: Configure pacman.conf
+  replace:
+    dest: /etc/pacman.conf
+    regexp: "^#Color"
+    replace: "Color"
