@@ -1,0 +1,14 @@
+# Base system configuration
+
+- name: Update cache list
+  pacman: update_cache=yes force=yes
+
+- name: Preparing the base system
+  pacman:
+    state: latest
+    name:
+      - base
+      - base-devel
+      - linux
+      - linux-headers
+

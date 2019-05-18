@@ -24,8 +24,9 @@
   become: yes
   tasks:
     - block:
-        - include_role: name=system
+        - include_role: name=base
         - include_role: name=aur
+        - include_role: name=system
         - include_role: name=shell
         - include_role: name=security
         - include_role: name=development
