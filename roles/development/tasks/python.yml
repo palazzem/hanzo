@@ -23,6 +23,7 @@
     extra_args: --user
     name:
       - ipython
-      - pipenv
+      - pip-tools
+      - virtualenvwrapper
   become: yes
   become_user: "{{ username }}"
