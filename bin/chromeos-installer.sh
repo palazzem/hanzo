@@ -32,8 +32,15 @@ set -e
 # Create a fresh ArchLinux LXC container
 lxc delete penguin --force || true
 run_container.sh --container_name penguin --lxd_image archlinux/current --lxd_remote https://us.images.linuxcontainers.org/
+echo "Waiting the container to be up and running... (5s)"; sleep 5s
+
+# Address DNS resolution error: https://wiki.archlinux.org/index.php/Chrome_OS_devices/Crostini#DNS_resolution_not_working
+lxc exec penguin -- sh -c "sed -i 's/hosts.*/hosts: files dns/g' /etc/nsswitch.conf"
+lxc exec penguin -- sh -c "ping -c 4 google.com"
+echo "LXC container connected to the Internet!"
 
 # Launch Hanzo bootstrap
+echo "Downloading Hanzo..."
 lxc exec penguin -- sh -c "curl -L https://raw.githubusercontent.com/palazzem/hanzo/master/bin/bootstrap.sh > /tmp/hanzo-installer.sh; bash /tmp/hanzo-installer.sh"
 
 # Stop the container so it's ready for use at the next start
