@@ -25,16 +25,6 @@
     - { regexp: '<I372>.*', replace: '// <I372> = 372;' }
     - { regexp: '<I374>.*', replace: '// <I374> = 374;' }
 
-- name: Configure the container (config files)
-  file: state=touch path={{item.path}} owner={{username}} group={{username}}
-  with_items:
-      - { path: "/home/{{username}}/.mime.types" }
-
-- name: Configure the container (symlinks)
-  file: state=link src={{item.src}} dest={{item.dest}}
-  with_items:
-      - { src: "/home/{{username}}/.dotfiles/config/mime.types", dest: "/etc/mime.types" }
-
 # ChromeOS binaries are available only when the LXC container is mounted in the
 # `termina` VM (in ChromeOS). This test is required otherwise our CI fails because
 # the binaries are not available.
