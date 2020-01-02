@@ -36,7 +36,6 @@
         - include_role: name=provisioning
         - include_role: name=cluster
         - include_role: name=extras
-        - include_role: name=fonts
         - include_role: name=dotfiles
         - include_role: name=chromeos
       always:
