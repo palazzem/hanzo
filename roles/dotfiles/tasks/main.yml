@@ -12,13 +12,6 @@
     - "/home/{{username}}/.zshrc"
     - "/home/{{username}}/.zshenv"
     - "/home/{{username}}/.spacemacs"
-    - "/home/{{username}}/.config/sakura/sakura.conf"
-
-- name: "[ChromeOS] Creating folders for dotfiles"
-  tags: ['never', 'chromeos']
-  file: state=directory name={{item}} owner={{username}} group={{username}}
-  with_items:
-    - "/home/{{username}}/.config/sakura"
 
 - name: Creating symbolic links
   file: state=link src={{item.src}} dest={{item.dest}} owner={{username}} group={{username}}
@@ -26,9 +19,3 @@
       - { src: "/home/{{username}}/.dotfiles/zshrc", dest: "/home/{{username}}/.zshrc" }
       - { src: "/home/{{username}}/.dotfiles/zshenv", dest: "/home/{{username}}/.zshenv" }
       - { src: "/home/{{username}}/.dotfiles/spacemacs", dest: "/home/{{username}}/.spacemacs" }
-
-- name: "[ChromeOS] Creating symbolic links"
-  tags: ['never', 'chromeos']
-  file: state=link src={{item.src}} dest={{item.dest}} owner={{username}} group={{username}}
-  with_items:
-      - { src: "/home/{{username}}/.dotfiles/config/sakura/sakura.conf", dest: "/home/{{username}}/.config/sakura/sakura.conf" }

@@ -1,0 +1,18 @@
+---
+
+# Updating dotfiles
+
+- name: Removing old files (if any)
+  file: state=absent name={{item}}
+  with_items:
+    - "/home/{{username}}/.config/sakura/sakura.conf"
+
+- name: Creating folders for dotfiles
+  file: state=directory name={{item}} owner={{username}} group={{username}}
+  with_items:
+    - "/home/{{username}}/.config/sakura"
+
+- name: Creating symbolic links
+  file: state=link src={{item.src}} dest={{item.dest}} owner={{username}} group={{username}}
+  with_items:
+      - { src: "/home/{{username}}/.dotfiles/config/sakura/sakura.conf", dest: "/home/{{username}}/.config/sakura/sakura.conf" }

@@ -3,6 +3,8 @@
 # Overview: configuring a developer machine in just minutes
 
 - hosts: localhost
+  name: Hanzo Lookup
+  tags: always
   tasks:
     - name: Configure the environment
       set_fact:
@@ -21,6 +23,8 @@
         - username
 
 - hosts: localhost
+  name: Archlinux/toolbox
+  tags: always
   become: yes
   tasks:
     - block:
@@ -36,7 +40,16 @@
         - include_role: name=cluster
         - include_role: name=extras
         - include_role: name=dotfiles
+      always:
+        - include_role: name=cleanup
+
+- hosts: localhost
+  name: ChromeOS Installer
+  tags: [ never, chromeos ]
+  become: yes
+  tasks:
+    - block:
+        - include_role: name=aur
         - include_role: name=chromeos
-          tags: ['never', 'chromeos']
       always:
         - include_role: name=cleanup
