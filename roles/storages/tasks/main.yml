@@ -1,6 +1,0 @@
----
-
-# Supported storages tools
-
-- name: Installing SQLite
-  pacman: name=sqlite state=latest

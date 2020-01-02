@@ -31,7 +31,6 @@
         - include_role: name=security
         - include_role: name=development
         - include_role: name=editors
-        - include_role: name=storages
         - include_role: name=orchestrators
         - include_role: name=provisioning
         - include_role: name=cluster
