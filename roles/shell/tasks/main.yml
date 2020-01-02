@@ -1,13 +1,19 @@
 ---
 
-# Install ZSH
+# Install Shell tools
 
 - name: Installing Shell packages
   pacman:
     state: latest
     name:
-      - sakura
       - zsh
+
+- name: "[ChromeOS] Installing the Terminal"
+  tags: ['never', 'chromeos']
+  pacman:
+    state: latest
+    name:
+      - sakura
 
 - name: Checking Oh-my-ZSH presence
   register: zsh
@@ -19,7 +25,8 @@
   become_user: "{{username}}"
   git: repo=https://github.com/robbyrussell/oh-my-zsh.git dest="/home/{{username}}/.oh-my-zsh"
 
-- name: Updating Sakura launcher to use Sommelier
+- name: "[ChromeOS] Updating Sakura launcher to use Sommelier"
+  tags: ['never', 'chromeos']
   replace:
     dest: /usr/share/applications/sakura.desktop
     regexp: "{{ item.regexp }}"

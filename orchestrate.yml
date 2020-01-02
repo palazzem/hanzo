@@ -37,5 +37,6 @@
         - include_role: name=extras
         - include_role: name=dotfiles
         - include_role: name=chromeos
+          tags: ['never', 'chromeos']
       always:
         - include_role: name=cleanup
