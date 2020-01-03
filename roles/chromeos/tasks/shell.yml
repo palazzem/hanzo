@@ -1,0 +1,17 @@
+---
+
+# Shell Configuration
+
+- name: Installing the Terminal
+  pacman:
+    state: latest
+    name:
+      - sakura
+
+- name: Updating Sakura launcher to use Sommelier
+  replace:
+    dest: /usr/share/applications/sakura.desktop
+    regexp: "{{ item.regexp }}"
+    replace: "{{ item.replace }}"
+  with_items:
+    - { regexp: 'Exec=sakura', replace: 'Exec=sommelier -X sakura' }

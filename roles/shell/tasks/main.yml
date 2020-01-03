@@ -1,12 +1,11 @@
 ---
 
-# Install ZSH
+# Install Shell tools
 
 - name: Installing Shell packages
   pacman:
     state: latest
     name:
-      - sakura
       - zsh
 
 - name: Checking Oh-my-ZSH presence
@@ -18,11 +17,3 @@
   become: yes
   become_user: "{{username}}"
   git: repo=https://github.com/robbyrussell/oh-my-zsh.git dest="/home/{{username}}/.oh-my-zsh"
-
-- name: Updating Sakura launcher to use Sommelier
-  replace:
-    dest: /usr/share/applications/sakura.desktop
-    regexp: "{{ item.regexp }}"
-    replace: "{{ item.replace }}"
-  with_items:
-    - { regexp: 'Exec=sakura', replace: 'Exec=sommelier -X sakura' }
