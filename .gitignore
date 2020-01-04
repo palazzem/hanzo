@@ -13,3 +13,4 @@ orchestrate.retry
 
 # IDE
 .idea/
+.vscode/
