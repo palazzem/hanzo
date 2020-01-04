@@ -44,9 +44,6 @@
 - name: Adding default user
   user: name={{username}} groups=wheel append=yes
 
-- name: Creating a default SSH key
-  user: name={{username}} generate_ssh_key=yes ssh_key_bits=8192 ssh_key_passphrase={{ssh_password}}
-
 - name: Creating 'programs' folder
   file: path="/home/{{username}}/programs" owner={{username}} group={{username}} state=directory
 
