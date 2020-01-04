@@ -1,6 +1,6 @@
 #! /bin/bash
 
-# Copyright (c) 2014-2019, Emanuele Palazzetti and contributors
+# Copyright (c) 2014-2020, Emanuele Palazzetti and contributors
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -40,8 +40,8 @@ lxc exec penguin -- sh -c "ping -c 4 google.com"
 echo "LXC container connected to the Internet!"
 
 # Launch Hanzo bootstrap
-echo "Downloading Hanzo..."
-lxc exec penguin -- sh -c "curl -L https://raw.githubusercontent.com/palazzem/hanzo/master/bin/bootstrap.sh > /tmp/hanzo-installer.sh; bash /tmp/hanzo-installer.sh"
+echo "Downloading Hanzo bootstrap..."
+lxc exec penguin -- sh -c "curl -L https://raw.githubusercontent.com/palazzem/hanzo/master/bin/bootstrap.sh > /tmp/hanzo-installer.sh; TAGS=chromeos bash /tmp/hanzo-installer.sh"
 
 # Stop the container so it's ready for use at the next start
 lxc stop penguin
