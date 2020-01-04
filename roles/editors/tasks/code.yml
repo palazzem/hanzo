@@ -1,0 +1,9 @@
+---
+
+# Code - OSS
+
+- name: Installing Code - OSS
+  pacman:
+    state: latest
+    name:
+      - code
