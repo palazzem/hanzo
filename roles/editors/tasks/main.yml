@@ -4,3 +4,4 @@
 
 - include: neovim.yml
 - include: emacs.yml
+- include: code.yml
