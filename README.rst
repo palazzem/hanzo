@@ -27,10 +27,20 @@ your system.
 
 If you use this approach, nothing else is required and you can enjoy your new system!
 
+Manual Installation
+-------------------
+
+In case you don't want to use the `curl` command above, you can clone or download this
+repository, using either `git` or the [release page](https://github.com/palazzem/hanzo/releases).
+After the checkout, run the following commands::
+
+    $ cd hanzo/
+    $ HANZO_FOLDER=$(pwd) bash bin/bootstrap.sh
+
 ChromeOS Installer
 ~~~~~~~~~~~~~~~~~~
 
-If you're not using a ChromeOS device, you can skip this section.
+If you're not using a ChromeOS device, you can ignore this section.
 ChromeOS installer will replace the default LXC container with a new ArchLinux container configured with Hanzo. If
 you're using actively the default ChromeOS container, bear in mind it **WILL BE REMOVED** from your system
 
@@ -41,48 +51,28 @@ To start the configuration, follow these steps:
 * Access the ``termina`` VM and launch the ChromeOS installer::
 
    $ vsh termina
-   $ curl -L http:/j.mp/hattori-hanzo-chromeos > /tmp/hanzo-installer.sh
-   $ bash /tmp/hanzo-installer.sh
+   $ curl -L http:/j.mp/hattori-hanzo-chromeos > /tmp/chrome-installer.sh
+   $ bash /tmp/chrome-installer.sh
 
 * Hanzo is launched automatically and nothing else is required. Enjoy your new system!
 
 **NOTE**: Your Google account username MUST be your Gmail account (without ``@gmail.com``) otherwise the integration will not work.
 
-Manual installation
--------------------
+Unattended Installer
+~~~~~~~~~~~~~~~~~~~~
 
-To use this playbook the following requirements must be installed::
+If you don't want to use the interactive shell to configure Hanzo, you can set the
+following environment variables:
 
-   $ pacman -Syy
-   $ pacman -S sudo git ansible --noconfirm
-   $ mkdir -p /usr/share/ansible/plugins/modules
-
-   # Enables AUR Ansible module
-   $ git clone https://github.com/kewlfft/ansible-aur.git /usr/share/ansible/plugins/modules/aur
-
-Starting the orchestration
-~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Clone this repository and start the orchestration with::
-
-   # Mandatory Environment Variables
-   $ export HANZO_FULLNAME test
-   $ export HANZO_USERNAME test
-   $ export HANZO_EMAIL test@example.com
-   $ export HANZO_SSH_PASSWORD som3th!ng
-
-   # Starts the provisioning
-   $ git clone https://github.com/palazzem/hanzo.git
-   $ ansible-playbook orchestrate.yml --connection=local
-
-The command above, requires the following parameters:
-
-* ``HANZO_FULLNAME`` is used inside the ``.gitconfig.j2`` template
-* ``HANZO_EMAIL`` is used inside the ``.gitconfig.j2`` template
-* ``HANZO_USERNAME`` is the created username
-* ``HANZO_SSH_PASSWORD`` is used to encrypt your newly generated SSH private key
-
-**NOTE:** These parameters are mandatory and if you don't provide any value, Ansible aborts the provisioning.
+* ``HANZO_FOLDER``: if specified, that folder is used as Hanzo root. If not specified, the
+  bootstrap script fetches Hanzo from GitHub.
+* ``HANZO_FULLNAME``: your full name used in the ``.gitconfig``.
+* ``HANZO_EMAIL``: your email address used in the ``.gitconfig``.
+* ``HANZO_USERNAME``: username used to create the main user.
+* ``TAGS``: sets Ansible tags. Available options are ``[chromeos]``. If not tags are set,
+  a standard Archlinux toolbox is configured.
+* ``EXTRA_ARGS``: sets Ansible extra arguments. Use this variable if you want to set options
+  such as ``--verbose`` or ``--check``.
 
 Testing
 -------
@@ -91,7 +81,7 @@ If you want to apply the playbook changes without touching your current configur
 change of the current configuration, a ``Dockerfile`` is available to build an ArchLinux container. To start the
 provisioning, just::
 
-   $ docker build . -t hanzo:latest && docker run -ti --rm hanzo:latest
+   $ docker build -t hanzo:test . && docker rmi hanzo:test
 
 Contribute
 ----------
@@ -105,6 +95,6 @@ to accept any PR that:
 * Enhances or makes me aware of different methods to distribute the playbook
 
 I will not accept any PR that adds new development tools, but I will be grateful if you can discuss about it in
-the `issues tracker`_.
+the `issue tracker`_.
 
-.. _issues tracker: https://github.com/palazzem/hanzo/issues
+.. _issue tracker: https://github.com/palazzem/hanzo/issues
