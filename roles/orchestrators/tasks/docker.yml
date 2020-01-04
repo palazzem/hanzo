@@ -2,7 +2,7 @@
 
 # Docker
 
-- name: Installing docker containers
+- name: Installing Docker
   pacman:
     state: latest
     name:
