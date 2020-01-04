@@ -40,8 +40,6 @@ ROOT_FOLDER=/root/.hanzo/
 read -p "Provide your full name: " HANZO_FULLNAME; export HANZO_FULLNAME
 read -p "Provide your username: " HANZO_USERNAME; export HANZO_USERNAME
 read -p "Provide your email: " HANZO_EMAIL; export HANZO_EMAIL
-echo -n "Provide your SSH password (encrypt private key): "
-read -s HANZO_SSH_PASSWORD; export HANZO_SSH_PASSWORD
 
 # System update and dependencies
 echo "Updating the system..."; pacman -Syyu --noconfirm
