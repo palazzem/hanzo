@@ -1,6 +1,6 @@
 #! /bin/bash
 
-# Copyright (c) 2014-2019, Emanuele Palazzetti and contributors
+# Copyright (c) 2014-2020, Emanuele Palazzetti and contributors
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -30,33 +30,51 @@
 set -e
 
 # Variables
-ANSIBLE_MODULE_PATH=/usr/share/ansible/plugins/modules
-AUR_MODULE_PATH="$ANSIBLE_MODULE_PATH/aur"
-AUR_MODULE_REPO=https://github.com/kewlfft/ansible-aur.git
+ANSIBLE_VERSION=2.9.2
 REPOSITORY=https://github.com/palazzem/hanzo.git
-ROOT_FOLDER=/root/.hanzo/
+OUT_FOLDER=/root/.hanzo/
+
+# Helper functions
+
+function get_env() {
+    read -p "$1 " retval
+    echo $retval
+}
 
 # Prompt for mandatory parameters
-read -p "Provide your full name: " HANZO_FULLNAME; export HANZO_FULLNAME
-read -p "Provide your username: " HANZO_USERNAME; export HANZO_USERNAME
-read -p "Provide your email: " HANZO_EMAIL; export HANZO_EMAIL
+HANZO_FULLNAME=${HANZO_FULLNAME:-$(get_env "Provide your full name:")}; export HANZO_FULLNAME
+HANZO_USERNAME=${HANZO_USERNAME:-$(get_env "Provide your username:")}; export HANZO_USERNAME
+HANZO_EMAIL=${HANZO_EMAIL:-$(get_env "Provide your email:")}; export HANZO_EMAIL
 
-# System update and dependencies
-echo "Updating the system..."; pacman -Syyu --noconfirm
+# Install/Update Hanzo unless a folder is specified
+if [[ -z "${HANZO_FOLDER}" ]]; then
+    echo "Downloading/Updating Hanzo..."
+    git clone "$REPOSITORY" "$OUT_FOLDER" 2> /dev/null || (cd "$OUT_FOLDER" ; git pull)
+else
+    echo "HANZO_FOLDER specified, skipping checkout..."
+    OUT_FOLDER=$HANZO_FOLDER
+fi
 
-echo "Installing dependencies..."
-pacman -S sudo git ansible --noconfirm
-mkdir -p $ANSIBLE_MODULE_PATH
-git clone "$AUR_MODULE_REPO" "$AUR_MODULE_PATH" 2> /dev/null || (cd "$AUR_MODULE_PATH" ; git pull)
+cd "$OUT_FOLDER"
 
-# Install/Update Hanzo
-echo "Preparing Hanzo..."
-git clone "$REPOSITORY" "$ROOT_FOLDER" 2> /dev/null || (cd "$ROOT_FOLDER" ; git pull)
+# Install Ansible Portable if not available
+if [ ! -d "$OUT_FOLDER/ansible-$ANSIBLE_VERSION" ]; then
+    echo "Installing Ansible Portable..."
+    pacman -Sy tar python --noconfirm
+    curl -L https://github.com/palazzem/ansible-portable/releases/download/$ANSIBLE_VERSION/ansible-$ANSIBLE_VERSION.tar.gz > /tmp/ansible.tar.gz
+    curl -L https://github.com/kewlfft/ansible-aur/archive/v0.24.tar.gz > /tmp/aur.tar.gz
+    tar -xf /tmp/ansible.tar.gz
+    tar -xf /tmp/aur.tar.gz -C /tmp
+    mkdir library
+    mv /tmp/ansible-aur-0.24/aur.py ./library
+    ln -s ansible ansible-$ANSIBLE_VERSION/ansible-playbook
+else
+    echo "Ansible found in $OUT_FOLDER/ansible-$ANSIBLE_VERSION, skipping installation..."
+fi
 
 # Orchestration
-echo "Starting orchestration..."
-cd "$ROOT_FOLDER"
-ansible-playbook orchestrate.yml --connection=local
+echo "Starting Hanzo orchestration..."
+PYTHONPATH=ansible-$ANSIBLE_VERSION python ansible-$ANSIBLE_VERSION/ansible-playbook orchestrate.yml --connection=local --tags=$TAGS
 
 # Post-install script
 echo "=================="
