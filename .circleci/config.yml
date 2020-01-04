@@ -1,17 +1,30 @@
 version: 2.1
 jobs:
-  # Build the docker container that will be orchestrated with Hanzo.
-  # For more details check: https://github.com/palazzem/hanzo/blob/master/Dockerfile#L21-L23
   archlinux-installer:
-    machine: true
+    docker:
+      - image: archlinux/base
+        environment:
+          EXTRA_ARGS: --verbose
+          HANZO_FULLNAME: test
+          HANZO_USERNAME: test
+          HANZO_EMAIL: test@example.com
+          HANZO_FOLDER: /root/project/
     steps:
       - checkout
-      - run: docker build -t hanzo:test .
+      - run: bash bin/bootstrap.sh
   chromeos-installer:
-    machine: true
+    docker:
+      - image: archlinux/base
+        environment:
+          TAGS: chromeos
+          EXTRA_ARGS: --verbose
+          HANZO_FULLNAME: test
+          HANZO_USERNAME: test
+          HANZO_EMAIL: test@example.com
+          HANZO_FOLDER: /root/project/
     steps:
       - checkout
-      - run: docker build -t hanzo:test --build-arg TAGS=chromeos .
+      - run: bash bin/bootstrap.sh
 
 workflows:
   version: 2
