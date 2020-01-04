@@ -31,6 +31,7 @@ set -e
 
 # Variables
 ANSIBLE_VERSION=2.9.2
+ANSIBLE_FOLDER="ansible-$ANSIBLE_VERSION"
 REPOSITORY=https://github.com/palazzem/hanzo.git
 OUT_FOLDER=/root/.hanzo/
 
@@ -58,7 +59,7 @@ fi
 cd "$OUT_FOLDER"
 
 # Install Ansible Portable if not available
-if [ ! -d "$OUT_FOLDER/ansible-$ANSIBLE_VERSION" ]; then
+if [ ! -d "$OUT_FOLDER/$ANSIBLE_FOLDER" ]; then
     echo "Installing Ansible Portable..."
     pacman -Sy tar python --noconfirm
     curl -L https://github.com/palazzem/ansible-portable/releases/download/$ANSIBLE_VERSION/ansible-$ANSIBLE_VERSION.tar.gz > /tmp/ansible.tar.gz
@@ -67,19 +68,15 @@ if [ ! -d "$OUT_FOLDER/ansible-$ANSIBLE_VERSION" ]; then
     tar -xf /tmp/aur.tar.gz -C /tmp
     mkdir library
     mv /tmp/ansible-aur-0.24/aur.py ./library
-    ln -s ansible ansible-$ANSIBLE_VERSION/ansible-playbook
+    ln -s ansible $ANSIBLE_FOLDER/ansible-playbook
 else
-    echo "Ansible found in $OUT_FOLDER/ansible-$ANSIBLE_VERSION, skipping installation..."
+    echo "Ansible found in $OUT_FOLDER/$ANSIBLE_FOLDER, skipping installation..."
 fi
 
 # Orchestration
 echo "Starting Hanzo orchestration..."
-PYTHONPATH=ansible-$ANSIBLE_VERSION python ansible-$ANSIBLE_VERSION/ansible-playbook orchestrate.yml --connection=local --tags=$TAGS
+PYTHONPATH=$ANSIBLE_FOLDER python $ANSIBLE_FOLDER/ansible-playbook orchestrate.yml --connection=local --tags=$TAGS
 
 # Post-install script
-echo "=================="
-echo "Post-install steps"
-echo "=================="
-
-passwd $HANZO_USERNAME
+echo "Executing post-install steps..."
 chsh -s /bin/zsh $HANZO_USERNAME
