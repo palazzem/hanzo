@@ -19,7 +19,6 @@
       - ntp
       - openssh
       - openssl
-      - openssl-1.0
       - p7zip
       - sudo
       - tar
