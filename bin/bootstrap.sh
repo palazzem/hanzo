@@ -75,7 +75,7 @@ fi
 
 # Orchestration
 echo "Starting Hanzo orchestration..."
-PYTHONPATH=$ANSIBLE_FOLDER python $ANSIBLE_FOLDER/ansible-playbook orchestrate.yml --connection=local --tags=$TAGS
+PYTHONPATH=$ANSIBLE_FOLDER python $ANSIBLE_FOLDER/ansible-playbook orchestrate.yml --connection=local --tags=$TAGS $EXTRA_ARGS
 
 # Post-install script
 echo "Executing post-install steps..."
