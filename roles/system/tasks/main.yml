@@ -20,6 +20,7 @@
       - openssh
       - openssl
       - p7zip
+      - speedtest-cli
       - sudo
       - tar
       - tree
