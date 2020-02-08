@@ -13,6 +13,7 @@
       - git
       - htop
       - httpie
+      - iputils
       - mlocate
       - mono
       - ntfsprogs
