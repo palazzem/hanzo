@@ -15,3 +15,10 @@
       - ncmpcpp
       - transmission-cli
       - youtube-dl
+
+- name: Installing Google Chrome Beta
+  aur:
+    name:
+      - google-chrome-beta
+  become: yes
+  become_user: aur_builder
