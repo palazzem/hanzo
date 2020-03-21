@@ -1,15 +1,12 @@
 name: release
 
 on:
-  pull_request:
-    
-  # Commented out for testing purposes
-  # push:
-  #   branches:
-  #     - master
-  # schedule:
-  #   # Run every day at 1.00am
-  #   - cron:  '0 1 * * *'
+  push:
+    branches:
+      - master
+  schedule:
+    # Run every day at 1.00am
+    - cron:  '0 1 * * *'
 
 jobs:
   build-container:
