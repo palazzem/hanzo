@@ -7,6 +7,8 @@ Hanzō
 
 .. image:: https://github.com/palazzem/hanzo/workflows/test/badge.svg
     :target: https://github.com/palazzem/hanzo/actions?query=workflow%3Atest
+.. image:: https://github.com/palazzem/hanzo/workflows/release/badge.svg
+    :target: https://github.com/palazzem/hanzo/actions?query=workflow%3Arelease
 
 This `Ansible`_ playbook configures a new ArchLinux installation with some development tools. The goal of the
 playbook is *inspiring developers* to prepare programmatically their development environment. This repository targets
@@ -81,7 +83,11 @@ If you want to apply the playbook changes without touching your current configur
 change of the current configuration, a ``Dockerfile`` is available to build an ArchLinux container. To start the
 provisioning, just::
 
-   $ docker build -t hanzo:test . && docker rmi hanzo:test
+   $ docker build . -t hanzo:test \
+       --build-arg HANZO_FULLNAME=test \
+       --build-arg HANZO_USERNAME=test \
+       --build-arg HANZO_EMAIL=test@example.com && \
+       docker rmi hanzo:test
 
 Contribute
 ----------
