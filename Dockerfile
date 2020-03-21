@@ -1,17 +1,15 @@
-FROM archlinux/base
-LABEL maintainer="hello@palazzetti.me"
+FROM docker.io/palazzem/archlinux-toolbox:latest
+LABEL maintainer="Emanuele Palazzetti <emanuele.palazzetti@gmail.com>"
 
-# Configure testing environment
-ARG TAGS
-ENV EXTRA_ARGS --verbose
-ENV HANZO_FULLNAME test
-ENV HANZO_USERNAME test
-ENV HANZO_EMAIL test@example.com
-ENV HANZO_FOLDER /root/hanzo
+# Configure the build environment
+ENV HANZO_FOLDER /root/.hanzo
+ARG HANZO_FULLNAME
+ARG HANZO_USERNAME
+ARG HANZO_EMAIL
 
-COPY . /root/hanzo
-WORKDIR /root/hanzo
+# Push the repository in Hanzo default folder
+COPY . /root/.hanzo
+WORKDIR /root/.hanzo
 
-# Provisioning at build time so that if a container builds correctly,
-# the test is successful
+# Provisioning at build time
 RUN bash bin/bootstrap.sh
