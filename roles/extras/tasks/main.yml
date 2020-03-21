@@ -16,6 +16,14 @@
       - transmission-cli
       - youtube-dl
 
+- name: Installing consumer applications (AUR)
+  aur:
+    name:
+      - mopidy-mpd
+      - mopidy-spotify
+  become: yes
+  become_user: aur_builder
+
 - name: Installing Google Chrome Beta
   aur:
     name:
