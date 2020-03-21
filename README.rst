@@ -81,7 +81,11 @@ If you want to apply the playbook changes without touching your current configur
 change of the current configuration, a ``Dockerfile`` is available to build an ArchLinux container. To start the
 provisioning, just::
 
-   $ docker build -t hanzo:test . && docker rmi hanzo:test
+   $ docker build . -t hanzo:test \
+       --build-arg HANZO_FULLNAME=test \
+       --build-arg HANZO_USERNAME=test \
+       --build-arg HANZO_EMAIL=test@example.com && \
+       docker rmi hanzo:test
 
 Contribute
 ----------
