@@ -43,20 +43,20 @@ resource "coder_agent" "main" {
 
     # Prepare the building environment
     pacman -Sy --noconfirm base-devel sudo
-    useradd coder -m
-    passwd -d coder
-    chown -R coder:coder /home/coder
+    useradd builduser -m
+    passwd -d builduser
+    chown -R builduser:builduser /home/builduser
     cp /etc/sudoers /etc/sudoers.previous
-    printf 'coder ALL=(ALL) ALL\n' | tee -a /etc/sudoers
+    printf 'builduser ALL=(ALL) ALL\n' | tee -a /etc/sudoers
 
     # Install code-server
-    yes | sudo -u coder sh -c "$(curl -fsSL https://code-server.dev/install.sh)"
+    yes | sudo -u builduser sh -c "$(curl -fsSL https://code-server.dev/install.sh)"
 
     # Restore sudoers
     cp /etc/sudoers.previous /etc/sudoers
     rm /etc/sudoers.previous
 
-    sudo -u coder code-server --auth none --port 13337
+    sudo -u ${var.hanzo_username} code-server --auth none --port 13337
     EOF
 }
 
@@ -121,7 +121,7 @@ resource "docker_container" "workspace" {
     ip   = "host-gateway"
   }
   volumes {
-    container_path = "/home/coder/"
+    container_path = "/home/${var.hanzo_username}/"
     volume_name    = docker_volume.home_volume.name
     read_only      = false
   }
