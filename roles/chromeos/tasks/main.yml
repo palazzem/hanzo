@@ -1,7 +1,0 @@
----
-
-# ChromeOS specific tasks to configure the LXC container integration
-# with the rest of the system
-- include: shell.yml
-- include: dotfiles.yml
-- include: wayland.yml

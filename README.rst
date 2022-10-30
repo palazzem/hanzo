@@ -39,27 +39,6 @@ After the checkout, run the following commands::
     $ cd hanzo/
     $ HANZO_FOLDER=$(pwd) bash bin/bootstrap.sh
 
-ChromeOS Installer
-~~~~~~~~~~~~~~~~~~
-
-If you're not using a ChromeOS device, you can ignore this section.
-ChromeOS installer will replace the default LXC container with a new ArchLinux container configured with Hanzo. If
-you're using actively the default ChromeOS container, bear in mind it **WILL BE REMOVED** from your system
-
-To start the configuration, follow these steps:
-
-* Enable Linux support on your ChromeOS system
-* Open ``crosh`` using ``CTRL`` + ``ALT`` + ``T``
-* Access the ``termina`` VM and launch the ChromeOS installer::
-
-   $ vsh termina
-   $ curl -L http:/j.mp/hattori-hanzo-chromeos > /tmp/chrome-installer.sh
-   $ bash /tmp/chrome-installer.sh
-
-* Hanzo is launched automatically and nothing else is required. Enjoy your new system!
-
-**NOTE**: Your Google account username MUST be your Gmail account (without ``@gmail.com``) otherwise the integration will not work.
-
 Unattended Installer
 ~~~~~~~~~~~~~~~~~~~~
 
