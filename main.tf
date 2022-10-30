@@ -11,6 +11,21 @@ terraform {
   }
 }
 
+variable "hanzo_username" {
+  description = "Your username used to configure your Linux account"
+  sensitive = false
+}
+
+variable "hanzo_fullname" {
+  description = "Your full name used to configure Git"
+  sensitive = false
+}
+
+variable "hanzo_email" {
+  description = "Your email used to configure Git "
+  sensitive = false
+}
+
 data "coder_provisioner" "me" {
 }
 
@@ -20,26 +35,43 @@ provider "docker" {
 data "coder_workspace" "me" {
 }
 
+resource "docker_network" "private_network" {
+  name = "network-${data.coder_workspace.me.id}"
+}
+
+resource "docker_container" "dind" {
+  image      = "docker:dind"
+  privileged = true
+  name       = "sidecar-${data.coder_workspace.me.id}"
+  entrypoint = ["dockerd", "-H", "tcp://0.0.0.0:2375"]
+  networks_advanced {
+    name = docker_network.private_network.name
+  }
+}
+
 resource "coder_agent" "main" {
   arch           = data.coder_provisioner.me.arch
   os             = "linux"
   startup_script = <<EOF
     #!/bin/sh
-    # install and start code-server
-    curl -fsSL https://code-server.dev/install.sh | sh
-    code-server --auth none --port 13337
-    EOF
 
-  # These environment variables allow you to make Git commits right away after creating a
-  # workspace. Note that they take precedence over configuration defined in ~/.gitconfig!
-  # You can remove this block if you'd prefer to configure Git manually or using
-  # dotfiles. (see docs/dotfiles.md)
-  env = {
-    GIT_AUTHOR_NAME     = "${data.coder_workspace.me.owner}"
-    GIT_COMMITTER_NAME  = "${data.coder_workspace.me.owner}"
-    GIT_AUTHOR_EMAIL    = "${data.coder_workspace.me.owner_email}"
-    GIT_COMMITTER_EMAIL = "${data.coder_workspace.me.owner_email}"
-  }
+    # Prepare the building environment
+    pacman -Sy --noconfirm base-devel sudo
+    useradd builduser -m
+    passwd -d builduser
+    chown -R builduser:builduser /home/builduser
+    cp /etc/sudoers /etc/sudoers.previous
+    printf 'builduser ALL=(ALL) ALL\n' | tee -a /etc/sudoers
+
+    # Install code-server
+    yes | sudo -u builduser sh -c "$(curl -fsSL https://code-server.dev/install.sh)"
+
+    # Restore sudoers
+    cp /etc/sudoers.previous /etc/sudoers
+    rm /etc/sudoers.previous
+
+    sudo -u ${var.hanzo_username} code-server --auth none --port 13337
+    EOF
 }
 
 resource "coder_app" "code-server" {
@@ -65,8 +97,16 @@ resource "docker_volume" "home_volume" {
 
 resource "docker_image" "main" {
   name = "coder-${data.coder_workspace.me.id}"
+
   build {
     path = "./build"
+
+    # Hanzo configuration
+    build_arg = {
+      HANZO_USERNAME : "${var.hanzo_username}"
+      HANZO_FULLNAME : "${var.hanzo_fullname}"
+      HANZO_EMAIL    : "${var.hanzo_email}"
+    }
   }
   triggers = {
     dir_sha1 = sha1(join("", [for f in fileset(path.module, "build/*") : filesha1(f)]))
@@ -89,13 +129,19 @@ resource "docker_container" "workspace" {
     ${replace(coder_agent.main.init_script, "/localhost|127\\.0\\.0\\.1/", "host.docker.internal")}
     EOT
   ]
-  env = ["CODER_AGENT_TOKEN=${coder_agent.main.token}"]
+  env = [
+    "CODER_AGENT_TOKEN=${coder_agent.main.token}",
+    "DOCKER_HOST=${docker_container.dind.name}:2375"
+  ]
+  networks_advanced {
+    name = docker_network.private_network.name
+  }
   host {
     host = "host.docker.internal"
     ip   = "host-gateway"
   }
   volumes {
-    container_path = "/home/coder/"
+    container_path = "/home/${var.hanzo_username}/"
     volume_name    = docker_volume.home_volume.name
     read_only      = false
   }
