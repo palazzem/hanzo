@@ -1,1 +1,1 @@
-FROM python:3.10
+FROM library/archlinux:latest
