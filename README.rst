@@ -5,10 +5,8 @@ Hanzō
     | Hattori Hanzō: You must have big rats if you need Hattori Hanzo's steel.
     | The Bride: ...Huge.
 
-.. image:: https://github.com/palazzem/hanzo/workflows/test/badge.svg
-    :target: https://github.com/palazzem/hanzo/actions?query=workflow%3Atest
-.. image:: https://github.com/palazzem/hanzo/workflows/release/badge.svg
-    :target: https://github.com/palazzem/hanzo/actions?query=workflow%3Arelease
+.. image:: https://github.com/palazzem/hanzo/actions/workflows/test.yaml/badge.svg?branch=master
+    :target: https://github.com/palazzem/hanzo/actions/workflows/test.yaml
 
 This `Ansible`_ playbook configures a new ArchLinux installation with some development tools. The goal of the
 playbook is *inspiring developers* to prepare programmatically their development environment. This repository targets
