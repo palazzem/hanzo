@@ -70,7 +70,8 @@ resource "coder_agent" "main" {
     cp /etc/sudoers.previous /etc/sudoers
     rm /etc/sudoers.previous
 
-    sudo -u ${var.hanzo_username} code-server --auth none --port 13337
+    # Run code-server with Microsoft Marketplace support
+    sudo -u ${var.hanzo_username} EXTENSIONS_GALLERY='{"serviceUrl": "https://marketplace.visualstudio.com/_apis/public/gallery","cacheUrl": "https://vscode.blob.core.windows.net/gallery/index","itemUrl": "https://marketplace.visualstudio.com/items"}' code-server --auth none --port 13337
     EOF
 }
 
