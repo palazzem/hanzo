@@ -40,15 +40,24 @@ resource "coder_agent" "main" {
   os             = "linux"
   startup_script = <<EOF
     #!/bin/sh
-    # install and start code-server
-    curl -fsSL https://code-server.dev/install.sh | sh
-    code-server --auth none --port 13337
-    EOF
 
-  # These environment variables allow you to make Git commits right away after creating a
-  # workspace. Note that they take precedence over configuration defined in ~/.gitconfig!
-  # You can remove this block if you'd prefer to configure Git manually or using
-  # dotfiles. (see docs/dotfiles.md)
+    # Prepare the building environment
+    pacman -Sy --noconfirm base-devel sudo
+    useradd coder -m
+    passwd -d coder
+    chown -R coder:coder /home/coder
+    cp /etc/sudoers /etc/sudoers.previous
+    printf 'coder ALL=(ALL) ALL\n' | tee -a /etc/sudoers
+
+    # Install code-server
+    yes | sudo -u coder sh -c "$(curl -fsSL https://code-server.dev/install.sh)"
+
+    # Restore sudoers
+    cp /etc/sudoers.previous /etc/sudoers
+    rm /etc/sudoers.previous
+
+    sudo -u coder code-server --auth none --port 13337
+    EOF
 }
 
 resource "coder_app" "code-server" {
