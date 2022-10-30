@@ -13,7 +13,6 @@ terraform {
 
 variable "hanzo_username" {
   description = "Your username used to configure your Linux account"
-  default = "coder"
   sensitive = false
 }
 
@@ -76,15 +75,15 @@ resource "docker_volume" "home_volume" {
 resource "docker_image" "main" {
   name = "coder-${data.coder_workspace.me.id}"
 
-  # Hanzo configuration
-  env = {
-    HANZO_USERNAME = "${var.hanzo_username}"
-    HANZO_FULLNAME = "${var.hanzo_fullname}"
-    HANZO_EMAIL    = "${var.hanzo_email}"
-  }
-
   build {
     path = "./build"
+
+    # Hanzo configuration
+    build_arg = {
+      HANZO_USERNAME : "${var.hanzo_username}"
+      HANZO_FULLNAME : "${var.hanzo_fullname}"
+      HANZO_EMAIL    : "${var.hanzo_email}"
+    }
   }
   triggers = {
     dir_sha1 = sha1(join("", [for f in fileset(path.module, "build/*") : filesha1(f)]))
