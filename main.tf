@@ -56,6 +56,10 @@ resource "coder_agent" "main" {
   startup_script = <<EOF
     #!/bin/sh
 
+    # Export DOCKER_HOST variable in Hanzo user
+    grep -qxF 'export DOCKER_HOST=${docker_container.dind.name}:2375' /home/${var.hanzo_username}/.zshenv \
+      || echo 'export DOCKER_HOST=${docker_container.dind.name}:2375' >> /home/${var.hanzo_username}/.zshenv
+
     # Prepare the building environment
     pacman -Sy --noconfirm base-devel sudo
     useradd builduser -m
