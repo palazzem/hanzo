@@ -40,14 +40,3 @@
         - include_role: name=dotfiles
       always:
         - include_role: name=cleanup
-
-- hosts: localhost
-  name: ChromeOS Installer
-  tags: [ never, chromeos ]
-  become: yes
-  tasks:
-    - block:
-        - include_role: name=aur
-        - include_role: name=chromeos
-      always:
-        - include_role: name=cleanup
