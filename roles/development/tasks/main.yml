@@ -9,7 +9,6 @@
       - cmake
       - gdb
       - git
-      - mercurial
       - sqlite
 
 - name: Configuring .gitconfig
