@@ -13,6 +13,7 @@ terraform {
 
 variable "hanzo_username" {
   description = "Your username used to configure your Linux account"
+  default = "coder"
   sensitive = false
 }
 
