@@ -6,27 +6,5 @@
   pacman:
     state: latest
     name:
-      - gimp
-      - imagemagick
-      - libreoffice-en-US
-      - libreoffice-fresh
-      - mopidy
-      - mpv
-      - ncmpcpp
       - transmission-cli
       - youtube-dl
-
-- name: Installing consumer applications (AUR)
-  aur:
-    name:
-      - mopidy-mpd
-      - mopidy-spotify
-  become: yes
-  become_user: aur_builder
-
-- name: Installing Google Chrome Beta
-  aur:
-    name:
-      - google-chrome-beta
-  become: yes
-  become_user: aur_builder

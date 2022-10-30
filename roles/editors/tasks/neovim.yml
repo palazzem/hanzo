@@ -7,4 +7,3 @@
     state: latest
     name:
       - neovim
-      - python-neovim

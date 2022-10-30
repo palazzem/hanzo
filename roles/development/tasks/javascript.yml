@@ -7,11 +7,3 @@
     state: latest
     name:
       - nodejs
-
-- name: Installing 'nodenv'
-  aur:
-    name:
-      - nodenv
-      - nodenv-node-build-git
-  become: yes
-  become_user: aur_builder

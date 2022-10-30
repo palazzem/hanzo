@@ -6,11 +6,3 @@
   pacman:
     state: latest
     name: ruby
-
-- name: Installing 'rbenv'
-  aur:
-    name:
-      - rbenv
-      - ruby-build
-  become: yes
-  become_user: aur_builder
