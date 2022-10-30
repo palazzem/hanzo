@@ -11,6 +11,22 @@ terraform {
   }
 }
 
+variable "hanzo_username" {
+  description = "Your username used to configure your Linux account"
+  default = "coder"
+  sensitive = false
+}
+
+variable "hanzo_fullname" {
+  description = "Your full name used to configure Git"
+  sensitive = false
+}
+
+variable "hanzo_email" {
+  description = "Your email used to configure Git "
+  sensitive = false
+}
+
 data "coder_provisioner" "me" {
 }
 
@@ -65,6 +81,14 @@ resource "docker_volume" "home_volume" {
 
 resource "docker_image" "main" {
   name = "coder-${data.coder_workspace.me.id}"
+
+  # Hanzo configuration
+  env = {
+    HANZO_USERNAME = "${var.hanzo_username}"
+    HANZO_FULLNAME = "${var.hanzo_fullname}"
+    HANZO_EMAIL    = "${var.hanzo_email}"
+  }
+
   build {
     path = "./build"
   }
