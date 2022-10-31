@@ -11,6 +11,11 @@ terraform {
   }
 }
 
+variable "rotation_time" {
+  description = "Number of hours before dispose the DevEnv Docker image"
+  sensitive = false
+}
+
 variable "hanzo_username" {
   description = "Your username used to configure your Linux account"
   default = "coder"
@@ -25,6 +30,10 @@ variable "hanzo_fullname" {
 variable "hanzo_email" {
   description = "Your email used to configure Git "
   sensitive = false
+}
+
+resource "time_rotating" "time_trigger" {
+  rotation_hours = var.rotation_time
 }
 
 data "coder_provisioner" "me" {
@@ -91,11 +100,9 @@ resource "coder_app" "code-server" {
   }
 }
 
-
 resource "docker_volume" "home_volume" {
   name = "coder-${data.coder_workspace.me.owner}-${lower(data.coder_workspace.me.name)}-home"
 }
-
 
 resource "docker_image" "main" {
   name = "coder-${data.coder_workspace.me.id}"
@@ -110,8 +117,11 @@ resource "docker_image" "main" {
       HANZO_EMAIL    : "${var.hanzo_email}"
     }
   }
+
+  # Triggers a rebuild if the Dockerfile changes, or every day
   triggers = {
     dir_sha1 = sha1(join("", [for f in fileset(path.module, "build/*") : filesha1(f)]))
+    every_day = formatdate("YYYY-MM-DD", time_rotating.time_trigger.id)
   }
 }
 
