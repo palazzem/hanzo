@@ -65,15 +65,11 @@ resource "coder_agent" "main" {
     useradd builduser -m
     passwd -d builduser
     chown -R builduser:builduser /home/builduser
-    cp /etc/sudoers /etc/sudoers.previous
-    printf 'builduser ALL=(ALL) ALL\n' | tee -a /etc/sudoers
 
-    # Install code-server
+    # Install code-server (sudo permissions are required)
+    usermod -aG wheel builduser
     yes | sudo -u builduser sh -c "$(curl -fsSL https://code-server.dev/install.sh)"
-
-    # Restore sudoers
-    cp /etc/sudoers.previous /etc/sudoers
-    rm /etc/sudoers.previous
+    gpasswd -d builduser wheel
 
     # Run code-server with Microsoft Marketplace support
     sudo -u ${var.hanzo_username} EXTENSIONS_GALLERY='{"serviceUrl": "https://marketplace.visualstudio.com/_apis/public/gallery","cacheUrl": "https://vscode.blob.core.windows.net/gallery/index","itemUrl": "https://marketplace.visualstudio.com/items"}' code-server --auth none --port 13337
