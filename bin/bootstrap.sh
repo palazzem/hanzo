@@ -67,9 +67,7 @@ cd "$OUT_FOLDER"
 
 # Install Ansible and configure collections
 pip install ansible-core --user
-# TODO: move to a collection.yml file
-$ANSIBLE_FOLDER/ansible-galaxy collection install community.general
-$ANSIBLE_FOLDER/ansible-galaxy collection install kewlfft.aur
+$ANSIBLE_FOLDER/ansible-galaxy collection install -r requirements.yml
 
 # Orchestration
 echo "Starting Hanzo orchestration..."
