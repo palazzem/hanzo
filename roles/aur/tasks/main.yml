@@ -15,9 +15,9 @@
     validate: 'visudo -cf %s'
 
 - name: Install 'yay' AUR helper
-  aur:
+  kewlfft.aur.aur:
     name: yay
     use: makepkg
-    skip_installed: true
+    state: present
   become: yes
   become_user: aur_builder

@@ -11,6 +11,7 @@
 - name: Installing Security Packages (AUR)
   become: yes
   become_user: aur_builder
-  aur:
+  kewlfft.aur.aur:
+    use: yay
     name:
       - openvpn-update-systemd-resolved
