@@ -8,6 +8,7 @@
     name:
       - python
       - python-pip
+      - python-setuptools
 
 - name: Installing 'pyenv'
   aur:
