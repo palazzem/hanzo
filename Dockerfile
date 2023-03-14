@@ -1,4 +1,4 @@
-FROM docker.io/palazzem/archlinux-toolbox:latest
+FROM archlinux:base-devel
 LABEL maintainer="Emanuele Palazzetti <emanuele.palazzetti@gmail.com>"
 
 # Configure the build environment
