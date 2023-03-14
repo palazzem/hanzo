@@ -31,7 +31,7 @@ set -e
 
 # Variables
 REPOSITORY=https://github.com/palazzem/hanzo.git
-OUT_FOLDER=/root/.hanzo/
+OUT_FOLDER=/root/.hanzo
 
 # Helper functions
 
