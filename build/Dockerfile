@@ -1,4 +1,4 @@
-FROM library/archlinux:latest
+FROM archlinux:base-devel
 
 # Build environment settings
 ARG HANZO_USERNAME
