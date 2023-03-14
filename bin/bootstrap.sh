@@ -45,6 +45,14 @@ HANZO_FULLNAME=${HANZO_FULLNAME:-$(get_env "Provide your full name:")}; export H
 HANZO_USERNAME=${HANZO_USERNAME:-$(get_env "Provide your username:")}; export HANZO_USERNAME
 HANZO_EMAIL=${HANZO_EMAIL:-$(get_env "Provide your email:")}; export HANZO_EMAIL
 
+# Install dependencies
+echo "Installing dependencies..."
+pacman -Sy --noconfirm \
+  git \
+  tar \
+  python \
+  python-pip
+
 # Install/Update Hanzo unless a folder is specified
 if [[ -z "${HANZO_FOLDER}" ]]; then
     echo "Downloading/Updating Hanzo..."
