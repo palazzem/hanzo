@@ -31,6 +31,7 @@ set -e
 
 # Variables
 REPOSITORY=https://github.com/palazzem/hanzo.git
+ANSIBLE_FOLDER=$HOME/.local/bin
 OUT_FOLDER=/root/.hanzo
 
 # Helper functions
@@ -64,21 +65,15 @@ fi
 
 cd "$OUT_FOLDER"
 
-# Install Ansible
-if [ ! -d "$OUT_FOLDER/library" ]; then
-    echo "Installing Ansible..."
-    pacman -Sy tar ansible --noconfirm
-    curl -L https://github.com/kewlfft/ansible-aur/archive/v0.24.tar.gz > /tmp/aur.tar.gz
-    tar -xf /tmp/aur.tar.gz -C /tmp
-    mkdir library
-    mv /tmp/ansible-aur-0.24/aur.py ./library
-else
-    echo "Ansible extensions found in $OUT_FOLDER/library, skipping installation..."
-fi
+# Install Ansible and configure collections
+pip install ansible-core --user
+# TODO: move to a collection.yml file
+$ANSIBLE_FOLDER/ansible-galaxy collection install community.general
+$ANSIBLE_FOLDER/ansible-galaxy collection install kewlfft.aur
 
 # Orchestration
 echo "Starting Hanzo orchestration..."
-ansible-playbook orchestrate.yml --connection=local --tags=$TAGS $EXTRA_ARGS
+$ANSIBLE_FOLDER/ansible-playbook orchestrate.yml --connection=local --tags=$TAGS $EXTRA_ARGS
 
 # Post-install script
 echo "Executing post-install steps..."
