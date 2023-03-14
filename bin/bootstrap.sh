@@ -30,7 +30,7 @@
 set -e
 
 # Variables
-ANSIBLE_VERSION=2.9.2
+ANSIBLE_VERSION=2.14.3
 ANSIBLE_FOLDER="ansible-$ANSIBLE_VERSION"
 REPOSITORY=https://github.com/palazzem/hanzo.git
 OUT_FOLDER=/root/.hanzo/
