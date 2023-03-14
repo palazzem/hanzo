@@ -66,27 +66,20 @@ resource "docker_container" "dind" {
 resource "coder_agent" "main" {
   arch           = data.coder_provisioner.me.arch
   os             = "linux"
-  startup_script = <<EOF
-    #!/bin/sh
+
+  login_before_ready     = false
+  startup_script_timeout = 180
+  startup_script         = <<-EOT
+    set -e
 
     # Export DOCKER_HOST variable in Hanzo user
     grep -qxF 'export DOCKER_HOST=${docker_container.dind.name}:2375' /home/${var.hanzo_username}/.zshenv \
       || echo 'export DOCKER_HOST=${docker_container.dind.name}:2375' >> /home/${var.hanzo_username}/.zshenv
 
-    # Prepare the building environment
-    pacman -Sy --noconfirm base-devel sudo
-    useradd builduser -m
-    passwd -d builduser
-    chown -R builduser:builduser /home/builduser
-
-    # Install code-server (sudo permissions are required)
-    usermod -aG wheel builduser
-    yes | sudo -u builduser sh -c "$(curl -fsSL https://code-server.dev/install.sh)"
-    gpasswd -d builduser wheel
-
-    # Run code-server with Microsoft Marketplace support
-    sudo -u ${var.hanzo_username} EXTENSIONS_GALLERY='{"serviceUrl": "https://marketplace.visualstudio.com/_apis/public/gallery","cacheUrl": "https://vscode.blob.core.windows.net/gallery/index","itemUrl": "https://marketplace.visualstudio.com/items"}' code-server --auth none --port 13337
-    EOF
+    # Install and start code-server
+    curl -fsSL https://code-server.dev/install.sh | sh -s -- --method=standalone --prefix=/tmp/code-server --version 4.8.3
+    EXTENSIONS_GALLERY='{"serviceUrl": "https://marketplace.visualstudio.com/_apis/public/gallery","cacheUrl": "https://vscode.blob.core.windows.net/gallery/index","itemUrl": "https://marketplace.visualstudio.com/items"}' /tmp/code-server/bin/code-server --auth none --port 13337 >/tmp/code-server.log 2>&1 &
+  EOT
 }
 
 resource "coder_app" "code-server" {
