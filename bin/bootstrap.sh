@@ -70,7 +70,7 @@ fi
 
 # Orchestration
 echo "Starting Hanzo orchestration..."
-ansible playbook orchestrate.yml --connection=local --tags=$TAGS $EXTRA_ARGS
+ansible-playbook orchestrate.yml --connection=local --tags=$TAGS $EXTRA_ARGS
 
 # Post-install script
 echo "Executing post-install steps..."
