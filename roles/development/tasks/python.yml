@@ -8,9 +8,11 @@
     name:
       - python
       - python-pip
+      - python-setuptools
 
 - name: Installing 'pyenv'
-  aur:
+  kewlfft.aur.aur:
+    use: yay
     name: pyenv
   become: yes
   become_user: aur_builder

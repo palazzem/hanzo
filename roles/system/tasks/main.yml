@@ -35,7 +35,8 @@
 - name: Installing system packages (AUR)
   become: yes
   become_user: aur_builder
-  aur:
+  kewlfft.aur.aur:
+    use: yay
     name:
       - downgrade
 

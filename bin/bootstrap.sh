@@ -30,10 +30,9 @@
 set -e
 
 # Variables
-ANSIBLE_VERSION=2.9.2
-ANSIBLE_FOLDER="ansible-$ANSIBLE_VERSION"
 REPOSITORY=https://github.com/palazzem/hanzo.git
-OUT_FOLDER=/root/.hanzo/
+ANSIBLE_FOLDER=$HOME/.local/bin
+OUT_FOLDER=/root/.hanzo
 
 # Helper functions
 
@@ -47,6 +46,14 @@ HANZO_FULLNAME=${HANZO_FULLNAME:-$(get_env "Provide your full name:")}; export H
 HANZO_USERNAME=${HANZO_USERNAME:-$(get_env "Provide your username:")}; export HANZO_USERNAME
 HANZO_EMAIL=${HANZO_EMAIL:-$(get_env "Provide your email:")}; export HANZO_EMAIL
 
+# Install dependencies
+echo "Installing dependencies..."
+pacman -Sy --noconfirm \
+  git \
+  tar \
+  python \
+  python-pip
+
 # Install/Update Hanzo unless a folder is specified
 if [[ -z "${HANZO_FOLDER}" ]]; then
     echo "Downloading/Updating Hanzo..."
@@ -58,24 +65,13 @@ fi
 
 cd "$OUT_FOLDER"
 
-# Install Ansible Portable if not available
-if [ ! -d "$OUT_FOLDER/$ANSIBLE_FOLDER" ]; then
-    echo "Installing Ansible Portable..."
-    pacman -Sy tar python --noconfirm
-    curl -L https://github.com/palazzem/ansible-portable/releases/download/$ANSIBLE_VERSION/ansible-$ANSIBLE_VERSION.tar.gz > /tmp/ansible.tar.gz
-    curl -L https://github.com/kewlfft/ansible-aur/archive/v0.24.tar.gz > /tmp/aur.tar.gz
-    tar -xf /tmp/ansible.tar.gz
-    tar -xf /tmp/aur.tar.gz -C /tmp
-    mkdir library
-    mv /tmp/ansible-aur-0.24/aur.py ./library
-    ln -s ansible $ANSIBLE_FOLDER/ansible-playbook
-else
-    echo "Ansible found in $OUT_FOLDER/$ANSIBLE_FOLDER, skipping installation..."
-fi
+# Install Ansible and configure collections
+pip install ansible-core --user
+$ANSIBLE_FOLDER/ansible-galaxy collection install -r requirements.yml
 
 # Orchestration
 echo "Starting Hanzo orchestration..."
-PYTHONPATH=$ANSIBLE_FOLDER python $ANSIBLE_FOLDER/ansible-playbook orchestrate.yml --connection=local --tags=$TAGS $EXTRA_ARGS
+$ANSIBLE_FOLDER/ansible-playbook orchestrate.yml --connection=local --tags=$TAGS $EXTRA_ARGS
 
 # Post-install script
 echo "Executing post-install steps..."
