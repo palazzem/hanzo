@@ -147,12 +147,10 @@ resource "docker_image" "main" {
 resource "docker_container" "workspace" {
   count = data.coder_workspace.dev.start_count
   image = docker_image.main.name
-  # Uses lower() to avoid Docker restriction on container names.
-  name = "coder-${data.coder_workspace.dev.owner}-${lower(data.coder_workspace.dev.name)}"
-  # Hostname makes the shell more user friendly: coder@my-workspace:~$
+  name = "coder-${data.coder_workspace.dev.id}-${lower(data.coder_workspace.dev.name)}"
   hostname = lower(data.coder_workspace.dev.name)
   dns      = ["1.1.1.1"]
-  # Use the docker gateway if the access URL is 127.0.0.1
+
   command = [
     "sh", "-c",
     <<EOT
@@ -160,17 +158,21 @@ resource "docker_container" "workspace" {
     ${replace(coder_agent.main.init_script, "/localhost|127\\.0\\.0\\.1/", "host.docker.internal")}
     EOT
   ]
+
   env = [
     "CODER_AGENT_TOKEN=${coder_agent.main.token}",
     "DOCKER_HOST=${docker_container.dind.name}:2375"
   ]
+
   networks_advanced {
     name = docker_network.private_network.name
   }
+
   host {
     host = "host.docker.internal"
     ip   = "host-gateway"
   }
+
   volumes {
     container_path = "/home/${data.coder_parameter.username.value}/"
     volume_name    = docker_volume.home_volume.name
