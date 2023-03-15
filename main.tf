@@ -63,7 +63,7 @@ resource "time_rotating" "rotation_hours" {
 
 # Workspace definition
 resource "docker_network" "private_network" {
-  name = "network-${data.coder_workspace.dev.id}"
+  name = "network-${data.coder_workspace.dev.id}-${data.coder_workspace.dev.name}"
 }
 
 # Note: using Docker-in-Docker is not recommended.
