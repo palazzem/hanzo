@@ -126,7 +126,7 @@ resource "docker_image" "main" {
   name = "coder-${data.coder_workspace.dev.id}"
 
   build {
-    path = "./build"
+    context  = "."
     no_cache = true
 
     # Hanzo configuration
