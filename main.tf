@@ -114,7 +114,12 @@ resource "coder_app" "code-server" {
 }
 
 resource "docker_volume" "home_volume" {
-  name = "coder-${data.coder_workspace.dev.owner}-${lower(data.coder_workspace.dev.name)}-home"
+  # Home folder persists until the workspace is deleted
+  name = "coder-${data.coder_workspace.dev.id}-home"
+
+  lifecycle {
+    ignore_changes = all
+  }
 }
 
 resource "docker_image" "main" {
