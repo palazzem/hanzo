@@ -87,10 +87,6 @@ resource "coder_agent" "main" {
   startup_script         = <<-EOT
     set -e
 
-    # Export DOCKER_HOST variable in Hanzo user
-    grep -qxF 'export DOCKER_HOST=${docker_container.dind.name}:2375' /home/${data.coder_parameter.username.value}/.zshenv \
-      || echo 'export DOCKER_HOST=${docker_container.dind.name}:2375' >> /home/${data.coder_parameter.username.value}/.zshenv
-
     # Install and start code-server
     curl -fsSL https://code-server.dev/install.sh | sh -s -- --method=standalone --prefix=/tmp/code-server --version 4.8.3
     EXTENSIONS_GALLERY='{"serviceUrl": "https://marketplace.visualstudio.com/_apis/public/gallery","cacheUrl": "https://vscode.blob.core.windows.net/gallery/index","itemUrl": "https://marketplace.visualstudio.com/items"}' /tmp/code-server/bin/code-server --auth none --port 13337 >/tmp/code-server.log 2>&1 &
