@@ -66,18 +66,6 @@ resource "docker_network" "private_network" {
   name = "network-${data.coder_workspace.dev.id}-${data.coder_workspace.dev.name}"
 }
 
-# Note: using Docker-in-Docker is not recommended.
-# Migrate to podman or Sysbox container runtime (see: https://coder.com/docs/v2/latest/templates/docker-in-docker)
-resource "docker_container" "dind" {
-  image      = "docker:dind"
-  privileged = true
-  name       = "sidecar-${data.coder_workspace.dev.id}"
-  entrypoint = ["dockerd", "-H", "tcp://0.0.0.0:2375"]
-  networks_advanced {
-    name = docker_network.private_network.name
-  }
-}
-
 resource "coder_agent" "main" {
   arch           = data.coder_provisioner.dev.arch
   os             = "linux"
@@ -158,7 +146,7 @@ resource "docker_container" "workspace" {
 
   env      = [
     "CODER_AGENT_TOKEN=${coder_agent.main.token}",
-    "DOCKER_HOST=${docker_container.dind.name}:2375"
+    "WORKSPACE_CONTAINER_ID=${docker_container.workspace.name}",
   ]
 
   networks_advanced {
@@ -171,8 +159,16 @@ resource "docker_container" "workspace" {
   }
 
   volumes {
+    # Home folder
     container_path = "/home/${data.coder_parameter.username.value}/"
     volume_name    = docker_volume.home_volume.name
     read_only      = false
+  }
+
+  volumes {
+    # Docker socket to run sibling containers
+    container_path = "/var/run/docker.sock"
+    host_path      = "/var/run/docker.sock"
+    read_only      = true
   }
 }
