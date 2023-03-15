@@ -57,7 +57,7 @@ data "coder_parameter" "email" {
 }
 
 # Used as a trigger to start a container rebuild
-resource "time_rotating" "time_trigger" {
+resource "time_rotating" "rotation_hours" {
   rotation_hours = data.coder_parameter.rotation_time.value
 }
 
@@ -131,10 +131,10 @@ resource "docker_image" "main" {
     }
   }
 
-  # Triggers a rebuild if the Dockerfile changes, or every day
+  # Triggers a rebuild if the Dockerfile changes, or based on configuration
   triggers = {
     dir_sha1 = sha1(join("", [for f in fileset(path.module, "build/*") : filesha1(f)]))
-    every_day = formatdate("YYYY-MM-DD", time_rotating.time_trigger.id)
+    time_rotation = time_rotating.rotation_hours.unix
   }
 }
 
