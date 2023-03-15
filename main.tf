@@ -27,10 +27,10 @@ data "coder_workspace" "dev" {
 
 # Template variables
 data "coder_parameter" "rotation_time" {
-  type = "number"
-  name = "Rotation time"
+  type        = "number"
+  name        = "Rotation time"
   description = "Hours before dispose the image and force a rebuild (default: 1 week)"
-  default = 168
+  default     = 168
 
   validation {
     min = 0
@@ -139,19 +139,20 @@ resource "docker_image" "main" {
 
   # Triggers a rebuild if the Dockerfile changes, or based on configuration
   triggers = {
-    dir_sha1 = sha1(join("", [for f in fileset(path.module, "build/*") : filesha1(f)]))
+    dir_sha1      = sha1(join("", [for f in fileset(path.module, "build/*") : filesha1(f)]))
     time_rotation = time_rotating.rotation_hours.unix
   }
 }
 
 resource "docker_container" "workspace" {
-  count = data.coder_workspace.dev.start_count
-  image = docker_image.main.name
-  name = "coder-${data.coder_workspace.dev.id}-${lower(data.coder_workspace.dev.name)}"
+  name     = "coder-${data.coder_workspace.dev.id}-${lower(data.coder_workspace.dev.name)}"
+  image    = docker_image.main.name
+
+  count    = data.coder_workspace.dev.start_count
   hostname = lower(data.coder_workspace.dev.name)
   dns      = ["1.1.1.1"]
 
-  command = [
+  command  = [
     "sh", "-c",
     <<EOT
     trap '[ $? -ne 0 ] && echo === Agent script exited with non-zero code. Sleeping infinitely to preserve logs... && sleep infinity' EXIT
@@ -159,7 +160,7 @@ resource "docker_container" "workspace" {
     EOT
   ]
 
-  env = [
+  env      = [
     "CODER_AGENT_TOKEN=${coder_agent.main.token}",
     "DOCKER_HOST=${docker_container.dind.name}:2375"
   ]
