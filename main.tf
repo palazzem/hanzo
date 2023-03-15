@@ -122,6 +122,7 @@ resource "docker_image" "main" {
 
   build {
     path = "./build"
+    no_cache = true
 
     # Hanzo configuration
     build_args = {
