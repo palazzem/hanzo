@@ -128,8 +128,12 @@ resource "docker_image" "main" {
   }
 }
 
+locals {
+  container_name = "coder-${data.coder_workspace.dev.id}-${lower(data.coder_workspace.dev.name)}"
+}
+
 resource "docker_container" "workspace" {
-  name     = "coder-${data.coder_workspace.dev.id}-${lower(data.coder_workspace.dev.name)}"
+  name     = "${local.container_name}"
   image    = docker_image.main.name
 
   count    = data.coder_workspace.dev.start_count
@@ -146,7 +150,7 @@ resource "docker_container" "workspace" {
 
   env      = [
     "CODER_AGENT_TOKEN=${coder_agent.main.token}",
-    "WORKSPACE_CONTAINER_ID=${docker_container.workspace.name}",
+    "WORKSPACE_CONTAINER_ID=${local.container_name}",
   ]
 
   networks_advanced {
