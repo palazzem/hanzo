@@ -19,10 +19,10 @@ provider "coder" {
 provider "docker" {
 }
 
-data "coder_provisioner" "me" {
+data "coder_provisioner" "dev" {
 }
 
-data "coder_workspace" "me" {
+data "coder_workspace" "dev" {
 }
 
 # Template variables
@@ -63,7 +63,7 @@ resource "time_rotating" "time_trigger" {
 
 # Workspace definition
 resource "docker_network" "private_network" {
-  name = "network-${data.coder_workspace.me.id}"
+  name = "network-${data.coder_workspace.dev.id}"
 }
 
 # Note: using Docker-in-Docker is not recommended.
@@ -71,7 +71,7 @@ resource "docker_network" "private_network" {
 resource "docker_container" "dind" {
   image      = "docker:dind"
   privileged = true
-  name       = "sidecar-${data.coder_workspace.me.id}"
+  name       = "sidecar-${data.coder_workspace.dev.id}"
   entrypoint = ["dockerd", "-H", "tcp://0.0.0.0:2375"]
   networks_advanced {
     name = docker_network.private_network.name
@@ -79,7 +79,7 @@ resource "docker_container" "dind" {
 }
 
 resource "coder_agent" "main" {
-  arch           = data.coder_provisioner.me.arch
+  arch           = data.coder_provisioner.dev.arch
   os             = "linux"
 
   login_before_ready     = false
@@ -114,11 +114,11 @@ resource "coder_app" "code-server" {
 }
 
 resource "docker_volume" "home_volume" {
-  name = "coder-${data.coder_workspace.me.owner}-${lower(data.coder_workspace.me.name)}-home"
+  name = "coder-${data.coder_workspace.dev.owner}-${lower(data.coder_workspace.dev.name)}-home"
 }
 
 resource "docker_image" "main" {
-  name = "coder-${data.coder_workspace.me.id}"
+  name = "coder-${data.coder_workspace.dev.id}"
 
   build {
     path = "./build"
@@ -139,12 +139,12 @@ resource "docker_image" "main" {
 }
 
 resource "docker_container" "workspace" {
-  count = data.coder_workspace.me.start_count
+  count = data.coder_workspace.dev.start_count
   image = docker_image.main.name
   # Uses lower() to avoid Docker restriction on container names.
-  name = "coder-${data.coder_workspace.me.owner}-${lower(data.coder_workspace.me.name)}"
+  name = "coder-${data.coder_workspace.dev.owner}-${lower(data.coder_workspace.dev.name)}"
   # Hostname makes the shell more user friendly: coder@my-workspace:~$
-  hostname = lower(data.coder_workspace.me.name)
+  hostname = lower(data.coder_workspace.dev.name)
   dns      = ["1.1.1.1"]
   # Use the docker gateway if the access URL is 127.0.0.1
   command = [
