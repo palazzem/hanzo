@@ -11,45 +11,48 @@ terraform {
   }
 }
 
-locals {
-  username = data.coder_workspace.me.owner
-  email = data.coder_workspace.me.owner_email
-}
-
-variable "rotation_time" {
+data "coder_parameter" "rotation_time" {
+  type = "number"
+  name = "Rotation time"
   description = "Hours before dispose the image and force a rebuild (default: 1 week)"
   default = 168
-  type = number
 
   validation {
-    condition = var.rotation_time > 0
-    error_message = "The value must be greater than 0."
+    min = 0
+    max = 336
   }
 }
 
-variable "hanzo_username" {
-  description = "Your username used to configure your Linux account"
-  type = string
+data "coder_parameter" "username" {
+  type        = "string"
+  name        = "Username"
+  description = "Used to create your user account within the devenv"
 }
 
-variable "hanzo_fullname" {
-  description = "Your full name used to configure Git"
-  type = string
+data "coder_parameter" "fullname" {
+  type        = "string"
+  name        = "Full name"
+  description = "Used in git commits"
 }
 
-variable "hanzo_email" {
-  description = "Your email used to configure Git"
-  type = string
+data "coder_parameter" "email" {
+  type        = "string"
+  name        = "Email"
+  description = "Used in git commits"
 }
 
 resource "time_rotating" "time_trigger" {
-  rotation_hours = var.rotation_time
+  rotation_hours = data.coder_parameter.rotation_time.value
 }
 
 data "coder_provisioner" "me" {
 }
 
 provider "docker" {
+}
+
+provider "coder" {
+  feature_use_managed_variables = "true"
 }
 
 data "coder_workspace" "me" {
@@ -79,8 +82,8 @@ resource "coder_agent" "main" {
     set -e
 
     # Export DOCKER_HOST variable in Hanzo user
-    grep -qxF 'export DOCKER_HOST=${docker_container.dind.name}:2375' /home/${var.hanzo_username}/.zshenv \
-      || echo 'export DOCKER_HOST=${docker_container.dind.name}:2375' >> /home/${var.hanzo_username}/.zshenv
+    grep -qxF 'export DOCKER_HOST=${docker_container.dind.name}:2375' /home/${data.coder_parameter.username.value}/.zshenv \
+      || echo 'export DOCKER_HOST=${docker_container.dind.name}:2375' >> /home/${data.coder_parameter.username.value}/.zshenv
 
     # Install and start code-server
     curl -fsSL https://code-server.dev/install.sh | sh -s -- --method=standalone --prefix=/tmp/code-server --version 4.8.3
@@ -92,7 +95,7 @@ resource "coder_app" "code-server" {
   agent_id     = coder_agent.main.id
   slug         = "code-server"
   display_name = "code-server"
-  url          = "http://localhost:13337/?folder=/home/${local.username}"
+  url          = "http://localhost:13337/?folder=/home/${data.coder_parameter.username.value}"
   icon         = "/icon/code.svg"
   subdomain    = false
   share        = "owner"
@@ -115,10 +118,10 @@ resource "docker_image" "main" {
     path = "./build"
 
     # Hanzo configuration
-    build_arg = {
-      HANZO_USERNAME : "${var.hanzo_username}"
-      HANZO_FULLNAME : "${var.hanzo_fullname}"
-      HANZO_EMAIL    : "${var.hanzo_email}"
+    build_args = {
+      HANZO_USERNAME : "${data.coder_parameter.username.value}"
+      HANZO_FULLNAME : "${data.coder_parameter.fullname.value}"
+      HANZO_EMAIL    : "${data.coder_parameter.email.value}"
     }
   }
 
@@ -157,7 +160,7 @@ resource "docker_container" "workspace" {
     ip   = "host-gateway"
   }
   volumes {
-    container_path = "/home/${var.hanzo_username}/"
+    container_path = "/home/${data.coder_parameter.username.value}/"
     volume_name    = docker_volume.home_volume.name
     read_only      = false
   }
