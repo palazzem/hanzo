@@ -13,27 +13,33 @@ terraform {
 
 locals {
   username = data.coder_workspace.me.owner
+  email = data.coder_workspace.me.owner_email
 }
 
 variable "rotation_time" {
-  description = "Number of hours before dispose the DevEnv Docker image"
-  sensitive = false
+  description = "Hours before dispose the image and force a rebuild (default: 1 week)"
+  default = 168
+  type = number
+
+  validation {
+    condition = var.rotation_time > 0
+    error_message = "The value must be greater than 0."
+  }
 }
 
 variable "hanzo_username" {
   description = "Your username used to configure your Linux account"
-  default = "coder"
-  sensitive = false
+  type = string
 }
 
 variable "hanzo_fullname" {
   description = "Your full name used to configure Git"
-  sensitive = false
+  type = string
 }
 
 variable "hanzo_email" {
-  description = "Your email used to configure Git "
-  sensitive = false
+  description = "Your email used to configure Git"
+  type = string
 }
 
 resource "time_rotating" "time_trigger" {
