@@ -11,6 +11,21 @@ terraform {
   }
 }
 
+# Providers configuration
+provider "coder" {
+  feature_use_managed_variables = "true"
+}
+
+provider "docker" {
+}
+
+data "coder_provisioner" "me" {
+}
+
+data "coder_workspace" "me" {
+}
+
+# Template variables
 data "coder_parameter" "rotation_time" {
   type = "number"
   name = "Rotation time"
@@ -41,27 +56,18 @@ data "coder_parameter" "email" {
   description = "Used in git commits"
 }
 
+# Used as a trigger to start a container rebuild
 resource "time_rotating" "time_trigger" {
   rotation_hours = data.coder_parameter.rotation_time.value
 }
 
-data "coder_provisioner" "me" {
-}
-
-provider "docker" {
-}
-
-provider "coder" {
-  feature_use_managed_variables = "true"
-}
-
-data "coder_workspace" "me" {
-}
-
+# Workspace definition
 resource "docker_network" "private_network" {
   name = "network-${data.coder_workspace.me.id}"
 }
 
+# Note: using Docker-in-Docker is not recommended.
+# Migrate to podman or Sysbox container runtime (see: https://coder.com/docs/v2/latest/templates/docker-in-docker)
 resource "docker_container" "dind" {
   image      = "docker:dind"
   privileged = true
