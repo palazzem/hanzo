@@ -17,10 +17,18 @@
   become: yes
   become_user: aur_builder
 
-- name: Installing Python tools
-  pip:
-    state: latest
+- name: Installing Python isolated environments (pipx)
+  ansible.builtin.pip:
+    state: install
     extra_args: --user
+    name:
+      - pipx
+  become: yes
+  become_user: "{{ username }}"
+
+- name: Installing Python tools
+  community.general.pipx:
+    state: install
     name:
       - ipython
       - pip-tools
