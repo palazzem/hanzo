@@ -55,7 +55,6 @@ ANSIBLE_FOLDER="$BUILD_FOLDER/ansible"
 echo "Installing dependencies..."
 pacman -Sy --noconfirm \
   git \
-  tar \
   python \
   python-pip
 
