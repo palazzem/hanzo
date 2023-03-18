@@ -3,7 +3,7 @@
 # Python
 
 - name: Installing Python
-  pacman:
+  community.general.pacman:
     state: latest
     name:
       - python
