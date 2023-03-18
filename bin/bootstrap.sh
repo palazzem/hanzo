@@ -70,12 +70,12 @@ fi
 cd "$HANZO_FOLDER"
 
 # Install Ansible and configure collections
-pip install ansible-core --user
-$ANSIBLE_FOLDER/ansible-galaxy collection install -r requirements.yml
+pip install ansible-core --target $ANSIBLE_FOLDER --progress-bar off
+PYTHONPATH=$ANSIBLE_FOLDER $ANSIBLE_FOLDER/bin/ansible-galaxy collection install -r requirements.yml
 
 # Orchestration
 echo "Starting Hanzo orchestration..."
-$ANSIBLE_FOLDER/ansible-playbook orchestrate.yml --connection=local --tags=$TAGS $EXTRA_ARGS
+PYTHONPATH=$ANSIBLE_FOLDER $ANSIBLE_FOLDER/bin/ansible-playbook orchestrate.yml --connection=local --inventory inventory.yml --tags=$TAGS $EXTRA_ARGS
 
 # Post-install script
 echo "Executing post-install steps..."
