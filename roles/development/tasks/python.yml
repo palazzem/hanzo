@@ -3,7 +3,7 @@
 # Python
 
 - name: Installing Python
-  pacman:
+  community.general.pacman:
     state: latest
     name:
       - python
@@ -17,13 +17,25 @@
   become: yes
   become_user: aur_builder
 
-- name: Installing Python tools
-  pip:
+- name: Installing Python isolated environments (pipx)
+  ansible.builtin.pip:
     state: latest
     extra_args: --user
     name:
-      - ipython
-      - pip-tools
-      - virtualenvwrapper
+      - pipx
+  become: yes
+  become_user: "{{ username }}"
+
+- name: Installing Python tools - ipython
+  community.general.pipx:
+    state: install
+    name: ipython
+  become: yes
+  become_user: "{{ username }}"
+
+- name: Installing Python tools - Poetry
+  community.general.pipx:
+    state: install
+    name: poetry
   become: yes
   become_user: "{{ username }}"
