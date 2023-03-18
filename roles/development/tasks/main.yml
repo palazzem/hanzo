@@ -15,8 +15,8 @@
   template: src=gitconfig.j2 dest="/home/{{username}}/.gitconfig" owner={{username}} group={{username}} mode=0644
 
 # Supported Languages
-- include: go.yml
-- include: java.yml
-- include: javascript.yml
-- include: python.yml
-- include: ruby.yml
+- ansible.builtin.include_tasks: go.yml
+- ansible.builtin.include_tasks: java.yml
+- ansible.builtin.include_tasks: javascript.yml
+- ansible.builtin.include_tasks: python.yml
+- ansible.builtin.include_tasks: ruby.yml
