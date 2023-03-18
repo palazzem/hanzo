@@ -31,8 +31,6 @@
     state: install
     name:
       - ipython
-      - pip-tools
-      - virtualenvwrapper
       - poetry
   become: yes
   become_user: "{{ username }}"
