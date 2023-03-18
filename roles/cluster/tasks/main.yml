@@ -2,4 +2,4 @@
 
 # Cluster management tools
 
-- include: gcloud.yml
+- ansible.builtin.include_tasks: gcloud.yml

@@ -2,6 +2,6 @@
 
 # Code Editors
 
-- include: neovim.yml
-- include: emacs.yml
-- include: code.yml
+- ansible.builtin.include_tasks: neovim.yml
+- ansible.builtin.include_tasks: emacs.yml
+- ansible.builtin.include_tasks: code.yml
