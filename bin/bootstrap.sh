@@ -29,13 +29,7 @@
 
 set -e
 
-# Variables
-REPOSITORY=https://github.com/palazzem/hanzo.git
-ANSIBLE_FOLDER=$HOME/.local/bin
-OUT_FOLDER=/root/.hanzo
-
 # Helper functions
-
 function get_env() {
     read -p "$1 " retval
     echo $retval
@@ -46,6 +40,17 @@ HANZO_FULLNAME=${HANZO_FULLNAME:-$(get_env "Provide your full name:")}; export H
 HANZO_USERNAME=${HANZO_USERNAME:-$(get_env "Provide your username:")}; export HANZO_USERNAME
 HANZO_EMAIL=${HANZO_EMAIL:-$(get_env "Provide your email:")}; export HANZO_EMAIL
 
+# Prepare the build folder where dependencies and Hanzo are downloaded.
+# Permissions are set to 666 as nothing is sensitive in the folder and
+# Hanzo needs broader permissions when `become_user` is used.
+BUILD_FOLDER=$(mktemp -d); export BUILD_FOLDER
+chmod 666 -R $BUILD_FOLDER
+echo "Using BUILD_FOLDER: $BUILD_FOLDER"
+
+# Variables
+REPOSITORY="https://github.com/palazzem/hanzo.git"
+ANSIBLE_FOLDER="$BUILD_FOLDER/ansible"
+
 # Install dependencies
 echo "Installing dependencies..."
 pacman -Sy --noconfirm \
@@ -55,15 +60,15 @@ pacman -Sy --noconfirm \
   python-pip
 
 # Install/Update Hanzo unless a folder is specified
-if [[ -z "${HANZO_FOLDER}" ]]; then
+if [[ -z "$HANZO_FOLDER" ]]; then
     echo "Downloading/Updating Hanzo..."
-    git clone "$REPOSITORY" "$OUT_FOLDER" 2> /dev/null || (cd "$OUT_FOLDER" ; git pull)
+    HANZO_FOLDER="$BUILD_FOLDER/hanzo"
+    git clone "$REPOSITORY" "$HANZO_FOLDER" 2> /dev/null || (cd "$HANZO_FOLDER" ; git pull)
 else
     echo "HANZO_FOLDER specified, skipping checkout..."
-    OUT_FOLDER=$HANZO_FOLDER
 fi
 
-cd "$OUT_FOLDER"
+cd "$HANZO_FOLDER"
 
 # Install Ansible and configure collections
 pip install ansible-core --user

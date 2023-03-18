@@ -6,6 +6,7 @@
   name: Hanzo Lookup
   vars:
     ansible_python_interpreter: /usr/bin/python3
+    ansible_remote_tmp: "{{ lookup('env', 'ANSIBLE_FOLDER') }}/tmp"
   tags: always
   tasks:
     - name: Configure the environment
@@ -26,6 +27,7 @@
   name: Archlinux/toolbox
   vars:
     ansible_python_interpreter: /usr/bin/python3
+    ansible_remote_tmp: "{{ lookup('env', 'ANSIBLE_FOLDER') }}/tmp"
   tags: always
   become: yes
   tasks:
