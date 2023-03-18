@@ -4,6 +4,8 @@
 
 - hosts: localhost
   name: Hanzo Lookup
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
   tags: always
   tasks:
     - name: Configure the environment
@@ -22,6 +24,8 @@
 
 - hosts: localhost
   name: Archlinux/toolbox
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
   tags: always
   become: yes
   tasks:
