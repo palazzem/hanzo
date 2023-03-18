@@ -19,7 +19,7 @@
 
 - name: Installing Python isolated environments (pipx)
   ansible.builtin.pip:
-    state: install
+    state: latest
     extra_args: --user
     name:
       - pipx
