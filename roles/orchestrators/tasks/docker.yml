@@ -11,3 +11,11 @@
 
 - name: Adding default user to docker group
   user: name={{username}} groups=docker append=yes
+
+- name: Helper script to join sibling Docker containers network
+  ansible.builtin.copy:
+    src: container-network.sh
+    dest: /usr/bin/container-network
+    owner: root
+    group: root
+    mode: '0755'
