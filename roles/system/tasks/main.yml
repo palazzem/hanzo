@@ -69,3 +69,13 @@
     dest: /etc/pacman.conf
     regexp: "^#Color"
     replace: "Color"
+
+- name: Detect tty file path
+  shell: tty
+  register: tty_path
+
+- name: Change ownership of tty device
+  file:
+    path: "{{ tty_path.stdout }}"
+    owner: "{{username}}"
+    group: "tty"
