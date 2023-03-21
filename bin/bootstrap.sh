@@ -80,3 +80,14 @@ PYTHONPATH=$ANSIBLE_FOLDER $ANSIBLE_FOLDER/bin/ansible-playbook orchestrate.yml 
 # Post-install script
 echo "Executing post-install steps..."
 chsh -s /bin/zsh $HANZO_USERNAME
+
+# Clean-up: remove temporary folders and cache
+echo "Clean-up temporary folders..."
+rm -rf \
+    $HANZO_FOLDER \
+    $BUILD_FOLDER \
+    /root/.ansible \
+    /root/.cache
+find /var/cache/pacman/ -type f -delete
+
+echo "Setup completed!"
