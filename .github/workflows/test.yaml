@@ -11,18 +11,12 @@ jobs:
   arch-linux:
     runs-on: ubuntu-latest
 
-    container:
-      image: archlinux:base-devel
-
     steps:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Run Hanzo
-        env:
-          EXTRA_ARGS: '--verbose'
-          HANZO_FULLNAME: 'test'
-          HANZO_USERNAME: 'test'
-          HANZO_EMAIL: 'test@example.com'
-          HANZO_FOLDER: '.'
-        run: bash bin/bootstrap.sh
+      - name: Build Arch Linux container with Hanzo
+        run: docker build . -t hanzo:test
+              --build-arg HANZO_FULLNAME=test
+              --build-arg HANZO_USERNAME=test
+              --build-arg HANZO_EMAIL=test@example.com
