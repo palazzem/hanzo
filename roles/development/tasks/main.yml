@@ -5,8 +5,6 @@
   pacman:
     state: latest
     name:
-      - clang
-      - cmake
       - gdb
       - git
       - jq
