@@ -7,5 +7,3 @@
     state: latest
     name:
       - jdk-openjdk
-      - maven
-      - apache-ant
