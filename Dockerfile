@@ -7,9 +7,8 @@ ARG HANZO_FULLNAME
 ARG HANZO_USERNAME
 ARG HANZO_EMAIL
 
-# Push the repository in Hanzo default folder
+# Copy development build
 COPY . /root/.hanzo
-WORKDIR /root/.hanzo
 
 # Provisioning at build time
-RUN bash bin/bootstrap.sh
+RUN sh $HANZO_FOLDER/bin/bootstrap.sh
