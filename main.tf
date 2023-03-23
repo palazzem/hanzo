@@ -56,6 +56,12 @@ data "coder_parameter" "email" {
   description = "Used in git commits"
 }
 
+data "coder_parameter" "docker_gid" {
+  type        = "string"
+  name        = "Docker GID"
+  description = "Change Docker GID so it matches the same as the host"
+}
+
 # Used as a trigger to start a container rebuild
 resource "time_rotating" "rotation_hours" {
   rotation_hours = data.coder_parameter.rotation_time.value
@@ -118,6 +124,7 @@ resource "docker_image" "main" {
       HANZO_USERNAME : "${data.coder_parameter.username.value}"
       HANZO_FULLNAME : "${data.coder_parameter.fullname.value}"
       HANZO_EMAIL    : "${data.coder_parameter.email.value}"
+      DOCKER_GID     : "${data.coder_parameter.docker_gid.value}"
     }
   }
 
