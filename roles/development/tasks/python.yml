@@ -32,10 +32,3 @@
     name: ipython
   become: yes
   become_user: "{{ username }}"
-
-- name: Installing Python tools - Poetry
-  community.general.pipx:
-    state: install
-    name: poetry
-  become: yes
-  become_user: "{{ username }}"
