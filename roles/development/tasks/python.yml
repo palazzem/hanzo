@@ -32,3 +32,10 @@
     name: ipython
   become: yes
   become_user: "{{ username }}"
+
+- name: Installing Python tools - hatch
+  community.general.pipx:
+    state: install
+    name: hatch
+  become: yes
+  become_user: "{{ username }}"
