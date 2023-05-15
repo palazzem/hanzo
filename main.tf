@@ -135,6 +135,7 @@ locals {
 resource "docker_container" "workspace" {
   name     = "${local.container_name}"
   image    = docker_image.main.name
+  runtime  = "sysbox-runc"
 
   count    = data.coder_workspace.dev.start_count
   hostname = lower(data.coder_workspace.dev.name)
@@ -143,6 +144,9 @@ resource "docker_container" "workspace" {
   command  = [
     "sh", "-c",
     <<EOT
+    # Start Docker daemon (sysbox runtime)
+    sudo dockerd & > /dev/null
+
     trap '[ $? -ne 0 ] && echo === Agent script exited with non-zero code. Sleeping infinitely to preserve logs... && sleep infinity' EXIT
     ${replace(coder_agent.main.init_script, "/localhost|127\\.0\\.0\\.1/", "host.docker.internal")}
     EOT
@@ -167,12 +171,5 @@ resource "docker_container" "workspace" {
     container_path = "/home/${data.coder_parameter.username.value}/"
     volume_name    = docker_volume.home_volume.name
     read_only      = false
-  }
-
-  volumes {
-    # Docker socket to run sibling containers
-    container_path = "/var/run/docker.sock"
-    host_path      = "/var/run/docker.sock"
-    read_only      = true
   }
 }
