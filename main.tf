@@ -154,7 +154,6 @@ resource "docker_container" "workspace" {
 
   env      = [
     "CODER_AGENT_TOKEN=${coder_agent.main.token}",
-    "WORKSPACE_CONTAINER_ID=${local.container_name}",
   ]
 
   networks_advanced {
