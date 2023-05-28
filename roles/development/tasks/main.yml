@@ -5,6 +5,7 @@
   pacman:
     state: latest
     name:
+      - direnv
       - gdb
       - git
       - jq
