@@ -5,10 +5,10 @@
   pacman:
     state: latest
     name:
-      - direnv
       - gdb
       - git
       - jq
+      - postgresql-libs
       - sqlite
       - yq
 
