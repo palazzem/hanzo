@@ -8,6 +8,7 @@
       - gdb
       - git
       - jq
+      - postgresql-libs
       - sqlite
       - yq
 
