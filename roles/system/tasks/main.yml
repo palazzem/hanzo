@@ -9,6 +9,7 @@
       - curl
       - dnsutils
       - dosfstools
+      - ffmpeg
       - fzf
       - git
       - htop
