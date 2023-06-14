@@ -8,6 +8,7 @@
     name:
       - python
       - python-pip
+      - python-pipx
       - python-setuptools
 
 - name: Installing 'pyenv'
@@ -16,15 +17,6 @@
     name: pyenv
   become: yes
   become_user: aur_builder
-
-- name: Installing Python isolated environments (pipx)
-  ansible.builtin.pip:
-    state: latest
-    extra_args: --user
-    name:
-      - pipx
-  become: yes
-  become_user: "{{ username }}"
 
 - name: Installing Python tools - ipython
   community.general.pipx:
