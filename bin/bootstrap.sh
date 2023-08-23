@@ -51,6 +51,10 @@ echo "Using BUILD_FOLDER: $BUILD_FOLDER"
 REPOSITORY="https://github.com/palazzem/hanzo.git"
 ANSIBLE_FOLDER="$BUILD_FOLDER/ansible"
 
+# System update
+echo "Updating system Arch Linux..."
+pacman -Syu --noconfirm
+
 # Install dependencies
 echo "Installing dependencies..."
 pacman -Sy --noconfirm \
