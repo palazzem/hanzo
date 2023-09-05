@@ -8,6 +8,7 @@
     name:
       - docker
       - docker-compose
+      - docker-buildx
 
 - name: Adding default user to docker group
   user: name={{username}} groups=docker append=yes
