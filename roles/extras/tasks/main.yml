@@ -7,4 +7,4 @@
     state: latest
     name:
       - transmission-cli
-      - youtube-dl
+      - yt-dlp
