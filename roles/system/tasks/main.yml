@@ -15,6 +15,7 @@
       - htop
       - httpie
       - iputils
+      - less
       - mlocate
       - mono
       - ntfsprogs
