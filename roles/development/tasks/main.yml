@@ -21,3 +21,4 @@
 - ansible.builtin.include_tasks: javascript.yml
 - ansible.builtin.include_tasks: python.yml
 - ansible.builtin.include_tasks: ruby.yml
+- ansible.builtin.include_tasks: validators.yml
