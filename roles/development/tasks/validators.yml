@@ -1,0 +1,20 @@
+---
+
+# Validation tools
+- name: Install pre-commit
+  community.general.pipx:
+    name: pre-commit
+
+- name: Install validation tools [1/2]
+  community.general.pipx:
+    name: checkov
+
+- name: Install validation tools [2/2]
+  become: yes
+  become_user: aur_builder
+  kewlfft.aur.aur:
+    use: yay
+    name:
+      - tflint
+      - tfsec
+      - terrascan
