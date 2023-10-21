@@ -1,20 +1,40 @@
 ---
 
-# Validation tools
+# Validators
 - name: Install pre-commit
   community.general.pipx:
+    state: install
     name: pre-commit
+  become: yes
+  become_user: "{{ username }}"
 
-- name: Install validation tools [1/2]
+- name: Install checkov validator
   community.general.pipx:
+    state: install
     name: checkov
+  become: yes
+  become_user: "{{ username }}"
 
-- name: Install validation tools [2/2]
+- name: Install tflint validator
   become: yes
   become_user: aur_builder
   kewlfft.aur.aur:
     use: yay
     name:
       - tflint
+
+- name: Install tfsec validator
+  become: yes
+  become_user: aur_builder
+  kewlfft.aur.aur:
+    use: yay
+    name:
       - tfsec
+
+- name: Install terrascan validator
+  become: yes
+  become_user: aur_builder
+  kewlfft.aur.aur:
+    use: yay
+    name:
       - terrascan
