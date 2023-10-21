@@ -38,3 +38,7 @@
     use: yay
     name:
       - terrascan
+- name: Install tfupdate validator
+  ansible.builtin.shell: go install github.com/minamijoyo/tfupdate@latest
+  become: yes
+  become_user: "{{ username }}"
