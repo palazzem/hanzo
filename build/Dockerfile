@@ -1,4 +1,6 @@
-FROM archlinux:base-devel
+ARG PLATFORM=amd64
+
+FROM --platform=${PLATFORM} archlinux:base-devel
 
 # Build environment settings
 ARG HANZO_USERNAME
