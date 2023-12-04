@@ -1,0 +1,22 @@
+{
+    // Workspaces are mounted into the home folder
+    "workspaceFolder": "/etc/hanzo",
+    "containerEnv": {
+        "DEV_CONTAINER": "1"
+    },
+    "build": {
+        // Build the container using hanzo.sh
+        "dockerfile": "../templates/hanzo/build/Dockerfile",
+        "args": {
+            "HANZO_USERNAME": "${localEnv:HANZO_USERNAME}",
+            "HANZO_FULLNAME": "${localEnv:HANZO_FULLNAME}",
+            "HANZO_EMAIL": "${localEnv:HANZO_EMAIL}"
+        }
+    },
+    "mounts": [
+        // Mount Docker socket from the VM into the container
+        // Mount a home directory to persist data
+        "source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind",
+        "source=devpod_home,target=/home,type=volume"
+    ]
+}
