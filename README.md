@@ -1,14 +1,13 @@
----
-name: Develop in Docker
-description: Run workspaces on a Docker host using registry images
-tags: [local, docker]
----
+# coder-config
 
-# Docker Coder Template
+`coder-config` is a Terraform config that provisions a developer machine using [Hanzo](http://hanzo.sh/) and [Coder](https://coder.com/).
 
-Base template that leverages [Hanzo](http://hanzo.sh) to build a Docker container ready
-for development.
+## Requirements
 
-## Configuration
+- Docker
+- [Coder CLI](https://github.com/coder/coder#install)
+- A running Coder deployment (check [Usage section](#usage))
+
+## Usage
 
 TBD
