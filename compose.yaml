@@ -1,0 +1,43 @@
+version: "3.9"
+services:
+  coder:
+    image: ghcr.io/coder/coder:${CODER_VERSION}
+    ports:
+      - "7080:7080"
+    environment:
+      CODER_PG_CONNECTION_URL: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@database/${POSTGRES_DB:-coder}?sslmode=disable"
+      CODER_HTTP_ADDRESS: "0.0.0.0:7080"
+      CODER_ACCESS_URL: "${CODER_ACCESS_URL}"
+      CODER_OAUTH2_GITHUB_ALLOW_SIGNUPS: "${CODER_OAUTH2_GITHUB_ALLOW_SIGNUPS}"
+      CODER_OAUTH2_GITHUB_ALLOWED_ORGS: "${CODER_OAUTH2_GITHUB_ALLOWED_ORGS}"
+      CODER_OAUTH2_GITHUB_CLIENT_ID: "${CODER_OAUTH2_GITHUB_CLIENT_ID}"
+      CODER_OAUTH2_GITHUB_CLIENT_SECRET: "${CODER_OAUTH2_GITHUB_CLIENT_SECRET}"
+      CODER_DISABLE_PASSWORD_AUTH: "${CODER_DISABLE_PASSWORD_AUTH}"
+    group_add:
+      - "999"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      database:
+        condition: service_healthy
+  database:
+    image: "postgres:${POSTGRES_VERSION}"
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - data_coder_pgsql_16:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+volumes:
+  data_coder_pgsql_16:
