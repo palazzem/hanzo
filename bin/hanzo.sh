@@ -3,9 +3,9 @@
 # Configuration
 URL=
 WORKSPACE_NAME="hanzo"
-HANZO_FULLNAME=
-HANZO_USERNAME=
-HANZO_EMAIL=
+export HANZO_FULLNAME=
+export HANZO_USERNAME=
+export HANZO_EMAIL=
 
 case "$1" in
     up)
