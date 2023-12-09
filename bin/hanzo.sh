@@ -23,8 +23,7 @@ case "$1" in
     update)
         echo "Running hanzo update..."
         devpod stop $WORKSPACE_NAME
-        devpod delete coder-config
-        docker rmi $(docker images | grep "coder-config" | awk '{print $3}')
+        devpod up --recreate --id $WORKSPACE_NAME $URL
         ;;
     destroy)
         echo "Running hanzo destroy..."
