@@ -1,8 +1,10 @@
 #!/bin/bash
 
-# Configuration
-URL=
+# Settings
+URL="https://github.com/palazzem/coder-config/"
 WORKSPACE_NAME="hanzo"
+
+# Configuration: update this section
 export HANZO_FULLNAME=
 export HANZO_USERNAME=
 export HANZO_EMAIL=
