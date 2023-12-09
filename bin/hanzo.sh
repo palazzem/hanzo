@@ -8,10 +8,13 @@ export HANZO_USERNAME=
 export HANZO_EMAIL=
 
 case "$1" in
+    ssh)
+        echo "Running hanzo ssh..."
+        devpod ssh --gpg-agent-forwarding --agent-forwarding $WORKSPACE_NAME
+        ;;
     up)
         echo "Running hanzo up..."
         devpod up --id $WORKSPACE_NAME $URL
-        devpod ssh --gpg-agent-forwarding --agent-forwarding $WORKSPACE_NAME
         ;;
     down)
         echo "Running hanzo down..."
@@ -29,6 +32,6 @@ case "$1" in
         docker rmi $(docker images | grep "$WORKSPACE_NAME" | awk '{print $3}')
         ;;
     *)
-        echo "Usage: hanzo {up|down|update|destroy}"
+        echo "Usage: hanzo {ssh|up|down|update|destroy}"
         exit 1
 esac
