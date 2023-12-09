@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# Configuration Variables
-WORKSPACE_NAME="hanzo"
+# Configuration
 URL=
+WORKSPACE_NAME="hanzo"
 HANZO_FULLNAME=
 HANZO_USERNAME=
 HANZO_EMAIL=
