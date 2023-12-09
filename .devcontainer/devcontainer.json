@@ -17,6 +17,6 @@
         // Mount Docker socket from the VM into the container
         // Mount a home directory to persist data
         "source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind",
-        "source=devpod_home,target=/home,type=volume"
+        "source=workspaces,target=/home/${localEnv:HANZO_USERNAME}/workspaces,type=volume"
     ]
 }
