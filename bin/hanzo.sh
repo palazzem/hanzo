@@ -30,7 +30,6 @@ case "$1" in
     destroy)
         echo "Running hanzo destroy..."
         devpod delete $WORKSPACE_NAME
-        docker rmi $(docker images | grep "$WORKSPACE_NAME" | awk '{print $3}')
         ;;
     *)
         echo "Usage: hanzo {ssh|up|down|update|destroy}"
