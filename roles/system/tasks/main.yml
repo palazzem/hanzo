@@ -5,7 +5,6 @@
   pacman:
     state: latest
     name:
-      - archey3
       - curl
       - dnsutils
       - dosfstools
@@ -18,6 +17,7 @@
       - less
       - mlocate
       - mono
+      - neofetch
       - ntfsprogs
       - ntp
       - openssh
