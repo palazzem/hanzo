@@ -13,6 +13,7 @@
             "HANZO_EMAIL": "${localEnv:HANZO_EMAIL}"
         }
     },
+    "runArgs": ["--net=host"],
     "mounts": [
         // Mount Docker socket from the VM into the container
         // Mount a home directory to persist data
