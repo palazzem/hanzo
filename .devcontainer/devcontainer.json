@@ -1,6 +1,6 @@
 {
     // Workspaces are mounted into the home folder
-    "workspaceFolder": "~",
+    "workspaceFolder": "/home/${localEnv:HANZO_USERNAME}",
     "containerEnv": {
         "DEV_CONTAINER": "1"
     },
