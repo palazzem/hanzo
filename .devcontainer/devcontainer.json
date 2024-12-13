@@ -1,6 +1,6 @@
 {
     // Workspaces are mounted into the home folder
-    "workspaceFolder": "/etc/hanzo",
+    "workspaceFolder": "~",
     "containerEnv": {
         "DEV_CONTAINER": "1"
     },
