@@ -1,16 +1,15 @@
 ---
-
 # Development configuration
 - name: Installing common development tools
   pacman:
-    state: latest
-    name:
-      - gdb
-      - git
-      - jq
-      - postgresql-libs
-      - sqlite
-      - yq
+      state: latest
+      name:
+          - gdb
+          - git
+          - jq
+          - postgresql-libs
+          - sqlite
+          - yq
 
 - name: Configuring .gitconfig
   template: src=gitconfig.j2 dest="/home/{{username}}/.gitconfig" owner={{username}} group={{username}} mode=0644
@@ -21,4 +20,5 @@
 - ansible.builtin.include_tasks: javascript.yml
 - ansible.builtin.include_tasks: python.yml
 - ansible.builtin.include_tasks: ruby.yml
+- ansible.builtin.include_tasks: rust.yml
 - ansible.builtin.include_tasks: validators.yml
