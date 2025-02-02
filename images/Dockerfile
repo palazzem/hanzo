@@ -63,14 +63,6 @@ RUN useradd -m -G wheel "${HANZO_USERNAME}" && \
     # Set locale
     echo "LANG=en_US.UTF-8" > /etc/locale.conf
 
-# Shell setup
-# Equivalent to 'shell' role
-# TODO: Add shell configurations and utilities
-
-# Security tools and configurations
-# Equivalent to 'security' role
-# TODO: Add security-related packages and configs
-
 # Development tools and languages
 # Equivalent to 'development' role
 RUN dnf install -y \
