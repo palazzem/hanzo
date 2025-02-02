@@ -130,7 +130,12 @@ RUN dnf install -y dnf-plugins-core && \
 
 # Cluster management tools
 # Equivalent to 'cluster' role
-# TODO: Add cluster management tools
+RUN su - ${HANZO_USERNAME} -c "\
+    mkdir -p /home/${HANZO_USERNAME}/.local/share && \
+    curl -o /tmp/gcloud_installer.sh https://sdk.cloud.google.com && \
+    bash /tmp/gcloud_installer.sh --disable-prompts \
+        --install-dir=/home/${HANZO_USERNAME}/.local/share/google-cloud-sdk && \
+    rm /tmp/gcloud_installer.sh"
 
 # Additional utilities
 # Equivalent to 'extras' role
