@@ -121,7 +121,12 @@ RUN dnf -y install dnf-plugins-core && \
 
 # Infrastructure provisioning tools
 # Equivalent to 'provisioning' role
-# TODO: Add infrastructure tools
+RUN dnf install -y dnf-plugins-core && \
+    dnf config-manager addrepo --from-repofile=https://rpm.releases.hashicorp.com/fedora/hashicorp.repo && \
+    dnf install -y \
+    terraform \
+    packer \
+    && dnf clean all
 
 # Cluster management tools
 # Equivalent to 'cluster' role
