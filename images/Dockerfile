@@ -91,6 +91,7 @@ RUN useradd -m -G wheel "${HANZO_USERNAME}" && \
 
 # Development tools and configurations that require user context
 RUN su - ${HANZO_USERNAME} -c "\
+        curl -fsSL https://pyenv.run | bash && \
         mkdir -p /home/${HANZO_USERNAME}/programs/go/bin && \
         GOPATH=/home/${HANZO_USERNAME}/programs/go go install github.com/minamijoyo/tfupdate@latest && \
         pipx install ipython && \
