@@ -31,15 +31,17 @@ RUN dnf install -y \
 # Equivalent to 'system' role
 RUN dnf install -y \
     bind-utils \
+    chrony \
     dosfstools \
     ffmpeg \
     fzf \
+    gettext \
+    glibc-langpack-en \
     htop \
     httpie \
     iputils \
     mono-core \
     ntfs-3g \
-    chrony \
     openssl \
     p7zip \
     p7zip-plugins \
@@ -50,7 +52,6 @@ RUN dnf install -y \
     wget \
     which \
     whois \
-    glibc-langpack-en \
     && dnf clean all
 
 # User and directory setup
