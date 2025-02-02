@@ -11,10 +11,13 @@ RUN [ -n "$HANZO_USERNAME" ] || (echo "HANZO_USERNAME not set" && false) && \
     [ -n "$HANZO_EMAIL" ] || (echo "HANZO_EMAIL not set" && false)
 
 # Base system configuration
-# Equivalent to 'base' role
+# Equivalent to 'base' role from Ansible
 RUN dnf update -y && \
+    dnf group install -y development-tools && \
     dnf install -y \
     sudo \
+    kernel-devel \
+    kernel-headers \
     && dnf clean all
 
 # System configuration
