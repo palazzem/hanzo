@@ -100,7 +100,11 @@ RUN dnf install -y \
 
 # Code editors and IDE tools
 # Equivalent to 'editors' role
-# TODO: Add editor packages and configurations
+RUN dnf install -y \
+    neovim \
+    emacs \
+    && dnf clean all \
+    && su - ${HANZO_USERNAME} -c "git clone https://github.com/syl20bnr/spacemacs /home/${HANZO_USERNAME}/.emacs.d"
 
 # Container orchestration tools
 # Equivalent to 'orchestrators' role
