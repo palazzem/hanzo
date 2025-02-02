@@ -66,6 +66,7 @@ RUN dnf group install -y development-tools && \
     rust \
     cargo \
     speedtest-cli \
+    fastfetch \
     sqlite \
     sudo \
     terraform \
