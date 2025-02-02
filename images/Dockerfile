@@ -20,9 +20,47 @@ RUN dnf update -y && \
     kernel-headers \
     && dnf clean all
 
+# Enable RPM Fusion repositories
+# Equivalent to 'aur' role from Ansible
+RUN dnf install -y \
+    https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm \
+    https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm \
+    && dnf clean all
+
 # System configuration
 # Equivalent to 'system' role
-# TODO: Add system-level configurations
+RUN dnf install -y \
+    bind-utils \
+    dosfstools \
+    ffmpeg \
+    fzf \
+    htop \
+    httpie \
+    iputils \
+    mono-core \
+    ntfs-3g \
+    chrony \
+    openssl \
+    p7zip \
+    p7zip-plugins \
+    plocate \
+    speedtest-cli \
+    tree \
+    unrar \
+    wget \
+    which \
+    whois \
+    glibc-langpack-en \
+    && dnf clean all
+
+# User and directory setup
+RUN useradd -m -G wheel "${HANZO_USERNAME}" && \
+    mkdir -p "/home/${HANZO_USERNAME}/programs" && \
+    mkdir -p "/home/${HANZO_USERNAME}/workspaces" && \
+    chown -R "${HANZO_USERNAME}:${HANZO_USERNAME}" "/home/${HANZO_USERNAME}" && \
+    echo '%wheel ALL=(ALL:ALL) NOPASSWD: ALL' >> /etc/sudoers && \
+    # Set locale
+    echo "LANG=en_US.UTF-8" > /etc/locale.conf
 
 # Shell setup
 # Equivalent to 'shell' role
