@@ -1,6 +1,6 @@
 {
     "name": "Fedora DevBox",
-    "workspaceFolder": "/workspaces",
+    "workspaceFolder": "/home/${localEnv:HANZO_USERNAME}",
     "containerEnv": {
         "DEV_CONTAINER": "1",
         "LANG": "en_US.UTF-8",
