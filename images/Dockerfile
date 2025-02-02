@@ -139,7 +139,10 @@ RUN su - ${HANZO_USERNAME} -c "\
 
 # Additional utilities
 # Equivalent to 'extras' role
-# TODO: Add extra utilities
+RUN dnf install -y \
+    transmission-cli \
+    yt-dlp \
+    && dnf clean all
 
 # User dotfiles configuration
 # Equivalent to 'dotfiles' role
