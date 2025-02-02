@@ -146,12 +146,20 @@ RUN dnf install -y \
 
 # User dotfiles configuration
 # Equivalent to 'dotfiles' role
-# TODO: Add dotfiles setup
+RUN su - ${HANZO_USERNAME} -c "\
+    git clone https://github.com/palazzem/dotfiles.git /home/${HANZO_USERNAME}/.dotfiles && \
+    rm -f /home/${HANZO_USERNAME}/.zshrc \
+         /home/${HANZO_USERNAME}/.zshenv \
+         /home/${HANZO_USERNAME}/.spacemacs && \
+    ln -s /home/${HANZO_USERNAME}/.dotfiles/zshrc /home/${HANZO_USERNAME}/.zshrc && \
+    ln -s /home/${HANZO_USERNAME}/.dotfiles/zshenv /home/${HANZO_USERNAME}/.zshenv && \
+    ln -s /home/${HANZO_USERNAME}/.dotfiles/spacemacs /home/${HANZO_USERNAME}/.spacemacs"
 
-# Cleanup
-# Equivalent to 'cleanup' role
-RUN dnf clean all && \
-    rm -rf /var/cache/dnf
+# Copy and configure git template
+COPY templates/.gitconfig /tmp/.gitconfig.template
+RUN envsubst < /tmp/.gitconfig.template > "/home/${HANZO_USERNAME}/.gitconfig" && \
+    chown ${HANZO_USERNAME}:${HANZO_USERNAME} "/home/${HANZO_USERNAME}/.gitconfig" && \
+    rm /tmp/.gitconfig.template -f
 
 # Set default login user
 USER $HANZO_USERNAME
