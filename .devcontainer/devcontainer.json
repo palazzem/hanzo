@@ -27,7 +27,6 @@
             "installZsh": true,
             "configureZshAsDefaultShell": true,
             "installOhMyZsh": true,
-            "installOhMyZshConfig": true,
             "upgradePackages": true,
             "username": "${localEnv:HANZO_USERNAME}"
         }
