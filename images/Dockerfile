@@ -73,7 +73,30 @@ RUN useradd -m -G wheel "${HANZO_USERNAME}" && \
 
 # Development tools and languages
 # Equivalent to 'development' role
-# TODO: Add development tools and SDKs
+RUN dnf install -y \
+    gdb \
+    golang \
+    java-latest-openjdk-devel \
+    jq \
+    nodejs \
+    postgresql \
+    python3 \
+    python3-pip \
+    python3-setuptools \
+    ruby \
+    rust \
+    cargo \
+    sqlite \
+    yq \
+    pipx \
+    && dnf clean all \
+    && su - ${HANZO_USERNAME} -c "mkdir -p /home/${HANZO_USERNAME}/programs/go/bin && \
+        GOPATH=/home/${HANZO_USERNAME}/programs/go go install github.com/minamijoyo/tfupdate@latest && \
+        pipx install ipython && \
+        pipx install hatch && \
+        pipx install pre-commit && \
+        pipx install checkov" \
+    && curl -s https://raw.githubusercontent.com/terraform-linters/tflint/master/install_linux.sh | bash
 
 # Code editors and IDE tools
 # Equivalent to 'editors' role
