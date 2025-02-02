@@ -10,28 +10,38 @@ export HANZO_USERNAME=
 export HANZO_EMAIL=
 
 case "$1" in
-    ssh)
-        echo "Running hanzo ssh..."
-        devpod ssh --gpg-agent-forwarding --agent-forwarding $WORKSPACE_NAME
-        ;;
     up)
-        echo "Running hanzo up..."
-        devpod up --id $WORKSPACE_NAME $URL
+        orb start
+        devpod up --gpg-agent-forwarding --id $WORKSPACE_NAME $URL
+
+        # Get the fingerprint of the key
+        FINGERPRINT=$(ssh-keygen -l -f ~/.ssh/id_ed25519.pub | awk '{print $2}')
+
+        # Check if the key is already added
+        if ! ssh-add -l | grep -q "$FINGERPRINT"; then
+            ssh-add ~/.ssh/id_ed25519
+        fi
+
+	    # Restart GPG service
+	    echo "Reloading GPG agent"
+	    gpgconf --kill gpg-agent && gpg -K
         ;;
     down)
-        echo "Running hanzo down..."
+        # Stop the workspace
         devpod stop $WORKSPACE_NAME
+	    orb stop
         ;;
-    update)
-        echo "Running hanzo update..."
+    recreate)
+        # Recreate the workspace
+	    orb start
         devpod stop $WORKSPACE_NAME
-        devpod up --recreate --id $WORKSPACE_NAME $URL
+        devpod up --gpg-agent-forwarding --recreate --id $WORKSPACE_NAME $URL
         ;;
     destroy)
-        echo "Running hanzo destroy..."
+        # Destroy the workspace
         devpod delete $WORKSPACE_NAME
         ;;
     *)
-        echo "Usage: hanzo {ssh|up|down|update|destroy}"
+        echo "Usage: hanzo {up|down|recreate|destroy}"
         exit 1
 esac
