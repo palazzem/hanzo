@@ -10,67 +10,54 @@ RUN [ -n "$HANZO_USERNAME" ] || (echo "HANZO_USERNAME not set" && false) && \
     [ -n "$HANZO_FULLNAME" ] || (echo "HANZO_FULLNAME not set" && false) && \
     [ -n "$HANZO_EMAIL" ] || (echo "HANZO_EMAIL not set" && false)
 
-# Base system configuration
-# Equivalent to 'base' role from Ansible
-RUN dnf update -y && \
-    dnf group install -y development-tools && \
-    dnf install -y \
-    sudo \
-    kernel-devel \
-    kernel-headers \
-    && dnf clean all
+# Update base system
+RUN dnf update -y && dnf clean all
 
-# Enable RPM Fusion repositories
-# Equivalent to 'aur' role from Ansible
-RUN dnf install -y \
+# Add external repositories
+RUN dnf install -y dnf-plugins-core && \
+    dnf config-manager addrepo --from-repofile=https://download.docker.com/linux/fedora/docker-ce.repo && \
+    dnf config-manager addrepo --from-repofile=https://rpm.releases.hashicorp.com/fedora/hashicorp.repo && \
+    dnf install -y \
     https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm \
     https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm \
     && dnf clean all
 
-# System configuration
-# Equivalent to 'system' role
-RUN dnf install -y \
+# Install dev env packages
+RUN dnf group install -y development-tools && \
+    dnf install -y \
     bind-utils \
     chrony \
+    docker-ce \
+    docker-ce-cli \
+    docker-buildx-plugin \
+    docker-compose-plugin \
+    containerd.io \
     dosfstools \
+    emacs \
     ffmpeg \
     fzf \
+    gdb \
     gettext \
+    git \
     glibc-langpack-en \
+    golang \
     htop \
     httpie \
     iputils \
+    java-latest-openjdk-devel \
+    jq \
+    kernel-devel \
+    kernel-headers \
     mono-core \
+    neovim \
+    nodejs \
     ntfs-3g \
     openssl \
     p7zip \
     p7zip-plugins \
+    packer \
+    pipx \
     plocate \
-    speedtest-cli \
-    tree \
-    unrar \
-    wget \
-    which \
-    whois \
-    && dnf clean all
-
-# User and directory setup
-RUN useradd -m -G wheel "${HANZO_USERNAME}" && \
-    mkdir -p "/home/${HANZO_USERNAME}/programs" && \
-    mkdir -p "/home/${HANZO_USERNAME}/workspaces" && \
-    chown -R "${HANZO_USERNAME}:${HANZO_USERNAME}" "/home/${HANZO_USERNAME}" && \
-    echo '%wheel ALL=(ALL:ALL) NOPASSWD: ALL' >> /etc/sudoers && \
-    # Set locale
-    echo "LANG=en_US.UTF-8" > /etc/locale.conf
-
-# Development tools and languages
-# Equivalent to 'development' role
-RUN dnf install -y \
-    gdb \
-    golang \
-    java-latest-openjdk-devel \
-    jq \
-    nodejs \
     postgresql \
     python3 \
     python3-pip \
@@ -78,66 +65,46 @@ RUN dnf install -y \
     ruby \
     rust \
     cargo \
+    speedtest-cli \
     sqlite \
+    sudo \
+    terraform \
+    transmission-cli \
+    tree \
+    unrar \
+    wget \
+    which \
+    whois \
     yq \
-    pipx \
-    && dnf clean all \
-    && su - ${HANZO_USERNAME} -c "mkdir -p /home/${HANZO_USERNAME}/programs/go/bin && \
+    yt-dlp \
+    && dnf clean all
+
+# User setup and permissions
+RUN useradd -m -G wheel "${HANZO_USERNAME}" && \
+    mkdir -p "/home/${HANZO_USERNAME}/programs" && \
+    mkdir -p "/home/${HANZO_USERNAME}/workspaces" && \
+    chown -R "${HANZO_USERNAME}:${HANZO_USERNAME}" "/home/${HANZO_USERNAME}" && \
+    echo '%wheel ALL=(ALL:ALL) NOPASSWD: ALL' >> /etc/sudoers && \
+    echo "LANG=en_US.UTF-8" > /etc/locale.conf && \
+    usermod -aG docker ${HANZO_USERNAME}
+
+# Development tools and configurations that require user context
+RUN su - ${HANZO_USERNAME} -c "\
+        mkdir -p /home/${HANZO_USERNAME}/programs/go/bin && \
         GOPATH=/home/${HANZO_USERNAME}/programs/go go install github.com/minamijoyo/tfupdate@latest && \
         pipx install ipython && \
         pipx install hatch && \
         pipx install pre-commit && \
-        pipx install checkov" \
-    && curl -s https://raw.githubusercontent.com/terraform-linters/tflint/master/install_linux.sh | bash
+        pipx install checkov && \
+        mkdir -p /home/${HANZO_USERNAME}/.local/share && \
+        curl -o /tmp/gcloud_installer.sh https://sdk.cloud.google.com && \
+        bash /tmp/gcloud_installer.sh --disable-prompts \
+            --install-dir=/home/${HANZO_USERNAME}/.local/share/google-cloud-sdk && \
+        rm /tmp/gcloud_installer.sh && \
+        git clone https://github.com/syl20bnr/spacemacs /home/${HANZO_USERNAME}/.emacs.d" && \
+    curl -s https://raw.githubusercontent.com/terraform-linters/tflint/master/install_linux.sh | bash
 
-# Code editors and IDE tools
-# Equivalent to 'editors' role
-RUN dnf install -y \
-    neovim \
-    emacs \
-    && dnf clean all \
-    && su - ${HANZO_USERNAME} -c "git clone https://github.com/syl20bnr/spacemacs /home/${HANZO_USERNAME}/.emacs.d"
-
-# Container orchestration tools
-# Equivalent to 'orchestrators' role
-RUN dnf -y install dnf-plugins-core && \
-    dnf config-manager addrepo --from-repofile=https://download.docker.com/linux/fedora/docker-ce.repo && \
-    dnf install -y \
-    docker-ce \
-    docker-ce-cli \
-    containerd.io \
-    docker-buildx-plugin \
-    docker-compose-plugin \
-    && dnf clean all \
-    && usermod -aG docker ${HANZO_USERNAME}
-
-# Infrastructure provisioning tools
-# Equivalent to 'provisioning' role
-RUN dnf install -y dnf-plugins-core && \
-    dnf config-manager addrepo --from-repofile=https://rpm.releases.hashicorp.com/fedora/hashicorp.repo && \
-    dnf install -y \
-    terraform \
-    packer \
-    && dnf clean all
-
-# Cluster management tools
-# Equivalent to 'cluster' role
-RUN su - ${HANZO_USERNAME} -c "\
-    mkdir -p /home/${HANZO_USERNAME}/.local/share && \
-    curl -o /tmp/gcloud_installer.sh https://sdk.cloud.google.com && \
-    bash /tmp/gcloud_installer.sh --disable-prompts \
-        --install-dir=/home/${HANZO_USERNAME}/.local/share/google-cloud-sdk && \
-    rm /tmp/gcloud_installer.sh"
-
-# Additional utilities
-# Equivalent to 'extras' role
-RUN dnf install -y \
-    transmission-cli \
-    yt-dlp \
-    && dnf clean all
-
-# User dotfiles configuration
-# Equivalent to 'dotfiles' role
+# User dotfiles
 RUN su - ${HANZO_USERNAME} -c "\
     git clone https://github.com/palazzem/dotfiles.git /home/${HANZO_USERNAME}/.dotfiles && \
     rm -f /home/${HANZO_USERNAME}/.zshrc \
@@ -147,7 +114,7 @@ RUN su - ${HANZO_USERNAME} -c "\
     ln -s /home/${HANZO_USERNAME}/.dotfiles/zshenv /home/${HANZO_USERNAME}/.zshenv && \
     ln -s /home/${HANZO_USERNAME}/.dotfiles/spacemacs /home/${HANZO_USERNAME}/.spacemacs"
 
-# Copy and configure git template
+# Git configuration from template
 COPY templates/.gitconfig /tmp/.gitconfig.template
 RUN envsubst < /tmp/.gitconfig.template > "/home/${HANZO_USERNAME}/.gitconfig" && \
     chown ${HANZO_USERNAME}:${HANZO_USERNAME} "/home/${HANZO_USERNAME}/.gitconfig" && \
