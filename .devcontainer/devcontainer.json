@@ -1,11 +1,12 @@
 {
-    // Workspaces are mounted into the home folder
+    "name": "Fedora DevBox",
     "workspaceFolder": "/workspaces",
     "containerEnv": {
-        "DEV_CONTAINER": "1"
+        "DEV_CONTAINER": "1",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US.UTF-8"
     },
     "build": {
-        // Build the container using hanzo.sh
         "dockerfile": "../images/Dockerfile",
         "args": {
             "HANZO_USERNAME": "${localEnv:HANZO_USERNAME}",
@@ -13,11 +14,19 @@
             "HANZO_EMAIL": "${localEnv:HANZO_EMAIL}"
         }
     },
-    "runArgs": ["--net=host"],
+    "runArgs": [
+        "--net=host",
+        "--security-opt=seccomp=unconfined"
+    ],
     "mounts": [
-        // Mount Docker socket from the VM into the container
-        // Mount a home directory to persist data
         "source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind",
         "source=workspaces,target=/home/${localEnv:HANZO_USERNAME}/workspaces,type=volume"
-    ]
+    ],
+    "features": {
+        "ghcr.io/devcontainers/features/common-utils:2": {
+            "installZsh": true,
+            "configureZshAsDefaultShell": true,
+            "username": "${localEnv:HANZO_USERNAME}"
+        }
+    }
 }
