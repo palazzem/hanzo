@@ -26,6 +26,9 @@
         "ghcr.io/devcontainers/features/common-utils:2": {
             "installZsh": true,
             "configureZshAsDefaultShell": true,
+            "installOhMyZsh": true,
+            "installOhMyZshConfig": true,
+            "upgradePackages": true,
             "username": "${localEnv:HANZO_USERNAME}"
         }
     }
