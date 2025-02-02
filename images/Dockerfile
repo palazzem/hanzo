@@ -108,7 +108,16 @@ RUN dnf install -y \
 
 # Container orchestration tools
 # Equivalent to 'orchestrators' role
-# TODO: Add container and orchestration tools
+RUN dnf -y install dnf-plugins-core && \
+    dnf config-manager addrepo --from-repofile=https://download.docker.com/linux/fedora/docker-ce.repo && \
+    dnf install -y \
+    docker-ce \
+    docker-ce-cli \
+    containerd.io \
+    docker-buildx-plugin \
+    docker-compose-plugin \
+    && dnf clean all \
+    && usermod -aG docker ${HANZO_USERNAME}
 
 # Infrastructure provisioning tools
 # Equivalent to 'provisioning' role
