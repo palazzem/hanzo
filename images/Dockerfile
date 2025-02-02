@@ -99,7 +99,7 @@ RUN su - ${HANZO_USERNAME} -c "\
         mkdir -p /home/${HANZO_USERNAME}/.local/share && \
         curl -o /tmp/gcloud_installer.sh https://sdk.cloud.google.com && \
         bash /tmp/gcloud_installer.sh --disable-prompts \
-            --install-dir=/home/${HANZO_USERNAME}/.local/share/google-cloud-sdk && \
+            --install-dir=/home/${HANZO_USERNAME}/.local/share && \
         rm /tmp/gcloud_installer.sh && \
         git clone https://github.com/syl20bnr/spacemacs /home/${HANZO_USERNAME}/.emacs.d" && \
     curl -s https://raw.githubusercontent.com/terraform-linters/tflint/master/install_linux.sh | bash
