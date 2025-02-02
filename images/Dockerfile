@@ -26,14 +26,16 @@ RUN dnf install -y dnf-plugins-core && \
 RUN dnf group install -y development-tools && \
     dnf install -y \
     bind-utils \
+    cargo \
     chrony \
+    containerd.io \
+    docker-buildx-plugin \
     docker-ce \
     docker-ce-cli \
-    docker-buildx-plugin \
     docker-compose-plugin \
-    containerd.io \
     dosfstools \
     emacs \
+    fastfetch \
     ffmpeg \
     fzf \
     gdb \
@@ -64,9 +66,7 @@ RUN dnf group install -y development-tools && \
     python3-setuptools \
     ruby \
     rust \
-    cargo \
     speedtest-cli \
-    fastfetch \
     sqlite \
     sudo \
     terraform \
