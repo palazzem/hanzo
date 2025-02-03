@@ -78,6 +78,7 @@ RUN dnf group install -y development-tools && \
     whois \
     yq \
     yt-dlp \
+    zsh \
     && dnf clean all
 
 # User setup and permissions
@@ -88,6 +89,11 @@ RUN useradd -m -G wheel "${HANZO_USERNAME}" && \
     echo '%wheel ALL=(ALL:ALL) NOPASSWD: ALL' >> /etc/sudoers && \
     echo "LANG=en_US.UTF-8" > /etc/locale.conf && \
     usermod -aG docker ${HANZO_USERNAME}
+
+# Install and configure Oh My Zsh
+RUN su - ${HANZO_USERNAME} -c "\
+    sh -c '$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)' '' --unattended && \
+    chsh -s $(which zsh) ${HANZO_USERNAME}
 
 # Development tools and configurations that require user context
 RUN su - ${HANZO_USERNAME} -c "\

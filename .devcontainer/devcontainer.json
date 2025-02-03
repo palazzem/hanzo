@@ -21,13 +21,5 @@
         "source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind",
         "source=workspaces,target=/home/${localEnv:HANZO_USERNAME}/workspaces,type=volume"
     ],
-    "postCreateCommand": "sudo chown root:docker /var/run/docker.sock",
-    "features": {
-        "ghcr.io/devcontainers/features/common-utils:2": {
-            "installZsh": true,
-            "installOhMyZsh": true,
-            "configureZshAsDefaultShell": true,
-            "username": "${localEnv:HANZO_USERNAME}"
-        }
-    }
+    "postCreateCommand": "sudo chown root:docker /var/run/docker.sock"
 }
