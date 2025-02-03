@@ -35,11 +35,11 @@ cleanup_docker() {
 case "$1" in
     ssh)
         setup_keys
+        ssh "$WORKSPACE_NAME.devpod"
         ;;
     up)
         orb start
         devpod up --gpg-agent-forwarding --id $WORKSPACE_NAME $URL
-        setup_keys
         ;;
     down)
         devpod stop $WORKSPACE_NAME
