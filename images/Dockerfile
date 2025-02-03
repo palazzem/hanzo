@@ -92,8 +92,7 @@ RUN useradd -m -G wheel "${HANZO_USERNAME}" && \
     usermod -aG docker ${HANZO_USERNAME}
 
 # Install and configure Oh My Zsh
-RUN su - ${HANZO_USERNAME} -c "\
-    sh -c '$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)' '' --unattended && \
+RUN su - ${HANZO_USERNAME} -c 'curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh > install.sh && sh install.sh --unattended && rm install.sh' && \
     chsh -s $(which zsh) ${HANZO_USERNAME}
 
 # Development tools and configurations that require user context
