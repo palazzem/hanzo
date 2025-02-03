@@ -4,6 +4,7 @@ FROM fedora:41
 ARG HANZO_USERNAME
 ARG HANZO_FULLNAME
 ARG HANZO_EMAIL
+ENV TZ="Europe/Rome"
 
 # Fail if required build args are missing
 RUN [ -n "$HANZO_USERNAME" ] || (echo "HANZO_USERNAME not set" && false) && \
