@@ -1,0 +1,6 @@
+---
+# Install a collection from Ansible Galaxy.
+
+collections:
+  - community.general
+  - kewlfft.aur

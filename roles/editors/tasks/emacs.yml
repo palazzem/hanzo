@@ -1,0 +1,16 @@
+---
+
+# Emacs
+
+- name: Installing Emacs
+  pacman:
+    state: latest
+    name:
+      - emacs
+
+- name: Installing Spacemacs
+  become: true
+  become_user: "{{ username }}"
+  git:
+    repo: https://github.com/syl20bnr/spacemacs
+    dest: "/home/{{username}}/.emacs.d"

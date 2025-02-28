@@ -1,0 +1,10 @@
+---
+
+# Extras
+
+- name: Installing consumer applications
+  pacman:
+    state: latest
+    name:
+      - transmission-cli
+      - yt-dlp

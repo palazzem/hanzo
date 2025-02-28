@@ -1,0 +1,10 @@
+---
+
+# Deployment and provisioning tools
+
+- name: Installing provisioning tools
+  pacman:
+    state: latest
+    name:
+      - packer
+      - terraform

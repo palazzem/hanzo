@@ -1,0 +1,33 @@
+---
+
+# Python
+
+- name: Installing Python
+  community.general.pacman:
+    state: latest
+    name:
+      - python
+      - python-pip
+      - python-pipx
+      - python-setuptools
+
+- name: Installing 'pyenv'
+  kewlfft.aur.aur:
+    use: yay
+    name: pyenv
+  become: yes
+  become_user: aur_builder
+
+- name: Installing Python tools - ipython
+  community.general.pipx:
+    state: install
+    name: ipython
+  become: yes
+  become_user: "{{ username }}"
+
+- name: Installing Python tools - hatch
+  community.general.pipx:
+    state: install
+    name: hatch
+  become: yes
+  become_user: "{{ username }}"
