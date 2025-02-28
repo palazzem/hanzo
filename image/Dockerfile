@@ -124,7 +124,7 @@ RUN su - ${HANZO_USERNAME} -c "\
     ln -s /home/${HANZO_USERNAME}/.dotfiles/spacemacs /home/${HANZO_USERNAME}/.spacemacs"
 
 # Git configuration from template
-COPY templates/gitconfig /tmp/.gitconfig.template
+COPY image/templates/gitconfig /tmp/.gitconfig.template
 RUN envsubst < /tmp/.gitconfig.template > "/home/${HANZO_USERNAME}/.gitconfig" && \
     chown ${HANZO_USERNAME}:${HANZO_USERNAME} "/home/${HANZO_USERNAME}/.gitconfig" && \
     rm /tmp/.gitconfig.template -f
