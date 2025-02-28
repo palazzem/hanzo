@@ -2,18 +2,20 @@ name: Nightly builds
 
 on:
   schedule:
-    - cron: '0 2 * * *' # run at 2 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:
 
 jobs:
-  arch-linux:
+  build-test:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Build Arch Linux container with Hanzo
-        run: docker build . -t hanzo:test
-              --build-arg HANZO_FULLNAME=test
-              --build-arg HANZO_USERNAME=test
-              --build-arg HANZO_EMAIL=test@example.com
+      - name: Build Docker container
+        run: |
+          docker build -f image/Dockerfile -t hanzo:nightly . \
+            --build-arg HANZO_FULLNAME="Test User" \
+            --build-arg HANZO_USERNAME=test \
+            --build-arg HANZO_EMAIL=test@example.com
