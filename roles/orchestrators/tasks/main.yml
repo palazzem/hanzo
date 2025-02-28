@@ -1,5 +1,0 @@
----
-
-# Containers tools
-
-- ansible.builtin.include_tasks: docker.yml

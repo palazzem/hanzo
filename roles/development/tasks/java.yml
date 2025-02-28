@@ -1,9 +1,0 @@
----
-
-# Java
-
-- name: Installing latest OpenJDK with tools
-  pacman:
-    state: latest
-    name:
-      - jdk-openjdk

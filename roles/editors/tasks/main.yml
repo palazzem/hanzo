@@ -1,6 +1,0 @@
----
-
-# Code Editors
-
-- ansible.builtin.include_tasks: neovim.yml
-- ansible.builtin.include_tasks: emacs.yml

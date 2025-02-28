@@ -1,7 +1,0 @@
----
-
-# handler
-
-- name: build font cache
-  become_user: "{{username}}"
-  shell: fc-cache -vf "/home/{{username}}/.fonts/"

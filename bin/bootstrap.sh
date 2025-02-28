@@ -1,6 +1,6 @@
-#! /bin/bash
+#!/usr/bin/env bash
 
-# Copyright (c) 2014-2023, Emanuele Palazzetti and contributors
+# Copyright (c) 2014-2025, Emanuele Palazzetti and contributors
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without
@@ -29,69 +29,60 @@
 
 set -e
 
-# Helper functions
-function get_env() {
-    read -p "$1 " retval
-    echo $retval
+# Colors for better visual output
+GREEN='\033[0;32m'
+BLUE='\033[0;34m'
+YELLOW='\033[1;33m'
+NC='\033[0m'
+
+# Print banner
+echo -e "${BLUE}╔════════════════════════════════════════════════════════╗${NC}"
+echo -e "${BLUE}║                                                        ║${NC}"
+echo -e "${BLUE}║                  ${GREEN}Hanzo Installer${BLUE}                       ║${NC}"
+echo -e "${BLUE}║                                                        ║${NC}"
+echo -e "${BLUE}╚════════════════════════════════════════════════════════╝${NC}"
+echo ""
+
+# Function to handle errors
+handle_error() {
+    echo -e "${YELLOW}Error: $1${NC}"
+    exit 1
 }
 
-# Prompt for mandatory parameters
-HANZO_FULLNAME=${HANZO_FULLNAME:-$(get_env "Provide your full name:")}; export HANZO_FULLNAME
-HANZO_USERNAME=${HANZO_USERNAME:-$(get_env "Provide your username:")}; export HANZO_USERNAME
-HANZO_EMAIL=${HANZO_EMAIL:-$(get_env "Provide your email:")}; export HANZO_EMAIL
+# Create necessary directories
+echo -e "📁 ${GREEN}Creating directories...${NC}"
+mkdir -p ~/.local/bin || handle_error "Failed to create ~/.local/bin"
+mkdir -p ~/.local/src || handle_error "Failed to create ~/.local/src"
 
-# Prepare the build folder where dependencies and Hanzo are downloaded.
-# Permissions are set to 666 as nothing is sensitive in the folder and
-# Hanzo needs broader permissions when `become_user` is used.
-BUILD_FOLDER=$(mktemp -d); export BUILD_FOLDER
-chmod 666 -R $BUILD_FOLDER
-echo "Using BUILD_FOLDER: $BUILD_FOLDER"
-
-# Variables
-REPOSITORY="https://github.com/palazzem/hanzo.git"
-ANSIBLE_FOLDER="$BUILD_FOLDER/ansible"
-
-# System update
-echo "Updating system Arch Linux..."
-pacman -Syu --noconfirm
-
-# Install dependencies
-echo "Installing dependencies..."
-pacman -Sy --noconfirm \
-  git \
-  python \
-  python-pip
-
-# Install/Update Hanzo unless a folder is specified
-if [[ -z "$HANZO_FOLDER" ]]; then
-    echo "Downloading/Updating Hanzo..."
-    HANZO_FOLDER="$BUILD_FOLDER/hanzo"
-    git clone "$REPOSITORY" "$HANZO_FOLDER" 2> /dev/null || (cd "$HANZO_FOLDER" ; git pull)
+# Check if hanzo is already installed
+if [ -d ~/.local/src/hanzo ]; then
+    echo -e "🔄 ${GREEN}Hanzo repository already exists. Updating...${NC}"
+    cd ~/.local/src/hanzo && git pull || handle_error "Failed to update hanzo repository"
 else
-    echo "HANZO_FOLDER specified, skipping checkout..."
+    echo -e "⬇️  ${GREEN}Cloning hanzo repository...${NC}"
+    git clone https://github.com/palazzem/hanzo.git ~/.local/src/hanzo || handle_error "Failed to clone hanzo repository"
 fi
 
-cd "$HANZO_FOLDER"
+# Create symlink (overwrite if exists)
+echo -e "🔗 ${GREEN}Creating symlink...${NC}"
+ln -sf ~/.local/src/hanzo/bin/hanzo.sh ~/.local/bin/hanzo || handle_error "Failed to create symlink"
 
-# Install Ansible and configure collections
-pip install ansible-core --target $ANSIBLE_FOLDER --progress-bar off
-PYTHONPATH=$ANSIBLE_FOLDER $ANSIBLE_FOLDER/bin/ansible-galaxy collection install -r requirements.yml
+# Check if PATH already contains ~/.local/bin
+if [[ ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
+    echo -e "⚠️  ${YELLOW}~/.local/bin is not in your PATH${NC}"
+    echo ""
+    echo -e "${GREEN}Add the following line to your shell configuration file:${NC}"
+    echo -e "${BLUE}export PATH=\"\$HOME/.local/bin:\$PATH\"${NC}"
+    echo ""
+    echo -e "${GREEN}For example:${NC}"
+    echo -e "  ${BLUE}bash${NC}: echo 'export PATH=\"\$HOME/.local/bin:\$PATH\"' >> ~/.bashrc"
+    echo -e "  ${BLUE}zsh${NC} : echo 'export PATH=\"\$HOME/.local/bin:\$PATH\"' >> ~/.zshrc"
+    echo -e "  ${BLUE}fish${NC}: fish -c 'set -U fish_user_paths \$HOME/.local/bin \$fish_user_paths'"
+else
+    echo -e "✅ ${GREEN}~/.local/bin is already in your PATH${NC}"
+fi
 
-# Orchestration
-echo "Starting Hanzo orchestration..."
-PYTHONPATH=$ANSIBLE_FOLDER $ANSIBLE_FOLDER/bin/ansible-playbook orchestrate.yml --connection=local --inventory inventory.yml --tags=$TAGS $EXTRA_ARGS
-
-# Post-install script
-echo "Executing post-install steps..."
-chsh -s /bin/zsh $HANZO_USERNAME
-
-# Clean-up: remove temporary folders and cache
-echo "Clean-up temporary folders..."
-rm -rf \
-    $HANZO_FOLDER \
-    $BUILD_FOLDER \
-    /root/.ansible \
-    /root/.cache
-find /var/cache/pacman/ -type f -delete
-
-echo "Setup completed!"
+echo ""
+echo -e "✅ ${GREEN}Installation complete!${NC}"
+echo -e "🚀 ${GREEN}Run 'hanzo' to get started${NC}"
+echo ""
