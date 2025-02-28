@@ -1,5 +1,0 @@
----
-# Rust
-
-- name: Installing Rust Compiler
-  pacman: name=rust state=latest

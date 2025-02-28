@@ -1,8 +1,0 @@
----
-
-# Ruby
-
-- name: Installing system Ruby
-  pacman:
-    state: latest
-    name: ruby

@@ -12,6 +12,11 @@ developers* to prepare programmatically their development environment. This
 repository targets my requirements and it's very unlikely it can be used in a
 general purpose sense.
 
+## Requirements
+
+- Any Docker Engine (e.g [Docker Desktop](https://www.docker.com/products/docker-desktop/), [OrbStack](https://orbstack.dev/), etc...)
+- (Optional) [DevPod](https://devpod.sh/)
+
 ## Quickstart
 
 If you like living on the bleeding edge and *curlbombs* don't scare you, the

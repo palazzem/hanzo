@@ -1,9 +1,0 @@
----
-
-# Go
-
-- name: Installing GoLang
-  pacman: name=go state=latest
-
-- name: Preparing Go folders
-  file: state=directory path="/home/{{username}}/programs/go/bin" owner={{username}} group={{username}}
