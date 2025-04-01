@@ -8,6 +8,7 @@
     },
     "build": {
         "dockerfile": "../image/Dockerfile",
+        "context": "..",
         "args": {
             "HANZO_USERNAME": "${localEnv:HANZO_USERNAME}",
             "HANZO_FULLNAME": "${localEnv:HANZO_FULLNAME}",
