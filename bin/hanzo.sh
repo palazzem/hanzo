@@ -50,6 +50,9 @@ load_config() {
         log_info "Loading configuration from $CONFIG_FILE"
         # shellcheck source=/dev/null
         source "$CONFIG_FILE"
+        export HANZO_FULLNAME
+        export HANZO_USERNAME
+        export HANZO_EMAIL
     fi
 }
 
