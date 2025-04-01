@@ -7,7 +7,7 @@
         "LC_ALL": "en_US.UTF-8"
     },
     "build": {
-        "dockerfile": "../images/Dockerfile",
+        "dockerfile": "../image/Dockerfile",
         "args": {
             "HANZO_USERNAME": "${localEnv:HANZO_USERNAME}",
             "HANZO_FULLNAME": "${localEnv:HANZO_FULLNAME}",
