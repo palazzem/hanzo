@@ -6,8 +6,6 @@ as an attribute on ``host.data`` inside task files. For example,
 """
 
 base_packages = [
-    "base-devel",
-    "git",
     "fzf",
     "htop",
     "neovim",
@@ -17,12 +15,7 @@ base_packages = [
     "jq",
     "yq",
     "httpie",
-    "openssl",
-    "gettext",
-    "gdb",
     "plocate",
-    "procps-ng",
-    "sudo",
     "bind",
     "whois",
     "tmux",
