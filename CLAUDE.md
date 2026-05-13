@@ -45,6 +45,7 @@ docker build -f tests/Containerfile -t hanzo:test .
 - `_sudo=True` for system operations (package installs, service management, config writes).
 - `_sudo=False` for user-space operations (paru, pyenv, dotfiles).
 - Use `tasks/packages.py` as the reference implementation.
+- Use `shlex.quote()` for any interpolated values in `server.shell` commands.
 
 ### Shell Scripts
 
