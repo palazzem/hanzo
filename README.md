@@ -1,90 +1,69 @@
-# Hanzō
+# Hanzo
 
-> Hattori Hanzō: You must have big rats if you need Hattori Hanzo's steel.
+> Hattori Hanzo: You must have big rats if you need Hattori Hanzo's steel.
 > The Bride: ...Huge.
 
-[![Testing](https://github.com/palazzem/hanzo/actions/workflows/test.yaml/badge.svg)](https://github.com/palazzem/hanzo/actions/workflows/test.yaml)
-[![Nightly builds](https://github.com/palazzem/hanzo/actions/workflows/nightly.yaml/badge.svg)](https://github.com/palazzem/hanzo/actions/workflows/nightly.yaml)
-
-Hanzo is a CLI tool that helps you set up and manage development environments using DevPod. It provides a streamlined
-workflow for creating, connecting to, and managing containerized development workspaces.
+CachyOS system provisioner powered by [pyinfra](https://pyinfra.com/). A single command bootstraps a complete development and gaming machine with idempotent configuration.
 
 ## Requirements
 
-- Any Docker Engine (e.g [Docker Desktop](https://www.docker.com/products/docker-desktop/), [OrbStack](https://orbstack.dev/), etc...)
-- [DevPod](https://devpod.sh/)
+- [CachyOS](https://cachyos.org/) (Arch-based)
+- Internet connection for initial setup
 
 ## Quickstart
 
-If you like living on the bleeding edge and *curlbombs* don't scare you, the automatic installer is the easiest way to get started:
-
-```shell
-$ sh <(curl -L http://j.mp/hattori-hanzo)
+```bash
+curl -L https://raw.githubusercontent.com/palazzem/hanzo/main/bin/bootstrap.sh | sh
 ```
 
-This will install Hanzo in your `~/.local/bin` directory. Make sure this directory is in your PATH.
+This will:
 
-After installation, you'll need to configure Hanzo with your personal information:
+1. Ask for your sudo password (once)
+2. Install [uv](https://docs.astral.sh/uv/) and [pyinfra](https://pyinfra.com/)
+3. Clone this repository to `~/.local/src/hanzo`
+4. Prompt for your name and email (first run only)
+5. Run the full provisioning
 
-```shell
-$ hanzo config init
+## Usage
+
+After bootstrap, re-run provisioning at any time:
+
+```bash
+hanzo              # full provisioning run
+hanzo --dry        # dry run (shows what would change)
 ```
 
-This will guide you through setting up your name, username, and email address.
+## Configuration
 
-## Manual Installation
+User configuration is stored at `~/.config/hanzo/config`:
 
-In case you don't want to use the `curl` command above, you can clone or download this repository, using either `git`
-or the [release page](https://github.com/palazzem/hanzo/releases). Run the following commands:
-
-```shell
-$ git clone https://github.com/palazzem/hanzo
-$ cd hanzo/
-$ bash bin/bootstrap.sh
+```
+HANZO_FULLNAME="Your Name"
+HANZO_EMAIL="your@email.com"
 ```
 
-## Using Hanzo
+Edit this file directly to update your settings.
 
-Hanzo provides several commands to manage your development environment:
+## What Gets Installed
 
-```shell
-$ hanzo help                 # Show help information
-$ hanzo config               # Show current configuration
-$ hanzo config init          # Interactive configuration setup
-$ hanzo config set KEY VALUE # Set a specific configuration value
-$ hanzo up                   # Start your development workspace
-$ hanzo ssh                  # Connect to your workspace via SSH
-$ hanzo down                 # Stop your workspace
-$ hanzo recreate             # Recreate your workspace
-$ hanzo destroy              # Destroy your workspace
-$ hanzo status               # Check workspace status
-```
+- **Base tools**: git, neovim, fzf, htop, tmux, jq, yq, httpie, and more
+- **Docker**: docker, buildx, compose
+- **Languages**: rustup, go, fnm (Node.js)
+- **AI**: ollama-rocm
+- **Gaming**: CachyOS gaming applications, multimedia codecs
+- **ASUS ROG**: asusctl, rog-control-center (auto-detected on GZ302 hardware)
 
-## Unattended Configuration
+See `group_data/all.py` for the complete package list.
 
-If you don't want to use the interactive configuration, you can set the following environment variables:
+## Architecture
 
-* `HANZO_FULLNAME`: your full name used in Git configurations.
-* `HANZO_USERNAME`: your username for the workspace.
-* `HANZO_EMAIL`: your email address used in Git configurations.
+Hanzo uses pyinfra to run operations locally via `pyinfra @local`. All operations are idempotent — running `hanzo` multiple times is safe and will only apply changes that are needed.
 
-You can also set these values directly using the config command:
+- `deploy.py` — main entry point, includes all task files
+- `group_data/all.py` — package lists and configuration data
+- `tasks/` — individual task files (packages, system, tools, dotfiles, hardware)
+- `templates/` — Jinja2 templates for config files
 
-```shell
-$ hanzo config set fullname "Your Name"
-$ hanzo config set username yourusername
-$ hanzo config set email your.email@example.com
-```
+## Contributing
 
-## Contribute
-
-This tool is designed to streamline my personal development workflow. Because it's unlikely that you use exactly
-my current environment, you may use this repository as a base to create your own configuration. Indeed, I'll be glad
-to accept any PR that:
-
-* Fixes bugs or issues in the current implementation
-* Improves the script structure or bash best practices
-* Enhances or makes me aware of different methods to manage development environments
-
-I will not merge pull requests that add new development tools, but I will be grateful if you can discuss about it
-in the [issue tracker](https://github.com/palazzem/hanzo/issues).
+This tool provisions my personal CachyOS setup. PRs that fix bugs or improve the pyinfra task structure are welcome. See `CLAUDE.md` for the task authoring contract.
