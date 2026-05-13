@@ -15,22 +15,24 @@ import os
 from pyinfra import host
 from pyinfra.operations import files, server
 
+# Each server.shell spawns a fresh shell where fnm-managed Node.js is not
+# on PATH. This preamble must appear in every command that needs node/npm.
+_FNM_ACTIVATE = 'eval "$(fnm env)"'
+
 # ---------------------------------------------------------------------------
 # Version managers
 # ---------------------------------------------------------------------------
 
-# pyenv: Python version manager installed via pyenv-installer.
-# The installer clones the pyenv repo to ~/.pyenv. Guard checks if the
-# directory already exists to avoid re-cloning on subsequent runs.
+# The installer clones the pyenv repo to ~/.pyenv. Guard checks the binary
+# rather than just the directory to detect corrupt/incomplete installs.
 server.shell(
     name="Install pyenv via pyenv-installer",
     commands=[
-        'test -d "$HOME/.pyenv" || curl -fsSL https://pyenv.run | bash',
+        'test -x "$HOME/.pyenv/bin/pyenv" || curl -fsSL https://pyenv.run | bash',
     ],
     _sudo=False,
 )
 
-# rustup: set stable as default toolchain.
 # rustup is already installed via pacman (runtime_packages) but ships with
 # no default toolchain. This command is inherently idempotent — it prints
 # "unchanged" if stable is already the default.
@@ -40,7 +42,6 @@ server.shell(
     _sudo=False,
 )
 
-# fnm: install Node.js LTS and set as default.
 # fnm-bin is already installed via paru (aur_packages). Each server.shell
 # runs in a fresh shell, so we must eval fnm env to activate it. Both
 # fnm install commands are idempotent (skip already-installed versions).
@@ -50,15 +51,15 @@ server.shell(
 server.shell(
     name="Install Node.js LTS via fnm",
     commands=[
-        'eval "$(fnm env)" && fnm install --lts && fnm default "$(fnm current)"',
+        f'{_FNM_ACTIVATE} && fnm install --lts && fnm default "$(fnm current)"',
     ],
     _sudo=False,
 )
 
-# GOPATH: create Go workspace directory structure.
 # go is already installed via pacman (runtime_packages). GOPATH persistence
 # across interactive shell sessions depends on tasks/dotfiles.py (fish
-# shell config). files.directory is idempotent — no-op if already exists.
+# shell config).
+# Expanded on the control machine — safe because Hanzo always targets @local.
 _gopath = os.path.expanduser(host.data.gopath)
 
 files.directory(
@@ -94,7 +95,6 @@ for _tool in host.data.pipx_tools:
 # Infrastructure tools
 # ---------------------------------------------------------------------------
 
-# Terraform and Packer via paru (AUR).
 # paru handles sudo internally, so _sudo=False. The --needed flag skips
 # already-installed packages (same pattern as packages.py's paru call).
 server.shell(
@@ -105,7 +105,6 @@ server.shell(
     _sudo=False,
 )
 
-# tflint: Terraform linter installed via official script to ~/.local/bin.
 # Guard checks the known binary path rather than `command -v` because
 # ~/.local/bin may not be on PATH in a fresh pyinfra shell. The export
 # inside the subshell ensures the piped bash process inherits the path.
@@ -119,8 +118,8 @@ server.shell(
     _sudo=False,
 )
 
-# Google Cloud SDK: installed via Google's interactive installer with
-# prompts disabled. Installs to ~/.local/share/google-cloud-sdk/.
+# Prompts must be disabled for unattended pyinfra runs. Install directory
+# is ~/.local/share/ rather than ~ to follow XDG conventions.
 server.shell(
     name="Install Google Cloud SDK",
     commands=[
@@ -131,10 +130,10 @@ server.shell(
     _sudo=False,
 )
 
-# Go tools: installed via `go install`. GOPATH and PATH must be set in
-# the same shell command since each server.shell spawns a fresh process
-# where $GOPATH/bin is not on PATH. Guard uses `test -x` on the known
-# binary path rather than `command -v` for the same reason.
+# GOPATH and PATH must be set in the same shell command since each
+# server.shell spawns a fresh process where $GOPATH/bin is not on PATH.
+# Guard uses `test -x` on the known binary path rather than `command -v`
+# for the same reason.
 for _tool_name, _tool_path in host.data.go_tools.items():
     server.shell(
         name=f"Install {_tool_name} via go install",
@@ -157,7 +156,7 @@ for _pkg in host.data.npm_global_packages:
     server.shell(
         name=f"Install {_pkg} via npm",
         commands=[
-            f'eval "$(fnm env)" && '
+            f"{_FNM_ACTIVATE} && "
             f"(npm list -g {_pkg} >/dev/null 2>&1 || npm install -g {_pkg})",
         ],
         _sudo=False,
