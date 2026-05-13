@@ -9,6 +9,7 @@ base_packages = [
     "fzf",
     "htop",
     "neovim",
+    "uv",
     "tree",
     "wget",
     "jq",
@@ -104,3 +105,21 @@ gz302_asus_lightbar_product = "18c6"
 # Bound in Hyprland to launch alacritty -e claude.
 gz302_keyboard_scancode = "70072"
 gz302_keyboard_target_key = "prog1"
+
+uv_tools = [
+    "ipython",
+    "pre-commit",
+    "checkov",
+]
+
+infra_aur_packages = [
+    "terraform",
+    "tflint-bin",
+    "tfupdate-bin",
+]
+
+npm_global_packages = [
+    "@anthropic-ai/claude-code",
+]
+
+gopath = "~/programs/go"

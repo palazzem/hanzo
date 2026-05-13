@@ -42,7 +42,7 @@ local.include("tasks/packages.py")
 
 # Phase 2 tasks (uncomment as they land):
 local.include("tasks/system.py")
-# local.include("tasks/tools.py")
+local.include("tasks/tools.py")
 local.include("tasks/dotfiles.py")
 
 # ---------------------------------------------------------------------------
