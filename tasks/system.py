@@ -16,14 +16,15 @@ Locale:
     Ensures /etc/locale.conf has the correct LANG= setting.
 """
 
-import os
+import getpass
 
 from pyinfra import host
 from pyinfra.operations import files, server, systemd
 
-# Resolved at runtime — pyinfra runs locally via @local, so $USER is always
-# the real invoking user (or testuser in CI).
-_current_user = os.environ["USER"]
+# Resolved at runtime — pyinfra runs locally via @local, so this is always
+# the real invoking user. getpass.getuser() reads from the passwd database,
+# which works even when $USER is unset (e.g., Docker RUN steps).
+_current_user = getpass.getuser()
 
 # ---------------------------------------------------------------------------
 # Groups
