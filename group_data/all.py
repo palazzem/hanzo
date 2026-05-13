@@ -102,6 +102,20 @@ claude_config_dir = "~/.claude"
 # artifacts and flicker on the Strix Halo OLED panel (kernel 7.0+).
 gz302_oled_kernel_param = "amdgpu.dcdebugmask=0x600"
 
+# GPU modprobe options for Radeon 8060S (RDNA 3.5, Strix Halo).
+# All power features except GFXOFF (bit 15) which causes GPU hangs.
+gz302_amdgpu_ppfeaturemask = "0xffff7fff"
+# Disable Adaptive Backlight Management (not applicable to OLED panels).
+gz302_amdgpu_abmlevel = 0
+# Disable scatter-gather display to prevent OLED flicker under memory pressure.
+gz302_amdgpu_sg_display = 0
+# Disable Compute Wavefront Save-Restore to prevent GPU hangs on RDNA 3.5.
+gz302_amdgpu_cwsr_enable = 0
+
+# HID modprobe option for ASUS keyboard.
+# F-row defaults to media keys; press Fn for standard F1-F12.
+gz302_hid_fnlock_default = 0
+
 # ASUS USB identifiers for keyboard, touchpad, and lightbar devices.
 # Used by suspend hook (USB reset, HID unbind), hwdb (key remap), and
 # udev rule (RGB).
