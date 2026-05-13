@@ -8,8 +8,8 @@ import os
 from pyinfra import config, host, local
 from pyinfra.facts.server import Command
 
-# System provisioning requires root for package management and config writes
-config.SUDO = True
+# Safe default: no implicit sudo. Each operation must declare _sudo explicitly.
+config.SUDO = False
 
 # ---------------------------------------------------------------------------
 # Load user configuration from ~/.config/hanzo/config

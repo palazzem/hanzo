@@ -25,22 +25,25 @@ pacman.packages(
         + host.data.asus_packages
     ),
     update=True,
+    _sudo=True,
 )
 
 pacman.packages(
     name="Install language runtimes",
     packages=host.data.runtime_packages,
+    _sudo=True,
 )
 
 pacman.packages(
     name="Install gaming and multimedia",
     packages=host.data.gaming_packages,
+    _sudo=True,
 )
 
 # ---------------------------------------------------------------------------
 # AUR packages (paru)
 # ---------------------------------------------------------------------------
-# paru must run as the current user, not root. Override global SUDO.
+# paru must run as the current user, not root.
 # Flags ensure idempotent, non-interactive execution for unattended runs.
 
 server.shell(
@@ -59,4 +62,5 @@ server.shell(
 server.shell(
     name="Auto-detect and install GPU drivers",
     commands=["chwd -a"],
+    _sudo=True,
 )

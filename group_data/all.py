@@ -23,8 +23,6 @@ base_packages = [
     "plocate",
     "procps-ng",
     "sudo",
-    # Provides dig, nslookup, and other DNS lookup utilities.
-    # Note: this installs the full BIND package (named daemon included but not enabled).
     "bind",
     "whois",
     "tmux",
@@ -62,20 +60,8 @@ runtime_packages = [
 gaming_packages = [
     "cachyos-gaming-applications",
     "ffmpeg",
-    "gst-plugins-good",
-    "gst-plugins-bad",
-    "gst-plugins-ugly",
-    "gst-libav",
 ]
 
 aur_packages = [
     "fnm-bin",
-]
-
-# Consumed by tasks/tools.py (Phase 2) — pipx install for each tool.
-pipx_tools = [
-    "ipython",
-    "hatch",
-    "pre-commit",
-    "checkov",
 ]

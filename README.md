@@ -1,6 +1,6 @@
 # Hanzo
 
-> Hattori Hanzo: You must have big rats if you need Hattori Hanzo's steel.
+> Hattori Hanzō: You must have big rats if you need Hattori Hanzo's steel.
 > The Bride: ...Huge.
 
 CachyOS system provisioner powered by [pyinfra](https://pyinfra.com/). A single command bootstraps a complete development and gaming machine with idempotent configuration.
@@ -13,7 +13,7 @@ CachyOS system provisioner powered by [pyinfra](https://pyinfra.com/). A single 
 ## Quickstart
 
 ```bash
-curl -L https://raw.githubusercontent.com/palazzem/hanzo/main/bin/bootstrap.sh | sh
+curl -L https://raw.githubusercontent.com/palazzem/hanzo/main/bin/bootstrap.sh | bash
 ```
 
 This will:
@@ -42,18 +42,7 @@ HANZO_FULLNAME="Your Name"
 HANZO_EMAIL="your@email.com"
 ```
 
-Edit this file directly to update your settings.
-
-## What Gets Installed
-
-- **Base tools**: git, neovim, fzf, htop, tmux, jq, yq, httpie, and more
-- **Docker**: docker, buildx, compose
-- **Languages**: rustup, go, fnm (Node.js)
-- **AI**: ollama-rocm
-- **Gaming**: CachyOS gaming applications, multimedia codecs
-- **ASUS ROG**: asusctl, rog-control-center (auto-detected on GZ302 hardware)
-
-See `group_data/all.py` for the complete package list.
+Edit this file directly to update your settings. You can also set `HANZO_FULLNAME` and `HANZO_EMAIL` as environment variables for unattended provisioning (e.g., in containers).
 
 ## Architecture
 
@@ -64,6 +53,15 @@ Hanzo uses pyinfra to run operations locally via `pyinfra @local`. All operation
 - `tasks/` — individual task files (packages, system, tools, dotfiles, hardware)
 - `templates/` — Jinja2 templates for config files
 
-## Contributing
+## Contribute
 
-This tool provisions my personal CachyOS setup. PRs that fix bugs or improve the pyinfra task structure are welcome. See `CLAUDE.md` for the task authoring contract.
+This tool provisions my personal CachyOS setup. You may use this repository as a base to create your own configuration. I'll be glad to accept any PR that:
+
+* Fixes bugs or issues in the current implementation
+* Improves the pyinfra task structure or provisioning logic
+* Enhances or makes me aware of different provisioning approaches
+
+I will not merge pull requests that add new development tools, but I will be grateful if you can discuss about it
+in the [issue tracker](https://github.com/palazzem/hanzo/issues).
+
+See `CLAUDE.md` for the task authoring contract.

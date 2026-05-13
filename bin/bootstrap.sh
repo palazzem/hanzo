@@ -89,6 +89,15 @@ CONFIG_FILE="$CONFIG_DIR/config"
 
 if [ -f "$CONFIG_FILE" ]; then
     log_info "Configuration already exists at $CONFIG_FILE"
+elif [ -n "${HANZO_FULLNAME:-}" ] && [ -n "${HANZO_EMAIL:-}" ]; then
+    # Unattended mode: env vars are set (e.g., container testing)
+    mkdir -p "$CONFIG_DIR"
+    cat > "$CONFIG_FILE" << EOF
+HANZO_FULLNAME="$HANZO_FULLNAME"
+HANZO_EMAIL="$HANZO_EMAIL"
+EOF
+
+    log_info "Configuration saved to $CONFIG_FILE (from environment)"
 else
     log_info "First-time setup — configuring Hanzo"
     echo ""
