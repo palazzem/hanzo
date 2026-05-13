@@ -19,4 +19,13 @@ RUN uv tool install pyinfra
 
 # Validate pyinfra scripts with a dry run
 ENV SKIP_HARDWARE_CHECK=1
+
+# Exercises: clone branch (no .dotfiles), identity-skip branch (no config)
 RUN pyinfra -y @local deploy.py --dry
+
+# Exercises: pull branch (existing .dotfiles repo) and identity injection branch
+RUN mkdir -p /home/testuser/.dotfiles/.git && \
+    mkdir -p /home/testuser/.config/hanzo && \
+    printf 'HANZO_FULLNAME="Test User"\nHANZO_EMAIL="test@example.com"\n' \
+      > /home/testuser/.config/hanzo/config && \
+    pyinfra -y @local deploy.py --dry
