@@ -1,0 +1,22 @@
+FROM --platform=linux/amd64 cachyos/cachyos:latest
+
+RUN pacman -Syu --noconfirm && \
+    pacman -S --noconfirm python git curl sudo base-devel paru
+
+# Non-root user with passwordless sudo for realistic testing
+RUN useradd -m -G wheel testuser && \
+    echo "testuser ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+
+COPY . /home/testuser/hanzo
+RUN chown -R testuser:testuser /home/testuser/hanzo
+
+USER testuser
+WORKDIR /home/testuser/hanzo
+
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh
+ENV PATH="/home/testuser/.local/bin:${PATH}"
+RUN uv tool install pyinfra
+
+# Validate pyinfra scripts with a dry run
+ENV SKIP_HARDWARE_CHECK=1
+RUN pyinfra -y @local deploy.py --dry
