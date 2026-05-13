@@ -5,6 +5,8 @@ This is the reference implementation for how Hanzo tasks should be written —
 see CLAUDE.md for the full contract.
 """
 
+import shlex
+
 from pyinfra import host
 from pyinfra.operations import pacman, server
 
@@ -49,7 +51,8 @@ pacman.packages(
 server.shell(
     name="Install AUR packages via paru",
     commands=[
-        "paru -S --needed --noconfirm " + " ".join(host.data.aur_packages),
+        "paru -S --needed --noconfirm "
+        + " ".join(shlex.quote(p) for p in host.data.aur_packages),
     ],
     _sudo=False,
 )
