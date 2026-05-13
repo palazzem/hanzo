@@ -29,7 +29,6 @@ _current_user = getpass.getuser()
 # ---------------------------------------------------------------------------
 # Groups
 # ---------------------------------------------------------------------------
-# Ensure system groups exist before adding the user.
 # docker is package-managed but created explicitly as a safety net in case
 # include order changes. render/video are kernel-managed — no creation needed.
 
@@ -52,7 +51,7 @@ server.user(
 # ---------------------------------------------------------------------------
 # Systemd services
 # ---------------------------------------------------------------------------
-# Enable and start services installed by tasks/packages.py.
+# Runs after packages so the service unit files are already on disk.
 
 for _service in host.data.system_services:
     systemd.service(
@@ -66,7 +65,8 @@ for _service in host.data.system_services:
 # ---------------------------------------------------------------------------
 # Locale
 # ---------------------------------------------------------------------------
-# Replace any existing LANG= line or append if missing.
+# Locale must be set explicitly — CachyOS images may ship with a different
+# default, and systemd reads LANG= from /etc/locale.conf at boot.
 
 files.line(
     name=f"Set system locale to {host.data.system_locale}",

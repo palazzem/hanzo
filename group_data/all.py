@@ -60,15 +60,15 @@ aur_packages = [
 # System configuration (tasks/system.py)
 # ---------------------------------------------------------------------------
 
-# Groups that must be created as system groups before user membership.
+# Only groups not managed by the kernel or package scripts.
 # render and video are kernel/udev-managed and always exist.
 system_groups = [
     "docker",
 ]
 
 # Supplementary groups to add the current user to.
-user_groups = [
-    "docker",
+# Includes system_groups (which we create) plus kernel-managed groups.
+user_groups = system_groups + [
     "render",
     "video",
 ]
@@ -80,5 +80,5 @@ system_services = [
     "asusd",
 ]
 
-# System locale.
+# Default locale — matches CachyOS installer defaults for US English.
 system_locale = "en_US.UTF-8"
