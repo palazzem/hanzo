@@ -89,3 +89,59 @@ for _tool in host.data.pipx_tools:
         ],
         _sudo=False,
     )
+
+# ---------------------------------------------------------------------------
+# Infrastructure tools
+# ---------------------------------------------------------------------------
+
+# Terraform and Packer via paru (AUR).
+# paru handles sudo internally, so _sudo=False. The --needed flag skips
+# already-installed packages (same pattern as packages.py's paru call).
+server.shell(
+    name="Install infrastructure AUR packages via paru",
+    commands=[
+        "paru -S --needed --noconfirm " + " ".join(host.data.infra_aur_packages),
+    ],
+    _sudo=False,
+)
+
+# tflint: Terraform linter installed via official script to ~/.local/bin.
+# Guard checks the known binary path rather than `command -v` because
+# ~/.local/bin may not be on PATH in a fresh pyinfra shell. The export
+# inside the subshell ensures the piped bash process inherits the path.
+server.shell(
+    name="Install tflint via official install script",
+    commands=[
+        'test -x "$HOME/.local/bin/tflint" || '
+        '(export TFLINT_INSTALL_PATH="$HOME/.local/bin" && '
+        "curl -fsSL https://raw.githubusercontent.com/terraform-linters/tflint/master/install_linux.sh | bash)",
+    ],
+    _sudo=False,
+)
+
+# Google Cloud SDK: installed via Google's interactive installer with
+# prompts disabled. Installs to ~/.local/share/google-cloud-sdk/.
+server.shell(
+    name="Install Google Cloud SDK",
+    commands=[
+        'test -d "$HOME/.local/share/google-cloud-sdk" || '
+        "(curl -fsSL https://sdk.cloud.google.com | "
+        'bash -s -- --disable-prompts --install-dir="$HOME/.local/share")',
+    ],
+    _sudo=False,
+)
+
+# Go tools: installed via `go install`. GOPATH and PATH must be set in
+# the same shell command since each server.shell spawns a fresh process
+# where $GOPATH/bin is not on PATH. Guard uses `test -x` on the known
+# binary path rather than `command -v` for the same reason.
+for _tool_name, _tool_path in host.data.go_tools.items():
+    server.shell(
+        name=f"Install {_tool_name} via go install",
+        commands=[
+            f'test -x "{_gopath}/bin/{_tool_name}" || '
+            f'GOPATH="{_gopath}" PATH="{_gopath}/bin:$PATH" '
+            f"go install {_tool_path}",
+        ],
+        _sudo=False,
+    )
