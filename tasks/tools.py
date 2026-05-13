@@ -145,3 +145,20 @@ for _tool_name, _tool_path in host.data.go_tools.items():
         ],
         _sudo=False,
     )
+
+# ---------------------------------------------------------------------------
+# AI / Editor tooling
+# ---------------------------------------------------------------------------
+# Node.js must be available via fnm. Each command re-evaluates fnm env
+# since server.shell runs in fresh processes. npm list -g checks if the
+# package is already globally installed before running npm install.
+
+for _pkg in host.data.npm_global_packages:
+    server.shell(
+        name=f"Install {_pkg} via npm",
+        commands=[
+            f'eval "$(fnm env)" && '
+            f"(npm list -g {_pkg} >/dev/null 2>&1 || npm install -g {_pkg})",
+        ],
+        _sudo=False,
+    )
