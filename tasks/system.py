@@ -11,6 +11,8 @@ Groups:
 Services:
     Enables and starts systemd services installed by tasks/packages.py.
     Runs after packages so the service units are already on disk.
+    Also enables user-scoped services (systemctl --user) that run in
+    the user's session without root.
 
 Locale:
     Ensures /etc/locale.conf has the correct LANG= setting.
@@ -60,6 +62,22 @@ for service in host.data.system_services:
         running=True,
         enabled=True,
         _sudo=True,
+    )
+
+# ---------------------------------------------------------------------------
+# User services (systemd --user)
+# ---------------------------------------------------------------------------
+# Per-user services managed via systemctl --user. These run in the user's
+# session and do not require root.
+
+for service in host.data.user_services:
+    systemd.service(
+        name=f"Enable and start {service} (user)",
+        service=service,
+        running=True,
+        enabled=True,
+        user_mode=True,
+        _sudo=False,
     )
 
 # ---------------------------------------------------------------------------

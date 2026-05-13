@@ -81,6 +81,11 @@ system_services = [
     "asusd",
 ]
 
+# Systemd user services to enable (systemctl --user).
+user_services = [
+    "ssh-agent",
+]
+
 # Default locale — matches CachyOS installer defaults for US English.
 system_locale = "en_US.UTF-8"
 
