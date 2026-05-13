@@ -66,3 +66,19 @@ load_hanzo_config() {
         log_warn "Run 'hanzo config init' to create it"
     fi
 }
+
+# --- Dotfiles repository ---
+
+DOTFILES_REPO="https://github.com/palazzem/dotfiles.git"
+DOTFILES_DIR="${HOME}/.dotfiles"
+
+clone_or_update_dotfiles() {
+    if [ -d "${DOTFILES_DIR}/.git" ]; then
+        log_info "Dotfiles already cloned. Pulling latest changes..."
+        git -C "$DOTFILES_DIR" pull
+    else
+        log_info "Cloning dotfiles repository..."
+        git clone "$DOTFILES_REPO" "$DOTFILES_DIR"
+    fi
+    log_success "Dotfiles repository is up to date"
+}
