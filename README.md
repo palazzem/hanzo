@@ -89,3 +89,7 @@ I will not merge pull requests that add new development tools, but I will be gra
 in the [issue tracker](https://github.com/palazzem/hanzo/issues).
 
 See `CLAUDE.md` for the task authoring contract.
+
+## License
+
+BSD 2-Clause. See [LICENSE](LICENSE) for details.
