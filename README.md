@@ -55,6 +55,28 @@ Hanzo uses pyinfra to run operations locally via `pyinfra @local`. All operation
 - `tasks/` — individual task files (packages, system, tools, dotfiles, hardware)
 - `templates/` — Jinja2 templates for config files
 
+## Development
+
+Clone the repository and install the pre-commit hooks:
+
+```bash
+git clone https://github.com/palazzem/hanzo.git
+cd hanzo
+pre-commit install
+```
+
+Run linters locally:
+
+```bash
+pre-commit run --all-files
+```
+
+Run the full test suite inside a CachyOS container:
+
+```bash
+docker build -f tests/Containerfile -t hanzo:test .
+```
+
 ## Contribute
 
 This tool provisions my personal CachyOS setup. You may use this repository as a base to create your own configuration. I'll be glad to accept any PR that:
