@@ -9,26 +9,4 @@ on:
 
 jobs:
   lint:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-
-      - name: Validate Python syntax
-        run: python -c "
-          import ast, pathlib;
-          files = list(pathlib.Path('.').rglob('*.py'));
-          print(f'Checking {len(files)} Python files...');
-          [ast.parse(f.read_text()) for f in files];
-          print('All files valid')
-          "
-
-      - name: Validate shell scripts
-        run: |
-          bash -n bin/bootstrap.sh
-          bash -n bin/hanzo
+    uses: ./.github/workflows/lint.yaml

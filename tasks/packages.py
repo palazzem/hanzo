@@ -11,9 +11,8 @@ from pyinfra.operations import pacman, server
 # ---------------------------------------------------------------------------
 # Official repo packages (pacman)
 # ---------------------------------------------------------------------------
-# pacman.packages is idempotent: pyinfra queries installed packages via
-# facts and only installs what's missing. We group packages into logical
-# transactions matching the spec.
+# Group packages into logical transactions matching the spec.
+# pacman.packages is idempotent — only missing packages are installed.
 
 pacman.packages(
     name="Install base development packages",
@@ -42,7 +41,7 @@ pacman.packages(
 # AUR packages (paru)
 # ---------------------------------------------------------------------------
 # paru must run as the current user, not root. Override global SUDO.
-# --needed skips already-installed packages. --noconfirm avoids prompts.
+# Flags ensure idempotent, non-interactive execution for unattended runs.
 
 server.shell(
     name="Install AUR packages via paru",

@@ -8,7 +8,7 @@ import os
 from pyinfra import config, host, local
 from pyinfra.facts.server import Command
 
-# Every operation runs with sudo unless explicitly overridden with _sudo=False
+# System provisioning requires root for package management and config writes
 config.SUDO = True
 
 # ---------------------------------------------------------------------------
@@ -23,9 +23,11 @@ if os.path.isfile(_config_path):
             _line = _line.strip()
             if not _line or _line.startswith("#"):
                 continue
-            _key, _, _value = _line.partition("=")
+            _key, _sep, _value = _line.partition("=")
+            if not _sep:
+                continue
             _key = _key.strip().lower()
-            _value = _value.strip().strip('"')
+            _value = _value.strip().strip('"').strip("'")
             # Only set if not already defined by group_data or CLI args.
             # HostData has no setdefault(); use get() + setattr() instead.
             if host.data.get(_key) is None:

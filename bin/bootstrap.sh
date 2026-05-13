@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Hanzo bootstrap — one-command CachyOS provisioner setup.
-# Usage: curl -L https://raw.githubusercontent.com/palazzem/hanzo/main/bin/bootstrap.sh | sh
+# Usage: curl -L https://raw.githubusercontent.com/palazzem/hanzo/main/bin/bootstrap.sh | bash
 
 set -euo pipefail
 
@@ -15,7 +15,6 @@ NC='\033[0m'
 
 log_info()    { echo -e "${GREEN}[hanzo]${NC} $1"; }
 log_warn()    { echo -e "${YELLOW}[hanzo]${NC} $1"; }
-log_error()   { echo -e "${RED}[hanzo]${NC} $1"; }
 
 # ---------------------------------------------------------------------------
 # Banner
@@ -36,7 +35,7 @@ echo ""
 log_info "Requesting sudo access (you may be prompted for your password)..."
 sudo -v
 
-# Keep sudo alive in the background until this script exits
+# Provisioning takes long enough for the sudo ticket to expire mid-run
 while true; do sudo -n true; sleep 50; done 2>/dev/null &
 SUDO_KEEPALIVE_PID=$!
 trap 'kill $SUDO_KEEPALIVE_PID 2>/dev/null' EXIT
@@ -50,7 +49,7 @@ else
     log_info "Installing uv..."
     curl -LsSf https://astral.sh/uv/install.sh | sh
 
-    # Source uv's env so it's available for the rest of this script
+    # uv's installer only modifies shell profiles, not the current session
     export PATH="$HOME/.local/bin:$PATH"
 fi
 
@@ -96,6 +95,10 @@ else
 
     read -rp "Full name: " HANZO_FULLNAME </dev/tty
     read -rp "Email: " HANZO_EMAIL </dev/tty
+
+    # Escape double quotes to prevent malformed config file
+    HANZO_FULLNAME="${HANZO_FULLNAME//\"/\\\"}"
+    HANZO_EMAIL="${HANZO_EMAIL//\"/\\\"}"
 
     mkdir -p "$CONFIG_DIR"
     cat > "$CONFIG_FILE" << EOF
