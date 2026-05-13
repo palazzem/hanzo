@@ -87,6 +87,9 @@ system_locale = "en_US.UTF-8"
 dotfiles_repo = "https://github.com/palazzem/dotfiles.git"
 dotfiles_dir = "~/.dotfiles"
 
+claude_config_repo = "https://github.com/palazzem/claude-config.git"
+claude_config_dir = "~/.claude"
+
 # ---------------------------------------------------------------------------
 # GZ302 (ASUS ROG Flow Z13) hardware configuration
 # ---------------------------------------------------------------------------
