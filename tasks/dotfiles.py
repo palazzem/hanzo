@@ -47,7 +47,7 @@ else:
 # symlinking config files. It is designed to be idempotent (re-runnable).
 server.shell(
     name="Run dotfiles installer",
-    commands=[os.path.join(_dotfiles_dir, "install.sh")],
+    commands=[shlex.quote(os.path.join(_dotfiles_dir, "install.sh"))],
     _sudo=False,
 )
 
