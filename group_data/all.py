@@ -85,3 +85,22 @@ system_locale = "en_US.UTF-8"
 
 dotfiles_repo = "https://github.com/palazzem/dotfiles.git"
 dotfiles_dir = "~/.dotfiles"
+
+# ---------------------------------------------------------------------------
+# GZ302 (ASUS ROG Flow Z13) hardware configuration
+# ---------------------------------------------------------------------------
+# OLED kernel param disables PSR-SU and Panel Replay to prevent scrolling
+# artifacts and flicker on the Strix Halo OLED panel (kernel 7.0+).
+gz302_oled_kernel_param = "amdgpu.dcdebugmask=0x600"
+
+# ASUS USB identifiers for keyboard, touchpad, and lightbar devices.
+# Used by suspend hook (USB reset, HID unbind), hwdb (key remap), and
+# udev rule (RGB).
+gz302_asus_usb_vendor = "0b05"
+gz302_asus_keyboard_product = "1a30"
+gz302_asus_lightbar_product = "18c6"
+
+# Keyboard hwdb remap: Copilot key -> KEY_PROG1.
+# Bound in Hyprland to launch alacritty -e claude.
+gz302_keyboard_scancode = "70072"
+gz302_keyboard_target_key = "prog1"
