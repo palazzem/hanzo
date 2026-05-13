@@ -32,7 +32,8 @@ if os.path.isdir(os.path.join(_dotfiles_dir, ".git")):
     server.shell(
         name="Pull latest dotfiles changes",
         commands=[
-            f"git -C {shlex.quote(_dotfiles_dir)} pull --ff-only",
+            f"git -C {shlex.quote(_dotfiles_dir)} pull --ff-only"
+            " || echo 'WARNING: fast-forward failed; local branch may have diverged — skipping pull'",
         ],
         _sudo=False,
     )
@@ -95,7 +96,8 @@ if os.path.isdir(os.path.join(_claude_config_dir, ".git")):
     server.shell(
         name="Pull latest claude-config changes",
         commands=[
-            f"git -C {shlex.quote(_claude_config_dir)} pull --ff-only",
+            f"git -C {shlex.quote(_claude_config_dir)} pull --ff-only"
+            " || echo 'WARNING: fast-forward failed; local branch may have diverged — skipping pull'",
         ],
         _sudo=False,
     )
