@@ -40,13 +40,27 @@ if os.path.isfile(_config_path):
                 setattr(host.data, _key, _value)
 
 # ---------------------------------------------------------------------------
-# Include task files — order matters (packages first, then system, etc.)
+# Include task files
+#
+# Order matters — each task depends on those above it:
+#
+#   packages.py   no dependencies (installs all system and AUR packages)
+#       |
+#   system.py     groups + services installed by packages.py
+#       |
+#   tools.py      configures rustup, fnm, go, uv installed by packages.py;
+#                 paru (preinstalled on CachyOS) for infra AUR packages
+#       |
+#   dotfiles.py   installer may reference tool paths from tools.py;
+#                 git identity uses config parsed above
+#
+# Hardware tasks (included conditionally after DMI detection below):
+#   hardware/gz302.py   uses asusctl, rog-control-center from packages.py
+#
 # Paths resolve relative to CWD. bin/hanzo sets CWD to the repo root
 # before exec'ing pyinfra, so these paths work from any calling directory.
 # ---------------------------------------------------------------------------
 local.include("tasks/packages.py")
-
-# Phase 2 tasks (uncomment as they land):
 local.include("tasks/system.py")
 local.include("tasks/tools.py")
 local.include("tasks/dotfiles.py")
