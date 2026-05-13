@@ -129,3 +129,16 @@ inject_git_config() {
     git config --global user.email "$HANZO_EMAIL"
     log_success "Git identity set to: ${HANZO_FULLNAME} <${HANZO_EMAIL}>"
 }
+
+# --- Main ---
+
+main() {
+    log_info "Setting up dotfiles..."
+    load_hanzo_config
+    clone_or_update_dotfiles
+    run_dotfiles_installer
+    inject_git_config
+    log_success "Dotfiles setup complete"
+}
+
+main
