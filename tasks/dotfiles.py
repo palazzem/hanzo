@@ -1,9 +1,14 @@
-"""Dotfiles setup task.
+"""Dotfiles and Claude Code configuration setup task.
 
 Clones the user's dotfiles repository to the configured directory (or pulls
 if it already exists), runs the repository's installer script, and injects
 git identity (user.name, user.email) from the Hanzo configuration. Git
 identity injection is skipped with a warning when values are not configured.
+
+Also clones the Claude Code configuration repository (claude-config) into
+~/.claude. If ~/.claude already exists but isn't a git repo (created by
+Claude Code on first use), the directory is adopted in-place as a git repo
+while preserving untracked runtime files.
 """
 
 import os
@@ -74,4 +79,49 @@ else:
     logger.warning(
         "hanzo_fullname or hanzo_email not configured — skipping git identity injection. "
         "Run bootstrap.sh or edit ~/.config/hanzo/config to set them."
+    )
+
+# ---------------------------------------------------------------------------
+# Clone or update the Claude Code configuration repository
+# ---------------------------------------------------------------------------
+# claude-config provides versioned Claude Code settings (CLAUDE.md, skills,
+# agents, settings.json). The repo uses an ignore-all .gitignore that
+# whitelists only config files, so untracked runtime files (memory/,
+# projects/, credentials) are preserved across all code paths.
+_claude_config_dir = os.path.expanduser(host.data.claude_config_dir)
+
+if os.path.isdir(os.path.join(_claude_config_dir, ".git")):
+    server.shell(
+        name="Pull latest claude-config changes",
+        commands=[
+            f"git -C {shlex.quote(_claude_config_dir)} pull --ff-only",
+        ],
+        _sudo=False,
+    )
+elif os.path.isdir(_claude_config_dir):
+    # Claude Code creates ~/.claude on first use. Adopt the existing
+    # directory as a git repo: init, fetch remote, and hard-reset to
+    # overwrite tracked files (repo is source of truth) while leaving
+    # untracked runtime files untouched.
+    server.shell(
+        name="Adopt existing ~/.claude directory as claude-config repo",
+        commands=[
+            f"git init {shlex.quote(_claude_config_dir)}",
+            f"git -C {shlex.quote(_claude_config_dir)} remote add origin"
+            f" {shlex.quote(host.data.claude_config_repo)}",
+            f"git -C {shlex.quote(_claude_config_dir)} fetch origin",
+            f"git -C {shlex.quote(_claude_config_dir)} reset --hard origin/main",
+            f"git -C {shlex.quote(_claude_config_dir)} branch -M main",
+            f"git -C {shlex.quote(_claude_config_dir)} branch --set-upstream-to=origin/main",
+        ],
+        _sudo=False,
+    )
+else:
+    server.shell(
+        name="Clone claude-config repository",
+        commands=[
+            f"git clone {shlex.quote(host.data.claude_config_repo)}"
+            f" {shlex.quote(_claude_config_dir)}",
+        ],
+        _sudo=False,
     )
