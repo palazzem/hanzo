@@ -11,6 +11,7 @@ Prerequisites:
 """
 
 import os
+import shlex
 
 from pyinfra import host
 from pyinfra.operations import files, server
@@ -86,7 +87,7 @@ for _tool in host.data.uv_tools:
     server.shell(
         name=f"Install {_tool} via uv tool",
         commands=[
-            f'uv tool list 2>/dev/null | grep -q "^{_tool} " || uv tool install {_tool}',
+            f'uv tool list 2>/dev/null | grep -q "^{_tool} " || uv tool install {shlex.quote(_tool)}',
         ],
         _sudo=False,
     )
@@ -100,7 +101,8 @@ for _tool in host.data.uv_tools:
 server.shell(
     name="Install infrastructure AUR packages via paru",
     commands=[
-        "paru -S --needed --noconfirm " + " ".join(host.data.infra_aur_packages),
+        "paru -S --needed --noconfirm "
+        + " ".join(shlex.quote(p) for p in host.data.infra_aur_packages),
     ],
     _sudo=False,
 )
@@ -129,7 +131,7 @@ for _pkg in host.data.npm_global_packages:
         name=f"Install {_pkg} via npm",
         commands=[
             f"{_FNM_ACTIVATE} && "
-            f"(npm list -g {_pkg} >/dev/null 2>&1 || npm install -g {_pkg})",
+            f"(npm list -g {shlex.quote(_pkg)} >/dev/null 2>&1 || npm install -g {shlex.quote(_pkg)})",
         ],
         _sudo=False,
     )
