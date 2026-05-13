@@ -1,0 +1,193 @@
+#!/usr/bin/env bash
+# GZ302 Suspend/Resume Hook
+# Managed by Hanzo. Do not edit manually.
+#
+# Fixes four distinct s2idle bugs on Strix Halo:
+#   1. Thunderbolt NHI spurious wakeup -> s2idle hang
+#   2. xHCI wakeup race -> resume failure
+#   3. ASUS HID ENOMEM (-12) on re-probe after resume
+#   4. MMC "Power Off Notify" timeout (-110) blocking suspend
+#
+# Post-resume restores all state, resets USB devices, rebinds HID.
+#
+# NOTE: No set -euo pipefail. This hook runs at every suspend/resume
+# cycle and must be best-effort. set -e would abort mid-operation on
+# any command failure, leaving the system partially modified. The hook
+# must always reach exit 0.
+
+LOG_TAG="gz302-suspend"
+STATE_DIR="/run/gz302-suspend"
+MMC_DRIVER_PATH="/sys/bus/mmc/drivers/mmcblk"
+
+log() { logger -t "$LOG_TAG" "$*"; }
+
+# Restore wakeup for PCI devices saved in a state file during pre-suspend.
+# Without restoration, devices stay in wakeup-disabled state across cycles
+# and accumulate stale config that breaks future resume paths.
+restore_wakeup() {
+    local state_file="$1" label="$2"
+    [[ -f "$state_file" ]] || return 0
+    while IFS= read -r dev_name; do
+        [[ -n "$dev_name" ]] || continue
+        log "  Re-enabling wakeup on $label $dev_name"
+        echo "enabled" > "/sys/bus/pci/devices/$dev_name/power/wakeup" 2>/dev/null || true
+    done < "$state_file"
+}
+
+# Cycle USB authorization to force the controller to re-enumerate the device.
+# After s2idle resume, ASUS USB devices often enter a stuck state where the
+# firmware ignores HID reports until a hard reset.
+reset_usb_device() {
+    local dev="$1" label="$2"
+    log "  Resetting $label at $dev"
+    echo 0 > "$dev/authorized" 2>/dev/null || true
+    sleep 0.1
+    echo 1 > "$dev/authorized" 2>/dev/null || true
+}
+
+case "${1:-}" in
+    pre)
+        log "=== Pre-suspend hook starting ==="
+        mkdir -p "$STATE_DIR"
+
+        # --- 1. Disable NHI and constrain xHCI wakeup in a single PCI scan ---
+        # NHI (Thunderbolt) controllers send spurious wakeup signals that cause
+        # the SoC to exit s2idle but fail to fully resume, resulting in a hang.
+        # Multiple xHCI controllers race during s2idle resume; only the
+        # controller hosting the internal keyboard (c4:00.4) keeps wakeup.
+        log "Scanning PCI wakeup sources (NHI + xHCI)..."
+        : > "$STATE_DIR/nhi-wakeup"
+        : > "$STATE_DIR/xhc-wakeup"
+        for dev in /sys/bus/pci/devices/*; do
+            [[ -f "$dev/class" ]] || continue
+            local_class=$(<"$dev/class")
+
+            case "$local_class" in
+                "0x0c0340")
+                    # Thunderbolt NHI (USB4 host)
+                    dev_name=$(basename "$dev")
+                    if [[ -f "$dev/power/wakeup" ]]; then
+                        current=$(<"$dev/power/wakeup")
+                        if [[ "$current" == "enabled" ]]; then
+                            log "  Disabling wakeup on NHI $dev_name"
+                            echo "$dev_name" >> "$STATE_DIR/nhi-wakeup"
+                            echo "disabled" > "$dev/power/wakeup" 2>/dev/null || true
+                        fi
+                    fi
+                    ;;
+                "0x0c0330")
+                    # xHCI USB controller
+                    dev_name=$(basename "$dev")
+                    # c4:00.4 hosts the built-in keyboard; disabling its
+                    # wakeup prevents lid-open and keyboard resume.
+                    [[ "$dev_name" == *"c4:00.4"* ]] && continue
+                    if [[ -f "$dev/power/wakeup" ]]; then
+                        current=$(<"$dev/power/wakeup")
+                        if [[ "$current" == "enabled" ]]; then
+                            log "  Disabling wakeup on xHCI $dev_name"
+                            echo "$dev_name" >> "$STATE_DIR/xhc-wakeup"
+                            echo "disabled" > "$dev/power/wakeup" 2>/dev/null || true
+                        fi
+                    fi
+                    ;;
+            esac
+        done
+
+        # --- 2. Unbind ASUS HID devices ---
+        # The asus HID driver re-probes on resume and fails with ENOMEM (-12),
+        # cascading into a hung resume. Unbind before suspend, rebind after.
+        log "Unbinding ASUS HID devices..."
+        : > "$STATE_DIR/asus-hid"
+        for hid_dev in /sys/bus/hid/devices/0003:{{ data.gz302_asus_usb_vendor | upper }}:*; do
+            [[ -e "$hid_dev" ]] || continue
+            dev_name=$(basename "$hid_dev")
+            if [[ -e "$hid_dev/driver" ]]; then
+                driver_name=$(basename "$(readlink "$hid_dev/driver")")
+                log "  Unbinding HID $dev_name (driver: $driver_name)"
+                echo "$dev_name:$driver_name" >> "$STATE_DIR/asus-hid"
+                echo "$dev_name" > "$hid_dev/driver/unbind" 2>/dev/null || true
+            fi
+        done
+
+        # --- 3. Unbind MMC devices ---
+        # Prevents "mmc0: error -110 writing Power Off Notify bit" blocking
+        # suspend. Only unbind devices that are not actively mounted.
+        log "Unbinding MMC devices..."
+        : > "$STATE_DIR/mmc-devices"
+        if [[ -d "$MMC_DRIVER_PATH" ]]; then
+            for dev in "$MMC_DRIVER_PATH"/mmc*; do
+                [[ -e "$dev" ]] || continue
+                dev_name=$(basename "$dev")
+                if ! mount | grep -q "^/dev/${dev_name}"; then
+                    log "  Unbinding $dev_name"
+                    echo "$dev_name" >> "$STATE_DIR/mmc-devices"
+                    echo "$dev_name" > "$MMC_DRIVER_PATH/unbind" 2>/dev/null || true
+                fi
+            done
+        fi
+
+        log "=== Pre-suspend hook complete ==="
+        ;;
+
+    post)
+        log "=== Post-resume hook starting ==="
+
+        # --- 1. Restore NHI and xHCI wakeup ---
+        restore_wakeup "$STATE_DIR/nhi-wakeup" "NHI"
+        restore_wakeup "$STATE_DIR/xhc-wakeup" "xHCI"
+
+        # --- 2. Rebind MMC devices ---
+        if [[ -f "$STATE_DIR/mmc-devices" ]]; then
+            while IFS= read -r dev_name; do
+                [[ -n "$dev_name" ]] || continue
+                log "  Rebinding $dev_name"
+                echo "$dev_name" > "$MMC_DRIVER_PATH/bind" 2>/dev/null || true
+            done < "$STATE_DIR/mmc-devices"
+        fi
+
+        # --- 3. Reset ASUS USB devices (keyboard/touchpad/lightbar) ---
+        log "Resetting ASUS USB devices..."
+        for dev in /sys/bus/usb/devices/*; do
+            [[ -f "$dev/idVendor" && -f "$dev/idProduct" ]] || continue
+            vid=$(<"$dev/idVendor")
+            pid=$(<"$dev/idProduct")
+            [[ "$vid" == "{{ data.gz302_asus_usb_vendor }}" ]] || continue
+
+            case "$pid" in
+                {{ data.gz302_asus_keyboard_product }})
+                    reset_usb_device "$dev" "keyboard/touchpad"
+                    ;;
+                {{ data.gz302_asus_lightbar_product }})
+                    reset_usb_device "$dev" "lightbar"
+                    ;;
+            esac
+        done
+
+        # --- 4. Rebind ASUS HID devices ---
+        # Wait for USB reset to settle before rebinding HID layer.
+        sleep 1
+        if [[ -f "$STATE_DIR/asus-hid" ]]; then
+            while IFS=: read -r dev_name driver_name; do
+                [[ -n "$dev_name" ]] || continue
+                # Rebinding an already-bound device triggers a kernel warning.
+                if [[ -e "/sys/bus/hid/devices/$dev_name" && ! -e "/sys/bus/hid/devices/$dev_name/driver" ]]; then
+                    if [[ -e "/sys/bus/hid/drivers/$driver_name" ]]; then
+                        log "  Rebinding HID $dev_name to $driver_name"
+                        echo "$dev_name" > "/sys/bus/hid/drivers/$driver_name/bind" 2>/dev/null || true
+                    fi
+                fi
+            done < "$STATE_DIR/asus-hid"
+        fi
+
+        # Leftover state files would cause stale rebinds on next cycle.
+        rm -rf "$STATE_DIR"
+
+        log "=== Post-resume hook complete ==="
+        ;;
+
+    *)
+        # Unknown argument -- ignore silently.
+        # systemd-sleep may pass arguments we don't handle.
+        ;;
+esac
+exit 0
