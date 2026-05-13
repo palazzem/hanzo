@@ -26,8 +26,8 @@ _dotfiles_dir = os.path.expanduser(host.data.dotfiles_dir)
 # Clone or update the dotfiles repository
 # ---------------------------------------------------------------------------
 # Mirrors the clone-or-pull pattern from bootstrap.sh: check for .git to
-# decide between clone and pull. --ff-only prevents merge commits if the
-# local branch has diverged unexpectedly.
+# decide between clone and pull. os.path.isdir() evaluates at control time
+# (Python parse), not deploy time — safe because Hanzo always targets @local.
 if os.path.isdir(os.path.join(_dotfiles_dir, ".git")):
     server.shell(
         name="Pull latest dotfiles changes",
@@ -88,6 +88,7 @@ else:
 # agents, settings.json). The repo uses an ignore-all .gitignore that
 # whitelists only config files, so untracked runtime files (memory/,
 # projects/, credentials) are preserved across all code paths.
+# Expanded on the control machine — safe because Hanzo always targets @local.
 _claude_config_dir = os.path.expanduser(host.data.claude_config_dir)
 
 if os.path.isdir(os.path.join(_claude_config_dir, ".git")):
