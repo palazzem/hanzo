@@ -72,3 +72,20 @@ files.directory(
     path=os.path.join(_gopath, "bin"),
     _sudo=False,
 )
+
+# ---------------------------------------------------------------------------
+# pipx tools
+# ---------------------------------------------------------------------------
+# python-pipx is installed by packages.py (base_packages). Each tool is
+# checked via `pipx list` before install because pipx exits with an error
+# if a tool is already installed. The --short flag outputs "name version"
+# per line, so grep anchors on "^tool " to avoid substring matches.
+
+for _tool in host.data.pipx_tools:
+    server.shell(
+        name=f"Install {_tool} via pipx",
+        commands=[
+            f'pipx list --short 2>/dev/null | grep -q "^{_tool} " || pipx install {_tool}',
+        ],
+        _sudo=False,
+    )
