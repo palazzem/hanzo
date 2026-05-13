@@ -21,58 +21,79 @@ MMC_DRIVER_PATH="/sys/bus/mmc/drivers/mmcblk"
 
 log() { logger -t "$LOG_TAG" "$*"; }
 
+# Restore wakeup for PCI devices saved in a state file during pre-suspend.
+# Without restoration, devices stay in wakeup-disabled state across cycles
+# and accumulate stale config that breaks future resume paths.
+restore_wakeup() {
+    local state_file="$1" label="$2"
+    [[ -f "$state_file" ]] || return 0
+    while IFS= read -r dev_name; do
+        [[ -n "$dev_name" ]] || continue
+        log "  Re-enabling wakeup on $label $dev_name"
+        echo "enabled" > "/sys/bus/pci/devices/$dev_name/power/wakeup" 2>/dev/null || true
+    done < "$state_file"
+}
+
+# Cycle USB authorization to force the controller to re-enumerate the device.
+# After s2idle resume, ASUS USB devices often enter a stuck state where the
+# firmware ignores HID reports until a hard reset.
+reset_usb_device() {
+    local dev="$1" label="$2"
+    log "  Resetting $label at $dev"
+    echo 0 > "$dev/authorized" 2>/dev/null || true
+    sleep 0.1
+    echo 1 > "$dev/authorized" 2>/dev/null || true
+}
+
 case "${1:-}" in
     pre)
         log "=== Pre-suspend hook starting ==="
         mkdir -p "$STATE_DIR"
 
-        # --- 1. Disable Thunderbolt/NHI wakeup ---
-        # NHI controllers send spurious wakeup signals that cause the SoC
-        # to exit s2idle but fail to fully resume, resulting in a hang.
-        log "Disabling Thunderbolt/NHI wakeup sources..."
-        : > "$STATE_DIR/nhi-wakeup"
-        for dev in /sys/bus/pci/devices/*; do
-            [[ -f "$dev/class" ]] || continue
-            local_class=$(<"$dev/class")
-            # 0x0c0340 = Thunderbolt NHI (USB4 host)
-            if [[ "$local_class" == "0x0c0340" ]]; then
-                dev_name=$(basename "$dev")
-                if [[ -f "$dev/power/wakeup" ]]; then
-                    current=$(<"$dev/power/wakeup")
-                    if [[ "$current" == "enabled" ]]; then
-                        log "  Disabling wakeup on NHI $dev_name"
-                        echo "$dev_name" >> "$STATE_DIR/nhi-wakeup"
-                        echo "disabled" > "$dev/power/wakeup" 2>/dev/null || true
-                    fi
-                fi
-            fi
-        done
-
-        # --- 2. Constrain xHCI wakeup sources ---
-        # Multiple xHCI controllers race during s2idle resume. Only the
+        # --- 1. Disable NHI and constrain xHCI wakeup in a single PCI scan ---
+        # NHI (Thunderbolt) controllers send spurious wakeup signals that cause
+        # the SoC to exit s2idle but fail to fully resume, resulting in a hang.
+        # Multiple xHCI controllers race during s2idle resume; only the
         # controller hosting the internal keyboard (c4:00.4) keeps wakeup.
-        log "Constraining xHCI wakeup sources..."
+        log "Scanning PCI wakeup sources (NHI + xHCI)..."
+        : > "$STATE_DIR/nhi-wakeup"
         : > "$STATE_DIR/xhc-wakeup"
         for dev in /sys/bus/pci/devices/*; do
             [[ -f "$dev/class" ]] || continue
             local_class=$(<"$dev/class")
-            # 0x0c0330 = xHCI USB controller
-            if [[ "$local_class" == "0x0c0330" ]]; then
-                dev_name=$(basename "$dev")
-                # Preserve wakeup on the internal USB controller (keyboard)
-                [[ "$dev_name" == *"c4:00.4"* ]] && continue
-                if [[ -f "$dev/power/wakeup" ]]; then
-                    current=$(<"$dev/power/wakeup")
-                    if [[ "$current" == "enabled" ]]; then
-                        log "  Disabling wakeup on xHCI $dev_name"
-                        echo "$dev_name" >> "$STATE_DIR/xhc-wakeup"
-                        echo "disabled" > "$dev/power/wakeup" 2>/dev/null || true
+
+            case "$local_class" in
+                "0x0c0340")
+                    # Thunderbolt NHI (USB4 host)
+                    dev_name=$(basename "$dev")
+                    if [[ -f "$dev/power/wakeup" ]]; then
+                        current=$(<"$dev/power/wakeup")
+                        if [[ "$current" == "enabled" ]]; then
+                            log "  Disabling wakeup on NHI $dev_name"
+                            echo "$dev_name" >> "$STATE_DIR/nhi-wakeup"
+                            echo "disabled" > "$dev/power/wakeup" 2>/dev/null || true
+                        fi
                     fi
-                fi
-            fi
+                    ;;
+                "0x0c0330")
+                    # xHCI USB controller
+                    dev_name=$(basename "$dev")
+                    # c4:00.4 hosts the built-in keyboard; disabling its
+                    # wakeup prevents lid-open and keyboard resume.
+                    [[ "$dev_name" == *"c4:00.4"* ]] && continue
+                    if [[ -f "$dev/power/wakeup" ]]; then
+                        current=$(<"$dev/power/wakeup")
+                        if [[ "$current" == "enabled" ]]; then
+                            log "  Disabling wakeup on xHCI $dev_name"
+                            echo "$dev_name" >> "$STATE_DIR/xhc-wakeup"
+                            echo "disabled" > "$dev/power/wakeup" 2>/dev/null || true
+                        fi
+                    fi
+                    ;;
+            esac
         done
 
-        # --- 3. Unbind ASUS HID devices ---
+        # --- 2. Unbind ASUS HID devices ---
         # The asus HID driver re-probes on resume and fails with ENOMEM (-12),
         # cascading into a hung resume. Unbind before suspend, rebind after.
         log "Unbinding ASUS HID devices..."
@@ -88,7 +109,7 @@ case "${1:-}" in
             fi
         done
 
-        # --- 4. Unbind MMC devices ---
+        # --- 3. Unbind MMC devices ---
         # Prevents "mmc0: error -110 writing Power Off Notify bit" blocking
         # suspend. Only unbind devices that are not actively mounted.
         log "Unbinding MMC devices..."
@@ -111,25 +132,11 @@ case "${1:-}" in
     post)
         log "=== Post-resume hook starting ==="
 
-        # --- 1. Restore NHI wakeup ---
-        if [[ -f "$STATE_DIR/nhi-wakeup" ]]; then
-            while IFS= read -r dev_name; do
-                [[ -n "$dev_name" ]] || continue
-                log "  Re-enabling wakeup on NHI $dev_name"
-                echo "enabled" > "/sys/bus/pci/devices/$dev_name/power/wakeup" 2>/dev/null || true
-            done < "$STATE_DIR/nhi-wakeup"
-        fi
+        # --- 1. Restore NHI and xHCI wakeup ---
+        restore_wakeup "$STATE_DIR/nhi-wakeup" "NHI"
+        restore_wakeup "$STATE_DIR/xhc-wakeup" "xHCI"
 
-        # --- 2. Restore xHCI wakeup ---
-        if [[ -f "$STATE_DIR/xhc-wakeup" ]]; then
-            while IFS= read -r dev_name; do
-                [[ -n "$dev_name" ]] || continue
-                log "  Re-enabling wakeup on xHCI $dev_name"
-                echo "enabled" > "/sys/bus/pci/devices/$dev_name/power/wakeup" 2>/dev/null || true
-            done < "$STATE_DIR/xhc-wakeup"
-        fi
-
-        # --- 3. Rebind MMC devices ---
+        # --- 2. Rebind MMC devices ---
         if [[ -f "$STATE_DIR/mmc-devices" ]]; then
             while IFS= read -r dev_name; do
                 [[ -n "$dev_name" ]] || continue
@@ -138,7 +145,7 @@ case "${1:-}" in
             done < "$STATE_DIR/mmc-devices"
         fi
 
-        # --- 4. Reset ASUS USB devices (keyboard/touchpad/lightbar) ---
+        # --- 3. Reset ASUS USB devices (keyboard/touchpad/lightbar) ---
         log "Resetting ASUS USB devices..."
         for dev in /sys/bus/usb/devices/*; do
             [[ -f "$dev/idVendor" && -f "$dev/idProduct" ]] || continue
@@ -148,27 +155,21 @@ case "${1:-}" in
 
             case "$pid" in
                 {{ data.gz302_asus_keyboard_product }})
-                    log "  Resetting keyboard/touchpad at $dev"
-                    echo 0 > "$dev/authorized" 2>/dev/null || true
-                    sleep 0.1
-                    echo 1 > "$dev/authorized" 2>/dev/null || true
+                    reset_usb_device "$dev" "keyboard/touchpad"
                     ;;
                 {{ data.gz302_asus_lightbar_product }})
-                    log "  Resetting lightbar at $dev"
-                    echo 0 > "$dev/authorized" 2>/dev/null || true
-                    sleep 0.1
-                    echo 1 > "$dev/authorized" 2>/dev/null || true
+                    reset_usb_device "$dev" "lightbar"
                     ;;
             esac
         done
 
-        # --- 5. Rebind ASUS HID devices ---
+        # --- 4. Rebind ASUS HID devices ---
         # Wait for USB reset to settle before rebinding HID layer.
         sleep 1
         if [[ -f "$STATE_DIR/asus-hid" ]]; then
             while IFS=: read -r dev_name driver_name; do
                 [[ -n "$dev_name" ]] || continue
-                # Only rebind if device exists and is not already bound
+                # Rebinding an already-bound device triggers a kernel warning.
                 if [[ -e "/sys/bus/hid/devices/$dev_name" && ! -e "/sys/bus/hid/devices/$dev_name/driver" ]]; then
                     if [[ -e "/sys/bus/hid/drivers/$driver_name" ]]; then
                         log "  Rebinding HID $dev_name to $driver_name"
@@ -178,7 +179,7 @@ case "${1:-}" in
             done < "$STATE_DIR/asus-hid"
         fi
 
-        # Clean up state directory
+        # Leftover state files would cause stale rebinds on next cycle.
         rm -rf "$STATE_DIR"
 
         log "=== Post-resume hook complete ==="

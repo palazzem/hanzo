@@ -96,7 +96,7 @@ files.template(
 # ---------------------------------------------------------------------------
 # Remaps the Copilot key to KEY_PROG1 for Hyprland binding.
 
-files.template(
+hwdb_config = files.template(
     name="Deploy keyboard hwdb remap",
     src="templates/90-gz302-keyboard.hwdb.j2",
     dest="/etc/udev/hwdb.d/90-gz302-keyboard.hwdb",
@@ -108,6 +108,7 @@ server.shell(
     name="Update hwdb and trigger udev (keyboard remap)",
     commands=["systemd-hwdb update && udevadm trigger"],
     _sudo=True,
+    _if=any_changed(hwdb_config),
 )
 
 # ---------------------------------------------------------------------------
@@ -115,7 +116,7 @@ server.shell(
 # ---------------------------------------------------------------------------
 # Grants unprivileged USB access for rog-control-center RGB control.
 
-files.template(
+rgb_rule = files.template(
     name="Deploy RGB udev rule",
     src="templates/99-gz302-rgb.rules.j2",
     dest="/etc/udev/rules.d/99-gz302-rgb.rules",
@@ -127,4 +128,5 @@ server.shell(
     name="Reload udev rules (RGB)",
     commands=["udevadm control --reload-rules && udevadm trigger"],
     _sudo=True,
+    _if=any_changed(rgb_rule),
 )
