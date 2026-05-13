@@ -31,3 +31,8 @@ RUN mkdir -p /home/testuser/.dotfiles/.git && \
     printf 'HANZO_FULLNAME="Test User"\nHANZO_EMAIL="test@example.com"\n' \
       > /home/testuser/.config/hanzo/config && \
     pyinfra -y @local deploy.py --dry
+
+# Exercises: unknown config keys are rejected by the allowlist
+RUN printf 'HANZO_FULLNAME="Test User"\nHANZO_EMAIL="test@example.com"\nEVIL_KEY="payload"\n' \
+      > /home/testuser/.config/hanzo/config && \
+    pyinfra -y @local deploy.py --dry 2>&1 | grep -q "Ignoring unknown config key: evil_key"

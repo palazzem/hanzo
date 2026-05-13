@@ -87,27 +87,33 @@ fi
 CONFIG_DIR="$HOME/.config/hanzo"
 CONFIG_FILE="$CONFIG_DIR/config"
 
-if [ -f "$CONFIG_FILE" ]; then
-    log_info "Configuration already exists at $CONFIG_FILE"
-elif [ -n "${HANZO_FULLNAME:-}" ] && [ -n "${HANZO_EMAIL:-}" ]; then
-    # Unattended mode: env vars are set (e.g., container testing)
-    if [[ "$HANZO_FULLNAME" == *$'\n'* ]] || [[ "$HANZO_EMAIL" == *$'\n'* ]]; then
-        log_error "HANZO_FULLNAME and HANZO_EMAIL must not contain newlines"
-        exit 1
-    fi
-
-    # Escape double quotes to prevent malformed config file
+# Escapes values and writes the config file with restrictive permissions.
+# Uses a subshell umask so the file is never world-readable, even briefly.
+write_config() {
+    # Double quotes in values would break the KEY="value" format
     HANZO_FULLNAME="${HANZO_FULLNAME//\"/\\\"}"
     HANZO_EMAIL="${HANZO_EMAIL//\"/\\\"}"
 
     mkdir -p "$CONFIG_DIR"
     chmod 0700 "$CONFIG_DIR"
-    cat > "$CONFIG_FILE" << EOF
+    (umask 077 && cat > "$CONFIG_FILE" << EOF
 HANZO_FULLNAME="$HANZO_FULLNAME"
 HANZO_EMAIL="$HANZO_EMAIL"
 EOF
-    chmod 0600 "$CONFIG_FILE"
+    )
+}
 
+if [ -f "$CONFIG_FILE" ]; then
+    log_info "Configuration already exists at $CONFIG_FILE"
+elif [ -n "${HANZO_FULLNAME:-}" ] && [ -n "${HANZO_EMAIL:-}" ]; then
+    # Unattended mode: env vars are set (e.g., container testing)
+    # Newlines in env vars would inject arbitrary lines into the config file
+    if [[ "$HANZO_FULLNAME" == *$'\n'* ]] || [[ "$HANZO_EMAIL" == *$'\n'* ]]; then
+        log_error "HANZO_FULLNAME and HANZO_EMAIL must not contain newlines"
+        exit 1
+    fi
+
+    write_config
     log_info "Configuration saved to $CONFIG_FILE (from environment)"
 else
     log_info "First-time setup — configuring Hanzo"
@@ -116,18 +122,7 @@ else
     read -rp "Full name: " HANZO_FULLNAME </dev/tty
     read -rp "Email: " HANZO_EMAIL </dev/tty
 
-    # Escape double quotes to prevent malformed config file
-    HANZO_FULLNAME="${HANZO_FULLNAME//\"/\\\"}"
-    HANZO_EMAIL="${HANZO_EMAIL//\"/\\\"}"
-
-    mkdir -p "$CONFIG_DIR"
-    chmod 0700 "$CONFIG_DIR"
-    cat > "$CONFIG_FILE" << EOF
-HANZO_FULLNAME="$HANZO_FULLNAME"
-HANZO_EMAIL="$HANZO_EMAIL"
-EOF
-    chmod 0600 "$CONFIG_FILE"
-
+    write_config
     log_info "Configuration saved to $CONFIG_FILE"
 fi
 
