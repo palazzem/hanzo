@@ -107,7 +107,9 @@ elif os.path.isdir(_claude_config_dir):
         name="Adopt existing ~/.claude directory as claude-config repo",
         commands=[
             f"git init {shlex.quote(_claude_config_dir)}",
-            f"git -C {shlex.quote(_claude_config_dir)} remote add origin"
+            f"git -C {shlex.quote(_claude_config_dir)} remote set-url origin"
+            f" {shlex.quote(host.data.claude_config_repo)} 2>/dev/null"
+            f" || git -C {shlex.quote(_claude_config_dir)} remote add origin"
             f" {shlex.quote(host.data.claude_config_repo)}",
             f"git -C {shlex.quote(_claude_config_dir)} fetch origin",
             f"git -C {shlex.quote(_claude_config_dir)} reset --hard origin/main",

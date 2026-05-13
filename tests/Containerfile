@@ -23,7 +23,8 @@ ENV SKIP_HARDWARE_CHECK=1
 # Exercises: clone branch (no .dotfiles), identity-skip branch (no config)
 RUN pyinfra -y @local deploy.py --dry
 
-# Exercises: pull branch (existing .dotfiles repo) and identity injection branch
+# Exercises: dotfiles pull branch (existing .dotfiles), identity injection,
+# and claude-config pull branch (existing .claude repo)
 RUN mkdir -p /home/testuser/.dotfiles/.git && \
     mkdir -p /home/testuser/.claude/.git && \
     mkdir -p /home/testuser/.config/hanzo && \
