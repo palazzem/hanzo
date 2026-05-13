@@ -66,6 +66,12 @@ docker build -f tests/Containerfile -t hanzo:test .
 | `pre-commit run --all-files` | Lint all files |
 | `docker build -f tests/Containerfile -t hanzo:test .` | Build and test in CachyOS container |
 
+## Environment Variables
+
+| Variable | Purpose |
+|----------|---------|
+| `SKIP_HARDWARE_CHECK` | Set to `1` to bypass DMI-based hardware detection in `deploy.py`. Used in CI (see `tests/Containerfile`) where `/sys/class/dmi/id/product_name` is unavailable. |
+
 ## Task Completion Checklist
 
 Before submitting changes:
