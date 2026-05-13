@@ -82,3 +82,6 @@ system_services = [
 
 # Default locale — matches CachyOS installer defaults for US English.
 system_locale = "en_US.UTF-8"
+
+dotfiles_repo = "https://github.com/palazzem/dotfiles.git"
+dotfiles_dir = "~/.dotfiles"
