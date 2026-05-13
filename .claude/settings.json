@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "deny": [
+      "Bash(*pyinfra*)",
+      "Bash(hanzo)",
+      "Bash(hanzo *)",
+      "Bash(*bin/hanzo*)",
+      "Bash(*bootstrap.sh*)"
+    ]
+  }
+}
