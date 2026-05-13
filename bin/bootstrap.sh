@@ -14,6 +14,7 @@ NC='\033[0m'
 
 log_info()    { echo -e "${GREEN}[hanzo]${NC} $1"; }
 log_warn()    { echo -e "${YELLOW}[hanzo]${NC} $1"; }
+log_error()   { echo -e "${RED}[hanzo]${NC} $1" >&2; }
 
 # ---------------------------------------------------------------------------
 # Banner
@@ -90,11 +91,22 @@ if [ -f "$CONFIG_FILE" ]; then
     log_info "Configuration already exists at $CONFIG_FILE"
 elif [ -n "${HANZO_FULLNAME:-}" ] && [ -n "${HANZO_EMAIL:-}" ]; then
     # Unattended mode: env vars are set (e.g., container testing)
+    if [[ "$HANZO_FULLNAME" == *$'\n'* ]] || [[ "$HANZO_EMAIL" == *$'\n'* ]]; then
+        log_error "HANZO_FULLNAME and HANZO_EMAIL must not contain newlines"
+        exit 1
+    fi
+
+    # Escape double quotes to prevent malformed config file
+    HANZO_FULLNAME="${HANZO_FULLNAME//\"/\\\"}"
+    HANZO_EMAIL="${HANZO_EMAIL//\"/\\\"}"
+
     mkdir -p "$CONFIG_DIR"
+    chmod 0700 "$CONFIG_DIR"
     cat > "$CONFIG_FILE" << EOF
 HANZO_FULLNAME="$HANZO_FULLNAME"
 HANZO_EMAIL="$HANZO_EMAIL"
 EOF
+    chmod 0600 "$CONFIG_FILE"
 
     log_info "Configuration saved to $CONFIG_FILE (from environment)"
 else
@@ -109,10 +121,12 @@ else
     HANZO_EMAIL="${HANZO_EMAIL//\"/\\\"}"
 
     mkdir -p "$CONFIG_DIR"
+    chmod 0700 "$CONFIG_DIR"
     cat > "$CONFIG_FILE" << EOF
 HANZO_FULLNAME="$HANZO_FULLNAME"
 HANZO_EMAIL="$HANZO_EMAIL"
 EOF
+    chmod 0600 "$CONFIG_FILE"
 
     log_info "Configuration saved to $CONFIG_FILE"
 fi
