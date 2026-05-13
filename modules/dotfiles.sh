@@ -52,3 +52,17 @@ log_error() {
 log_success() {
     echo -e "✅ ${GREEN}$1${NC}"
 }
+
+# --- Configuration ---
+
+HANZO_CONFIG_FILE="${HOME}/.config/hanzo/config"
+
+load_hanzo_config() {
+    if [ -f "$HANZO_CONFIG_FILE" ]; then
+        # shellcheck source=/dev/null
+        source "$HANZO_CONFIG_FILE"
+    else
+        log_warn "Hanzo config file not found at ${HANZO_CONFIG_FILE}"
+        log_warn "Run 'hanzo config init' to create it"
+    fi
+}
