@@ -55,3 +55,30 @@ gaming_packages = [
 aur_packages = [
     "fnm-bin",
 ]
+
+# ---------------------------------------------------------------------------
+# System configuration (tasks/system.py)
+# ---------------------------------------------------------------------------
+
+# Groups that must be created as system groups before user membership.
+# render and video are kernel/udev-managed and always exist.
+system_groups = [
+    "docker",
+]
+
+# Supplementary groups to add the current user to.
+user_groups = [
+    "docker",
+    "render",
+    "video",
+]
+
+# Systemd services to enable at boot and start.
+system_services = [
+    "docker",
+    "ollama",
+    "asusd",
+]
+
+# System locale.
+system_locale = "en_US.UTF-8"
