@@ -24,7 +24,7 @@ from pyinfra.operations import files, server, systemd
 # Resolved at runtime — pyinfra runs locally via @local, so this is always
 # the real invoking user. getpass.getuser() reads from the passwd database,
 # which works even when $USER is unset (e.g., Docker RUN steps).
-_current_user = getpass.getuser()
+current_user = getpass.getuser()
 
 # ---------------------------------------------------------------------------
 # Groups
@@ -32,17 +32,17 @@ _current_user = getpass.getuser()
 # docker is package-managed but created explicitly as a safety net in case
 # include order changes. render/video are kernel-managed — no creation needed.
 
-for _group in host.data.system_groups:
+for group in host.data.system_groups:
     server.group(
-        name=f"Ensure {_group} group exists",
-        group=_group,
+        name=f"Ensure {group} group exists",
+        group=group,
         system=True,
         _sudo=True,
     )
 
 server.user(
-    name=f"Add {_current_user} to supplementary groups",
-    user=_current_user,
+    name=f"Add {current_user} to supplementary groups",
+    user=current_user,
     groups=host.data.user_groups,
     append=True,
     _sudo=True,
@@ -53,10 +53,10 @@ server.user(
 # ---------------------------------------------------------------------------
 # Runs after packages so the service unit files are already on disk.
 
-for _service in host.data.system_services:
+for service in host.data.system_services:
     systemd.service(
-        name=f"Enable and start {_service}",
-        service=_service,
+        name=f"Enable and start {service}",
+        service=service,
         running=True,
         enabled=True,
         _sudo=True,
