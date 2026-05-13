@@ -1,88 +1,128 @@
 #!/usr/bin/env bash
+# Hanzo bootstrap — one-command CachyOS provisioner setup.
+# Usage: curl -L https://raw.githubusercontent.com/palazzem/hanzo/main/bin/bootstrap.sh | sh
 
-# Copyright (c) 2014-2025, Emanuele Palazzetti and contributors
-# All rights reserved.
+set -euo pipefail
 
-# Redistribution and use in source and binary forms, with or without
-# modification, are permitted provided that the following conditions are met:
-
-# 1. Redistributions of source code must retain the above copyright notice, this
-#    list of conditions and the following disclaimer.
-# 2. Redistributions in binary form must reproduce the above copyright notice,
-#    this list of conditions and the following disclaimer in the documentation
-#    and/or other materials provided with the distribution.
-
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-# ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-# WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-# DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
-# ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-# (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-# LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
-# ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-# SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-# The views and conclusions contained in the software and documentation are those
-# of the authors and should not be interpreted as representing official policies,
-# either expressed or implied, of the FreeBSD Project.
-
-set -e
-
-# Colors for better visual output
+# ---------------------------------------------------------------------------
+# Colors
+# ---------------------------------------------------------------------------
 GREEN='\033[0;32m'
 BLUE='\033[0;34m'
 YELLOW='\033[1;33m'
+RED='\033[0;31m'
 NC='\033[0m'
 
-# Print banner
-echo -e "${BLUE}╔════════════════════════════════════════════════════════╗${NC}"
-echo -e "${BLUE}║                                                        ║${NC}"
-echo -e "${BLUE}║                  ${GREEN}Hanzo Installer${BLUE}                       ║${NC}"
-echo -e "${BLUE}║                                                        ║${NC}"
-echo -e "${BLUE}╚════════════════════════════════════════════════════════╝${NC}"
+log_info()    { echo -e "${GREEN}[hanzo]${NC} $1"; }
+log_warn()    { echo -e "${YELLOW}[hanzo]${NC} $1"; }
+log_error()   { echo -e "${RED}[hanzo]${NC} $1"; }
+
+# ---------------------------------------------------------------------------
+# Banner
+# ---------------------------------------------------------------------------
+echo -e "${BLUE}"
+echo "  _   _                       "
+echo " | | | | __ _ _ __  _______   "
+echo " | |_| |/ _\` | '_ \\|_  / _ \\  "
+echo " |  _  | (_| | | | |/ / (_) | "
+echo " |_| |_|\\__,_|_| |_/___\\___/  "
+echo -e "${NC}"
+echo -e "${GREEN}CachyOS System Provisioner${NC}"
 echo ""
 
-# Function to handle errors
-handle_error() {
-    echo -e "${YELLOW}Error: $1${NC}"
-    exit 1
-}
+# ---------------------------------------------------------------------------
+# Step 1: Sudo — ask password once, keep the ticket alive in background
+# ---------------------------------------------------------------------------
+log_info "Requesting sudo access (you may be prompted for your password)..."
+sudo -v
 
-# Create necessary directories
-echo -e "📁 ${GREEN}Creating directories...${NC}"
-mkdir -p ~/.local/bin || handle_error "Failed to create ~/.local/bin"
-mkdir -p ~/.local/src || handle_error "Failed to create ~/.local/src"
+# Keep sudo alive in the background until this script exits
+while true; do sudo -n true; sleep 50; done 2>/dev/null &
+SUDO_KEEPALIVE_PID=$!
+trap 'kill $SUDO_KEEPALIVE_PID 2>/dev/null' EXIT
 
-# Check if hanzo is already installed
-if [ -d ~/.local/src/hanzo ]; then
-    echo -e "🔄 ${GREEN}Hanzo repository already exists. Updating...${NC}"
-    cd ~/.local/src/hanzo && git pull || handle_error "Failed to update hanzo repository"
+# ---------------------------------------------------------------------------
+# Step 2: Install uv (Astral's Python package manager)
+# ---------------------------------------------------------------------------
+if command -v uv >/dev/null 2>&1; then
+    log_info "uv is already installed: $(uv --version)"
 else
-    echo -e "⬇️  ${GREEN}Cloning hanzo repository...${NC}"
-    git clone https://github.com/palazzem/hanzo.git ~/.local/src/hanzo || handle_error "Failed to clone hanzo repository"
+    log_info "Installing uv..."
+    curl -LsSf https://astral.sh/uv/install.sh | sh
+
+    # Source uv's env so it's available for the rest of this script
+    export PATH="$HOME/.local/bin:$PATH"
 fi
 
-# Create symlink (overwrite if exists)
-echo -e "🔗 ${GREEN}Creating symlink...${NC}"
-ln -sf ~/.local/src/hanzo/bin/hanzo.sh ~/.local/bin/hanzo || handle_error "Failed to create symlink"
+# ---------------------------------------------------------------------------
+# Step 3: Install pyinfra via uv tool
+# ---------------------------------------------------------------------------
+if uv tool list 2>/dev/null | grep -q "^pyinfra"; then
+    log_info "pyinfra is already installed"
+else
+    log_info "Installing pyinfra..."
+    uv tool install pyinfra
+fi
 
-# Check if PATH already contains ~/.local/bin
+# ---------------------------------------------------------------------------
+# Step 4: Clone or update the Hanzo repository
+# ---------------------------------------------------------------------------
+HANZO_REPO="https://github.com/palazzem/hanzo.git"
+HANZO_DIR="$HOME/.local/src/hanzo"
+
+mkdir -p "$(dirname "$HANZO_DIR")"
+
+if [ -d "$HANZO_DIR/.git" ]; then
+    log_info "Updating Hanzo repository..."
+    git -C "$HANZO_DIR" pull --ff-only
+else
+    log_info "Cloning Hanzo repository..."
+    git clone "$HANZO_REPO" "$HANZO_DIR"
+fi
+
+# ---------------------------------------------------------------------------
+# Step 5: User configuration
+# When piped from curl, stdin is the pipe — read from /dev/tty to reach
+# the terminal for interactive prompts.
+# ---------------------------------------------------------------------------
+CONFIG_DIR="$HOME/.config/hanzo"
+CONFIG_FILE="$CONFIG_DIR/config"
+
+if [ -f "$CONFIG_FILE" ]; then
+    log_info "Configuration already exists at $CONFIG_FILE"
+else
+    log_info "First-time setup — configuring Hanzo"
+    echo ""
+
+    read -rp "Full name: " HANZO_FULLNAME </dev/tty
+    read -rp "Email: " HANZO_EMAIL </dev/tty
+
+    mkdir -p "$CONFIG_DIR"
+    cat > "$CONFIG_FILE" << EOF
+HANZO_FULLNAME="$HANZO_FULLNAME"
+HANZO_EMAIL="$HANZO_EMAIL"
+EOF
+
+    log_info "Configuration saved to $CONFIG_FILE"
+fi
+
+# ---------------------------------------------------------------------------
+# Step 6: Symlink bin/hanzo into PATH
+# ---------------------------------------------------------------------------
+mkdir -p "$HOME/.local/bin"
+ln -sf "$HANZO_DIR/bin/hanzo" "$HOME/.local/bin/hanzo"
+
 if [[ ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
-    echo -e "⚠️  ${YELLOW}~/.local/bin is not in your PATH${NC}"
-    echo ""
-    echo -e "${GREEN}Add the following line to your shell configuration file:${NC}"
-    echo -e "${BLUE}export PATH=\"\$HOME/.local/bin:\$PATH\"${NC}"
-    echo ""
-    echo -e "${GREEN}For example:${NC}"
-    echo -e "  ${BLUE}bash${NC}: echo 'export PATH=\"\$HOME/.local/bin:\$PATH\"' >> ~/.bashrc"
-    echo -e "  ${BLUE}zsh${NC} : echo 'export PATH=\"\$HOME/.local/bin:\$PATH\"' >> ~/.zshrc"
-    echo -e "  ${BLUE}fish${NC}: fish -c 'set -U fish_user_paths \$HOME/.local/bin \$fish_user_paths'"
-else
-    echo -e "✅ ${GREEN}~/.local/bin is already in your PATH${NC}"
+    log_warn "\$HOME/.local/bin is not in your PATH — add it to your shell config"
 fi
 
+# ---------------------------------------------------------------------------
+# Step 7: Run the provisioner
+# ---------------------------------------------------------------------------
+log_info "Running provisioner..."
 echo ""
-echo -e "✅ ${GREEN}Installation complete!${NC}"
-echo -e "🚀 ${GREEN}Run 'hanzo' to get started${NC}"
+cd "$HANZO_DIR"
+pyinfra @local deploy.py
+
 echo ""
+log_info "Done! Run 'hanzo' to re-provision at any time."
