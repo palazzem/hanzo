@@ -1,8 +1,8 @@
 """Package installation tasks.
 
-Installs all packages from the official repos (via pacman), AUR (via paru),
-and auto-detects GPU drivers (via chwd). This is the reference implementation
-for how Hanzo tasks should be written — see CLAUDE.md for the full contract.
+Installs all packages from the official repos (via pacman) and AUR (via paru).
+This is the reference implementation for how Hanzo tasks should be written —
+see CLAUDE.md for the full contract.
 """
 
 from pyinfra import host
@@ -52,15 +52,4 @@ server.shell(
         "paru -S --needed --noconfirm " + " ".join(host.data.aur_packages),
     ],
     _sudo=False,
-)
-
-# ---------------------------------------------------------------------------
-# GPU driver auto-detection
-# ---------------------------------------------------------------------------
-# chwd (CachyOS Hardware Detection) picks the right GPU driver automatically.
-
-server.shell(
-    name="Auto-detect and install GPU drivers",
-    commands=["chwd -a"],
-    _sudo=True,
 )

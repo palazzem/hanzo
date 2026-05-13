@@ -1,7 +1,7 @@
 FROM --platform=linux/amd64 cachyos/cachyos:latest
 
 RUN pacman -Syu --noconfirm && \
-    pacman -S --noconfirm python git curl sudo base-devel
+    pacman -S --noconfirm python git curl sudo base-devel paru
 
 # Non-root user with passwordless sudo for realistic testing
 RUN useradd -m -G wheel testuser && \
@@ -19,4 +19,4 @@ RUN uv tool install pyinfra
 
 # Validate pyinfra scripts with a dry run
 ENV SKIP_HARDWARE_CHECK=1
-RUN pyinfra @local deploy.py --dry
+RUN pyinfra -y @local deploy.py --dry

@@ -19,7 +19,7 @@ CachyOS system provisioner powered by pyinfra.
 
 1. Data in `group_data/all.py`, logic in `tasks/`. Never hardcode package names, paths, or config values in task files. Add them to `group_data/all.py` and access via `host.data`.
 2. Prefer pyinfra built-in operations (`pacman.packages`, `files.template`, `systemd.service`, `server.user`, `files.line`) over `server.shell`. Built-in operations are idempotent for free.
-3. `server.shell` is the escape hatch. Use only when no built-in operation exists (e.g., paru for AUR, chwd). Always include `name=`.
+3. `server.shell` is the escape hatch. Use only when no built-in operation exists (e.g., paru for AUR). Always include `name=`.
 4. Explicit `_sudo` on every operation. Global sudo is OFF (`config.SUDO = False`). Every operation must declare `_sudo=True` (system-level: package installs, service management, config writes) or `_sudo=False` (user-space: paru, dotfiles). The `_` prefix is pyinfra's convention for global arguments, not a private marker.
 5. Hardware detection belongs in `deploy.py`. Task files never check DMI or hardware. `deploy.py` gates hardware-specific includes — tasks assume they should run if included.
 6. One file per domain. `packages.py` for package installation, `system.py` for groups/services/locale, etc.
