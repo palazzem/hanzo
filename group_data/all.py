@@ -9,7 +9,7 @@ base_packages = [
     "fzf",
     "htop",
     "neovim",
-    "python-pipx",
+    "uv",
     "tree",
     "wget",
     "jq",
@@ -106,21 +106,17 @@ gz302_asus_lightbar_product = "18c6"
 gz302_keyboard_scancode = "70072"
 gz302_keyboard_target_key = "prog1"
 
-pipx_tools = [
+uv_tools = [
     "ipython",
-    "hatch",
     "pre-commit",
     "checkov",
 ]
 
 infra_aur_packages = [
     "terraform",
-    "packer",
+    "tflint-bin",
+    "tfupdate-bin",
 ]
-
-go_tools = {
-    "tfupdate": "github.com/minamijoyo/tfupdate@latest",
-}
 
 npm_global_packages = [
     "@anthropic-ai/claude-code",

@@ -1,13 +1,13 @@
 """Development tools installation tasks.
 
 Installs version managers (pyenv, rustup stable toolchain, fnm Node.js LTS),
-configures Go workspace, installs Python CLI tools via pipx, infrastructure
-tools (terraform, packer, tflint, gcloud, tfupdate), and AI tooling (Claude
-Code). All operations are user-space — no sudo required.
+configures Go workspace, installs Python CLI tools via uv, infrastructure
+tools (terraform, tflint, tfupdate, gcloud), and AI tooling (Claude Code).
+All operations are user-space — no sudo required.
 
 Prerequisites:
     tasks/packages.py must run first to install rustup, go, fnm-bin, and
-    python-pipx via pacman/paru.
+    uv via pacman/paru.
 """
 
 import os
@@ -75,18 +75,18 @@ files.directory(
 )
 
 # ---------------------------------------------------------------------------
-# pipx tools
+# uv tools
 # ---------------------------------------------------------------------------
-# python-pipx is installed by packages.py (base_packages). Each tool is
-# checked via `pipx list` before install because pipx exits with an error
-# if a tool is already installed. The --short flag outputs "name version"
-# per line, so grep anchors on "^tool " to avoid substring matches.
+# uv is installed by packages.py (base_packages). Each tool is checked via
+# `uv tool list` before install because uv exits with an error if a tool
+# is already installed. The output format is "name vX.Y.Z" per tool, so
+# grep anchors on "^tool " to avoid substring matches.
 
-for _tool in host.data.pipx_tools:
+for _tool in host.data.uv_tools:
     server.shell(
-        name=f"Install {_tool} via pipx",
+        name=f"Install {_tool} via uv tool",
         commands=[
-            f'pipx list --short 2>/dev/null | grep -q "^{_tool} " || pipx install {_tool}',
+            f'uv tool list 2>/dev/null | grep -q "^{_tool} " || uv tool install {_tool}',
         ],
         _sudo=False,
     )
@@ -105,19 +105,6 @@ server.shell(
     _sudo=False,
 )
 
-# Guard checks the known binary path rather than `command -v` because
-# ~/.local/bin may not be on PATH in a fresh pyinfra shell. The export
-# inside the subshell ensures the piped bash process inherits the path.
-server.shell(
-    name="Install tflint via official install script",
-    commands=[
-        'test -x "$HOME/.local/bin/tflint" || '
-        '(export TFLINT_INSTALL_PATH="$HOME/.local/bin" && '
-        "curl -fsSL https://raw.githubusercontent.com/terraform-linters/tflint/master/install_linux.sh | bash)",
-    ],
-    _sudo=False,
-)
-
 # Prompts must be disabled for unattended pyinfra runs. Install directory
 # is ~/.local/share/ rather than ~ to follow XDG conventions.
 server.shell(
@@ -129,21 +116,6 @@ server.shell(
     ],
     _sudo=False,
 )
-
-# GOPATH and PATH must be set in the same shell command since each
-# server.shell spawns a fresh process where $GOPATH/bin is not on PATH.
-# Guard uses `test -x` on the known binary path rather than `command -v`
-# for the same reason.
-for _tool_name, _tool_path in host.data.go_tools.items():
-    server.shell(
-        name=f"Install {_tool_name} via go install",
-        commands=[
-            f'test -x "{_gopath}/bin/{_tool_name}" || '
-            f'GOPATH="{_gopath}" PATH="{_gopath}/bin:$PATH" '
-            f"go install {_tool_path}",
-        ],
-        _sudo=False,
-    )
 
 # ---------------------------------------------------------------------------
 # AI / Editor tooling
