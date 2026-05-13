@@ -55,3 +55,30 @@ gaming_packages = [
 aur_packages = [
     "fnm-bin",
 ]
+
+# ---------------------------------------------------------------------------
+# System configuration (tasks/system.py)
+# ---------------------------------------------------------------------------
+
+# Only groups not managed by the kernel or package scripts.
+# render and video are kernel/udev-managed and always exist.
+system_groups = [
+    "docker",
+]
+
+# Supplementary groups to add the current user to.
+# Includes system_groups (which we create) plus kernel-managed groups.
+user_groups = system_groups + [
+    "render",
+    "video",
+]
+
+# Systemd services to enable at boot and start.
+system_services = [
+    "docker",
+    "ollama",
+    "asusd",
+]
+
+# Default locale — matches CachyOS installer defaults for US English.
+system_locale = "en_US.UTF-8"
