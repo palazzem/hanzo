@@ -82,3 +82,24 @@ clone_or_update_dotfiles() {
     fi
     log_success "Dotfiles repository is up to date"
 }
+
+# --- Dotfiles installer ---
+
+run_dotfiles_installer() {
+    local installer="${DOTFILES_DIR}/install.sh"
+
+    if [ ! -f "$installer" ]; then
+        log_error "Dotfiles installer not found at ${installer}"
+        log_error "The dotfiles repository may need to be updated"
+        return 1
+    fi
+
+    if [ ! -x "$installer" ]; then
+        log_warn "Dotfiles installer is not executable. Setting permissions..."
+        chmod +x "$installer"
+    fi
+
+    log_info "Running dotfiles installer..."
+    "$installer"
+    log_success "Dotfiles installer completed"
+}
