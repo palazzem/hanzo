@@ -103,3 +103,29 @@ run_dotfiles_installer() {
     "$installer"
     log_success "Dotfiles installer completed"
 }
+
+# --- Git identity injection ---
+
+inject_git_config() {
+    local has_values=true
+
+    if [ -z "${HANZO_FULLNAME:-}" ]; then
+        log_warn "HANZO_FULLNAME is empty. Skipping git user.name injection."
+        has_values=false
+    fi
+
+    if [ -z "${HANZO_EMAIL:-}" ]; then
+        log_warn "HANZO_EMAIL is empty. Skipping git user.email injection."
+        has_values=false
+    fi
+
+    if [ "$has_values" = false ]; then
+        log_warn "Run 'hanzo config init' to set your identity"
+        return 0
+    fi
+
+    log_info "Injecting git identity..."
+    git config --global user.name "$HANZO_FULLNAME"
+    git config --global user.email "$HANZO_EMAIL"
+    log_success "Git identity set to: ${HANZO_FULLNAME} <${HANZO_EMAIL}>"
+}
