@@ -1,0 +1,19 @@
+---
+# Infrastructure tools — Terraform ecosystem and Google Cloud SDK.
+
+- name: Install infrastructure AUR packages
+  kewlfft.aur.aur:
+    name: "{{ item }}"
+    use: paru
+  loop: "{{ infra_aur_packages }}"
+  become: false
+
+# Prompts must be disabled for unattended runs. Install directory
+# is ~/.local/share/ rather than ~ to follow XDG conventions.
+- name: Install Google Cloud SDK
+  ansible.builtin.shell: >
+    curl -fsSL https://sdk.cloud.google.com |
+    bash -s -- --disable-prompts --install-dir="{{ ansible_env.HOME }}/.local/share"
+  args:
+    creates: "{{ ansible_env.HOME }}/.local/share/google-cloud-sdk"
+  become: false
