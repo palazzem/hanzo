@@ -50,9 +50,7 @@ def shell_paru_install(packages: list[str]) -> str:
     Returns:
         Shell command string.
     """
-    return "paru -S --needed --noconfirm " + " ".join(
-        shlex.quote(p) for p in packages
-    )
+    return "paru -S --needed --noconfirm " + " ".join(shlex.quote(p) for p in packages)
 
 
 def shell_uv_tool_install(tool: str) -> str:
