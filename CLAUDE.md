@@ -2,26 +2,6 @@
 
 CachyOS system provisioner powered by Ansible.
 
-## Project Layout
-
-| Path | Purpose |
-|------|---------|
-| `playbook.yml` | Main entry point. Lists roles in dependency order. Loads optional user config via `pre_tasks` (graceful when missing). |
-| `ansible.cfg` | Local connection, become defaults, roles path. |
-| `group_vars/all.yml` | Package lists, system configuration, and hardware data. Ansible exposes every key here as a top-level variable inside roles. Add new package lists here. |
-| `requirements.yml` | Ansible Galaxy collection dependencies (`community.general`, `kewlfft.aur`), pinned to specific versions for reproducibility. |
-| `roles/` | One Ansible role per domain. Each role contains `tasks/main.yml`; some also contain `handlers/main.yml` (e.g., `hardware`) or `templates/` (e.g., `hardware`). |
-| `roles/packages/` | pacman + AUR package installation. |
-| `roles/system/` | Groups, user, systemd services, locale. |
-| `roles/languages/` | pyenv, rustup, fnm/Node.js, Go workspace. |
-| `roles/devtools/` | uv tools, npm global packages. |
-| `roles/infra/` | Infrastructure AUR packages, Google Cloud SDK. |
-| `roles/dotfiles/` | Dotfiles, claude-config, git identity. Uses a reusable `git_adopt.yml` helper. |
-| `roles/hardware/` | Hardware-specific tasks, dispatched by `ansible_facts['product_name']`, with a container guard against `ansible_facts['virtualization_type']`. |
-| `bin/bootstrap.sh` | `curl \| bash` installer for first-time setup. Supports unattended mode via `HANZO_FULLNAME` and `HANZO_EMAIL` env vars. Writes config to `~/.config/hanzo/config.yml`. |
-| `bin/hanzo` | CLI wrapper — resolves repo root and runs `ansible-playbook playbook.yml`. |
-| `tests/Containerfile` | CachyOS container for CI and local testing. Runs `ansible-playbook --check` in two stages (with and without user config). |
-
 ## Rules
 
 1. Data in `group_vars/all.yml`, logic in `roles/`. Never hardcode package names, paths, or config values in task files. Add them to `group_vars/all.yml` and access via the plain variable name.
