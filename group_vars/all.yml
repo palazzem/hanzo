@@ -43,10 +43,16 @@ gaming_packages:
   - cachyos-gaming-applications
   - ffmpeg
 
+comm_packages:
+  - signal-desktop
+
 aur_packages:
   - claude-desktop-bin
   - fnm-bin
   - wifiman-desktop
+
+comm_aur_packages:
+  - zoom
 
 # ---------------------------------------------------------------------------
 # System configuration (roles/system)
