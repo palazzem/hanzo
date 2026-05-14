@@ -5,7 +5,7 @@ Run with: pyinfra @local deploy.py
 
 import os
 
-from pyinfra import config, host, local
+from pyinfra import config, host, local, logger
 from pyinfra.facts.server import Command
 
 # Safe default: no implicit sudo. Each operation must declare _sudo explicitly.
@@ -16,6 +16,9 @@ config.SUDO = False
 # The file uses KEY="value" shell syntax. We parse it into host.data so
 # every task can access values via host.data.hanzo_fullname, etc.
 # ---------------------------------------------------------------------------
+# Mirrors the keys written by bin/bootstrap.sh; keep both in sync.
+_ALLOWED_CONFIG_KEYS = {"hanzo_fullname", "hanzo_email"}
+
 _config_path = os.path.expanduser("~/.config/hanzo/config")
 if os.path.isfile(_config_path):
     with open(_config_path) as _f:
@@ -27,6 +30,9 @@ if os.path.isfile(_config_path):
             if not _sep:
                 continue
             _key = _key.strip().lower()
+            if _key not in _ALLOWED_CONFIG_KEYS:
+                logger.warning("Ignoring unknown config key: %s", _key)
+                continue
             _value = _value.strip().strip('"').strip("'")
             # Only set if not already defined by group_data or CLI args.
             # HostData has no setdefault(); use get() + setattr() instead.
@@ -34,13 +40,27 @@ if os.path.isfile(_config_path):
                 setattr(host.data, _key, _value)
 
 # ---------------------------------------------------------------------------
-# Include task files — order matters (packages first, then system, etc.)
+# Include task files
+#
+# Order matters — each task depends on those above it:
+#
+#   packages.py   no dependencies (installs all system and AUR packages)
+#       |
+#   system.py     groups + services installed by packages.py
+#       |
+#   tools.py      configures rustup, fnm, go, uv installed by packages.py;
+#                 paru (preinstalled on CachyOS) for infra AUR packages
+#       |
+#   dotfiles.py   installer may reference tool paths from tools.py;
+#                 git identity uses config parsed above
+#
+# Hardware tasks (included conditionally after DMI detection below):
+#   hardware/gz302.py   uses asusctl, rog-control-center from packages.py
+#
 # Paths resolve relative to CWD. bin/hanzo sets CWD to the repo root
 # before exec'ing pyinfra, so these paths work from any calling directory.
 # ---------------------------------------------------------------------------
 local.include("tasks/packages.py")
-
-# Phase 2 tasks (uncomment as they land):
 local.include("tasks/system.py")
 local.include("tasks/tools.py")
 local.include("tasks/dotfiles.py")
