@@ -4,9 +4,18 @@
 # Prerequisites: packages role must run first to install rustup, go,
 # fnm-bin, and uv via pacman/paru.
 
+# pyenv ships an installer script. Download + execute is split so we
+# can avoid risky-shell-pipe and use idempotent get_url instead of curl.
+- name: Download pyenv installer
+  ansible.builtin.get_url:
+    url: https://pyenv.run
+    dest: /tmp/hanzo-pyenv-installer.sh
+    mode: "0755"
+  become: false
+
 - name: Install pyenv via pyenv-installer
-  ansible.builtin.shell: curl -fsSL https://pyenv.run | bash
-  args:
+  ansible.builtin.command:
+    cmd: /tmp/hanzo-pyenv-installer.sh
     creates: "{{ ansible_env.HOME }}/.pyenv/bin/pyenv"
   become: false
 
@@ -38,10 +47,12 @@
   ansible.builtin.file:
     path: "{{ gopath | expanduser }}"
     state: directory
+    mode: "0755"
   become: false
 
 - name: Create GOPATH bin directory
   ansible.builtin.file:
     path: "{{ gopath | expanduser }}/bin"
     state: directory
+    mode: "0755"
   become: false

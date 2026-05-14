@@ -4,7 +4,7 @@
 # uv tools: check installed list once, install missing ones.
 - name: Check installed uv tools
   ansible.builtin.command: uv tool list
-  register: uv_tool_list
+  register: devtools_uv_tool_list
   changed_when: false
   failed_when: false
   become: false
@@ -18,7 +18,7 @@
   ansible.builtin.command: "uv tool install {{ item }}"
   loop: "{{ uv_tools }}"
   when: >
-    uv_tool_list.stdout_lines | default([])
+    devtools_uv_tool_list.stdout_lines | default([])
     | select('match', '^' ~ item ~ ' ') | list | length == 0
   changed_when: true
   become: false
@@ -29,19 +29,19 @@
   ansible.builtin.shell: >
     eval "$(fnm env)" && npm list -g {{ item }} 2>/dev/null
   loop: "{{ npm_global_packages }}"
-  register: npm_check
+  register: devtools_npm_check
   changed_when: false
   failed_when: false
   become: false
 
-# Loop directly over npm_check.results so item.item is the package name
-# and item.rc is that probe's return code (0 = installed).
+# Loop directly over devtools_npm_check.results so item.item is the package
+# name and item.rc is that probe's return code (0 = installed).
 # Like `Install uv tools`, the `when:` gate ensures this only runs when
 # the package is missing, so every actual execution represents a real change.
 - name: Install npm global packages
   ansible.builtin.shell: >
     eval "$(fnm env)" && npm install -g {{ item.item }}
-  loop: "{{ npm_check.results }}"
+  loop: "{{ devtools_npm_check.results }}"
   when: item.rc != 0
   changed_when: true
   become: false

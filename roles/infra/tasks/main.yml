@@ -8,12 +8,20 @@
   loop: "{{ infra_aur_packages }}"
   become: false
 
+# Google Cloud SDK ships an installer script. We split download from
+# execution so we can: (a) avoid risky-shell-pipe (curl | bash), and
+# (b) replace the curl call with get_url (idempotent, retry-aware).
+- name: Download Google Cloud SDK installer
+  ansible.builtin.get_url:
+    url: https://sdk.cloud.google.com
+    dest: /tmp/hanzo-gcloud-installer.sh
+    mode: "0755"
+  become: false
+
 # Prompts must be disabled for unattended runs. Install directory
 # is ~/.local/share/ rather than ~ to follow XDG conventions.
 - name: Install Google Cloud SDK
-  ansible.builtin.shell: >
-    curl -fsSL https://sdk.cloud.google.com |
-    bash -s -- --disable-prompts --install-dir="{{ ansible_env.HOME }}/.local/share"
-  args:
+  ansible.builtin.command:
+    cmd: "/tmp/hanzo-gcloud-installer.sh --disable-prompts --install-dir={{ ansible_env.HOME }}/.local/share"
     creates: "{{ ansible_env.HOME }}/.local/share/google-cloud-sdk"
   become: false

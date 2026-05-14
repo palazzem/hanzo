@@ -10,26 +10,27 @@
 #   git_repo: Repository URL
 #   git_dest: Destination directory (absolute path)
 #
-# Registered variables (_git_dir, _dest_dir) are scoped to this include
-# invocation in Ansible — they do not leak across multiple include_tasks
-# calls of this same file in the parent role.
+# Registered variables are scoped to this include invocation in Ansible
+# — they do not leak across multiple include_tasks calls of this same
+# file in the parent role.
 
-- name: "Check if {{ git_dest }} is a git repository"
+- name: Check git repository presence at {{ git_dest }}
   ansible.builtin.stat:
     path: "{{ git_dest }}/.git"
-  register: _git_dir
+  register: dotfiles_git_dir
 
-- name: "Check if {{ git_dest }} directory exists"
+- name: Check destination directory at {{ git_dest }}
   ansible.builtin.stat:
     path: "{{ git_dest }}"
-  register: _dest_dir
+  register: dotfiles_dest_dir
 
-- name: "Pull latest changes in {{ git_dest }}"
+- name: Pull latest changes at {{ git_dest }}
   ansible.builtin.git:
     repo: "{{ git_repo }}"
     dest: "{{ git_dest }}"
+    version: main
     update: true
-  when: _git_dir.stat.exists
+  when: dotfiles_git_dir.stat.exists
   become: false
 
 # Adopt existing directory as a git repo: init, fetch remote, and
@@ -39,7 +40,7 @@
 # set -euo pipefail aborts on any sub-command failure so we never leave
 # a half-initialised .git in place. | quote escapes both interpolations
 # even though values come from group_vars (defense in depth, per CLAUDE.md).
-- name: "Adopt existing {{ git_dest }} as git repo"
+- name: Adopt directory as git repo at {{ git_dest }}
   ansible.builtin.shell: |
     set -euo pipefail
     git init {{ git_dest | quote }}
@@ -49,13 +50,14 @@
     git -C {{ git_dest | quote }} reset --hard origin/main
     git -C {{ git_dest | quote }} branch -M main
     git -C {{ git_dest | quote }} branch --set-upstream-to=origin/main
-  when: _dest_dir.stat.exists and not _git_dir.stat.exists
+  when: dotfiles_dest_dir.stat.exists and not dotfiles_git_dir.stat.exists
   changed_when: true
   become: false
 
-- name: "Clone {{ git_repo }} to {{ git_dest }}"
+- name: Clone repository to {{ git_dest }}
   ansible.builtin.git:
     repo: "{{ git_repo }}"
     dest: "{{ git_dest }}"
-  when: not _dest_dir.stat.exists
+    version: main
+  when: not dotfiles_dest_dir.stat.exists
   become: false
