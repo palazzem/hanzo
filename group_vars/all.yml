@@ -46,9 +46,14 @@ gaming_packages:
 comm_packages:
   - signal-desktop
 
+desktop_packages:
+  - moonlight-qt
+  - spotify-launcher
+
 aur_packages:
   - claude-desktop-bin
   - fnm-bin
+  - google-chrome
   - wifiman-desktop
 
 comm_aur_packages:

@@ -47,6 +47,11 @@
     name: "{{ comm_packages }}"
   become: true
 
+- name: Install desktop applications
+  community.general.pacman:
+    name: "{{ desktop_packages }}"
+  become: true
+
 # kewlfft.aur.aur accepts a list under `name:`, batching the underlying
 # paru invocation. Avoids per-iteration paru startup + AUR DB read cost.
 - name: Install AUR packages
