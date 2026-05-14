@@ -11,14 +11,16 @@ Prerequisites:
 """
 
 import os
-import shlex
 
 from pyinfra import host
 from pyinfra.operations import files, server
 
-# Each server.shell spawns a fresh shell where fnm-managed Node.js is not
-# on PATH. This preamble must appear in every command that needs node/npm.
-_FNM_ACTIVATE = 'eval "$(fnm env)"'
+from tasks.helpers import (
+    FNM_ACTIVATE,
+    shell_npm_install,
+    shell_paru_install,
+    shell_uv_tool_install,
+)
 
 # ---------------------------------------------------------------------------
 # Version managers
@@ -52,7 +54,7 @@ server.shell(
 server.shell(
     name="Install Node.js LTS via fnm",
     commands=[
-        f'{_FNM_ACTIVATE} && fnm install --lts && fnm default "$(fnm current)"',
+        f'{FNM_ACTIVATE} && fnm install --lts && fnm default "$(fnm current)"',
     ],
     _sudo=False,
 )
@@ -86,9 +88,7 @@ files.directory(
 for _tool in host.data.uv_tools:
     server.shell(
         name=f"Install {_tool} via uv tool",
-        commands=[
-            f'uv tool list 2>/dev/null | grep -q "^{_tool} " || uv tool install {shlex.quote(_tool)}',
-        ],
+        commands=[shell_uv_tool_install(_tool)],
         _sudo=False,
     )
 
@@ -100,10 +100,7 @@ for _tool in host.data.uv_tools:
 # already-installed packages (same pattern as packages.py's paru call).
 server.shell(
     name="Install infrastructure AUR packages via paru",
-    commands=[
-        "paru -S --needed --noconfirm "
-        + " ".join(shlex.quote(p) for p in host.data.infra_aur_packages),
-    ],
+    commands=[shell_paru_install(host.data.infra_aur_packages)],
     _sudo=False,
 )
 
@@ -129,9 +126,6 @@ server.shell(
 for _pkg in host.data.npm_global_packages:
     server.shell(
         name=f"Install {_pkg} via npm",
-        commands=[
-            f"{_FNM_ACTIVATE} && "
-            f"(npm list -g {shlex.quote(_pkg)} >/dev/null 2>&1 || npm install -g {shlex.quote(_pkg)})",
-        ],
+        commands=[shell_npm_install(_pkg)],
         _sudo=False,
     )

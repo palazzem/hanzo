@@ -17,19 +17,7 @@ import shlex
 from pyinfra import host, logger
 from pyinfra.operations import server
 
-
-def _git_pull_ff_cmd(repo_dir: str) -> str:
-    """Build a git pull --ff-only command with a graceful fallback on divergence.
-
-    Uses --ff-only to avoid accidental merge commits. On failure (diverged
-    branch, network error, etc.) warns and continues rather than aborting the
-    entire provisioning run — a stale checkout is acceptable; a failed
-    provision is not.
-    """
-    return (
-        f"git -C {shlex.quote(repo_dir)} pull --ff-only"
-        " || echo 'WARNING: fast-forward failed; local branch may have diverged — skipping pull' >&2"
-    )
+from tasks.helpers import shell_git_pull
 
 
 # ---------------------------------------------------------------------------
@@ -43,11 +31,11 @@ _dotfiles_dir = os.path.expanduser(host.data.dotfiles_dir)
 # Mirrors the clone-or-pull pattern from bootstrap.sh: check for .git to
 # decide between clone and pull. os.path.isdir() evaluates at control time
 # (Python parse), not deploy time — safe because Hanzo always targets @local.
-# Pull uses --ff-only with a graceful fallback (see _git_pull_ff_cmd).
+# Pull uses --ff-only with a graceful fallback (see helpers.shell_git_pull).
 if os.path.isdir(os.path.join(_dotfiles_dir, ".git")):
     server.shell(
         name="Pull latest dotfiles changes",
-        commands=[_git_pull_ff_cmd(_dotfiles_dir)],
+        commands=[shell_git_pull(_dotfiles_dir)],
         _sudo=False,
     )
 else:
@@ -108,7 +96,7 @@ _claude_config_dir = os.path.expanduser(host.data.claude_config_dir)
 if os.path.isdir(os.path.join(_claude_config_dir, ".git")):
     server.shell(
         name="Pull latest claude-config changes",
-        commands=[_git_pull_ff_cmd(_claude_config_dir)],
+        commands=[shell_git_pull(_claude_config_dir)],
         _sudo=False,
     )
 elif os.path.isdir(_claude_config_dir):
