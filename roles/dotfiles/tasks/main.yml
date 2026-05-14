@@ -15,10 +15,13 @@
 
 # install.sh is the dotfiles repo's own installer. Re-runnable by design;
 # there is no clean change signal, so we mark it unchanged unconditionally.
+# Skipped in check mode: the clone above is simulated, so install.sh
+# isn't on disk to execute.
 - name: Run dotfiles installer
   ansible.builtin.command:
     cmd: "{{ dotfiles_dir | expanduser }}/install.sh"
   changed_when: false
+  when: not ansible_check_mode
   become: false
 
 - name: Set git user.name

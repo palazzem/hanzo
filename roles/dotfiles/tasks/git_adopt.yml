@@ -13,6 +13,15 @@
 # Registered variables are scoped to this include invocation in Ansible
 # — they do not leak across multiple include_tasks calls of this same
 # file in the parent role.
+#
+# Check mode: the git module sets cwd to `dest` before running its
+# probing commands. When `dest` doesn't exist (the clone branch), git
+# fails with "not a git repository: (null)". The shell-based adopt
+# branch likewise can't run without a real working tree. Both git
+# branches (pull + clone) and the adopt branch therefore skip in
+# check mode — the stat probes still run, so check mode validates
+# variable resolution and task structure even when the side-effecting
+# tasks are bypassed.
 
 - name: Check git repository presence at {{ git_dest }}
   ansible.builtin.stat:
@@ -30,7 +39,9 @@
     dest: "{{ git_dest }}"
     version: main
     update: true
-  when: dotfiles_git_dir.stat.exists
+  when:
+    - dotfiles_git_dir.stat.exists
+    - not ansible_check_mode
   become: false
 
 # Adopt existing directory as a git repo: init, fetch remote, and
@@ -50,7 +61,10 @@
     git -C {{ git_dest | quote }} reset --hard origin/main
     git -C {{ git_dest | quote }} branch -M main
     git -C {{ git_dest | quote }} branch --set-upstream-to=origin/main
-  when: dotfiles_dest_dir.stat.exists and not dotfiles_git_dir.stat.exists
+  when:
+    - dotfiles_dest_dir.stat.exists
+    - not dotfiles_git_dir.stat.exists
+    - not ansible_check_mode
   changed_when: true
   become: false
 
@@ -59,5 +73,7 @@
     repo: "{{ git_repo }}"
     dest: "{{ git_dest }}"
     version: main
-  when: not dotfiles_dest_dir.stat.exists
+  when:
+    - not dotfiles_dest_dir.stat.exists
+    - not ansible_check_mode
   become: false

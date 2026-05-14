@@ -1,26 +1,39 @@
 ---
 # System configuration — groups, services, and locale.
 
+# Groups must exist before the user.groups task can add the user to them.
+# check_mode: false ensures groups are always created — without it,
+# `ansible-playbook --check` would simulate group creation, then the
+# user task would fail when it tries to find the docker group.
 - name: Ensure system groups exist
   ansible.builtin.group:
     name: "{{ item }}"
     system: true
   loop: "{{ system_groups }}"
+  check_mode: false
   become: true
 
+# Skipped in check mode: render/video groups are kernel-managed and may
+# not exist on the test machine (e.g., inside the CI container), even
+# though they always exist on a real CachyOS system after first boot.
 - name: Add user to supplementary groups
   ansible.builtin.user:
     name: "{{ ansible_user_id }}"
     groups: "{{ user_groups }}"
     append: true
+  when: not ansible_check_mode
   become: true
 
+# systemd_service requires the unit file to exist. In `--check` mode,
+# package installs are simulated, so service unit files may not be
+# present. Skip — real runs will have the units installed.
 - name: Enable and start system services
   ansible.builtin.systemd_service:
     name: "{{ item }}"
     state: started
     enabled: true
   loop: "{{ system_services }}"
+  when: not ansible_check_mode
   become: true
 
 - name: Enable and start user services
@@ -30,6 +43,7 @@
     enabled: true
     scope: user
   loop: "{{ user_services }}"
+  when: not ansible_check_mode
   become: false
 
 - name: Set system locale

@@ -1,5 +1,9 @@
 ---
 # Developer tools — uv CLI tools and npm global packages.
+#
+# Prerequisites: packages role installs uv, languages role installs
+# fnm/Node.js. In `--check` mode those installs are simulated, so the
+# binaries are missing — gate the whole role on `not ansible_check_mode`.
 
 # uv tools: check installed list once, install missing ones.
 - name: Check installed uv tools
@@ -7,6 +11,7 @@
   register: devtools_uv_tool_list
   changed_when: false
   failed_when: false
+  when: not ansible_check_mode
   become: false
 
 # `uv tool list` output format: "toolname vX.Y.Z" per line. We anchor on
@@ -17,9 +22,11 @@
 - name: Install uv tools
   ansible.builtin.command: "uv tool install {{ item }}"
   loop: "{{ uv_tools }}"
-  when: >
-    devtools_uv_tool_list.stdout_lines | default([])
-    | select('match', '^' ~ item ~ ' ') | list | length == 0
+  when:
+    - not ansible_check_mode
+    - >
+      devtools_uv_tool_list.stdout_lines | default([])
+      | select('match', '^' ~ item ~ ' ') | list | length == 0
   changed_when: true
   become: false
 
@@ -32,6 +39,7 @@
   register: devtools_npm_check
   changed_when: false
   failed_when: false
+  when: not ansible_check_mode
   become: false
 
 # Loop directly over devtools_npm_check.results so item.item is the package
@@ -41,7 +49,10 @@
 - name: Install npm global packages
   ansible.builtin.shell: >
     eval "$(fnm env)" && npm install -g {{ item.item }}
-  loop: "{{ devtools_npm_check.results }}"
-  when: item.rc != 0
+  loop: "{{ devtools_npm_check.results | default([]) }}"
+  when:
+    - not ansible_check_mode
+    - item.rc is defined
+    - item.rc != 0
   changed_when: true
   become: false

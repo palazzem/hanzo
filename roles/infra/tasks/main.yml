@@ -20,8 +20,11 @@
 
 # Prompts must be disabled for unattended runs. Install directory
 # is ~/.local/share/ rather than ~ to follow XDG conventions.
+# Skipped in check mode: get_url doesn't actually download in check
+# mode, so the installer script isn't on disk to execute.
 - name: Install Google Cloud SDK
   ansible.builtin.command:
     cmd: "/tmp/hanzo-gcloud-installer.sh --disable-prompts --install-dir={{ ansible_env.HOME }}/.local/share"
     creates: "{{ ansible_env.HOME }}/.local/share/google-cloud-sdk"
+  when: not ansible_check_mode
   become: false

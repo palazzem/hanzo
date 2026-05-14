@@ -2,7 +2,9 @@
 # Version managers and language runtimes.
 #
 # Prerequisites: packages role must run first to install rustup, go,
-# fnm-bin, and uv via pacman/paru.
+# fnm-bin, and uv via pacman/paru. In `--check` mode those installs
+# are simulated, so binaries like rustup/fnm are missing — the tasks
+# below that invoke them are gated on `not ansible_check_mode`.
 
 # pyenv ships an installer script. Download + execute is split so we
 # can avoid risky-shell-pipe and use idempotent get_url instead of curl.
@@ -13,19 +15,24 @@
     mode: "0755"
   become: false
 
+# Skipped in check mode: get_url doesn't actually download the file
+# in check mode, so the installer script isn't on disk to execute.
 - name: Install pyenv via pyenv-installer
   ansible.builtin.command:
     cmd: /tmp/hanzo-pyenv-installer.sh
     creates: "{{ ansible_env.HOME }}/.pyenv/bin/pyenv"
+  when: not ansible_check_mode
   become: false
 
 # rustup default stable is idempotent. We can't reliably introspect its
 # stdout for change detection (output varies across versions), so we
 # unconditionally mark unchanged. The first-run "ok" status is cosmetic
 # only — the toolchain is still installed/selected by rustup itself.
+# Skipped in check mode: rustup binary comes from the packages role.
 - name: Set rustup default toolchain to stable
   ansible.builtin.command: rustup default stable
   changed_when: false
+  when: not ansible_check_mode
   become: false
 
 # fnm is installed via paru (aur_packages). Each shell task runs in a
@@ -33,12 +40,14 @@
 # is idempotent (skips installed versions) — see comment on rustup above
 # for why we use changed_when: false instead of stdout introspection or
 # a static creates: path (LTS version drifts over time).
+# Skipped in check mode: fnm binary comes from the packages role.
 - name: Install Node.js LTS via fnm
   ansible.builtin.shell: >
     eval "$(fnm env)" &&
     fnm install --lts &&
     fnm default "$(fnm current)"
   changed_when: false
+  when: not ansible_check_mode
   become: false
 
 # Go workspace directories. GOPATH persistence across interactive shell
