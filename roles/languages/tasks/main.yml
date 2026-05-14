@@ -1,0 +1,47 @@
+---
+# Version managers and language runtimes.
+#
+# Prerequisites: packages role must run first to install rustup, go,
+# fnm-bin, and uv via pacman/paru.
+
+- name: Install pyenv via pyenv-installer
+  ansible.builtin.shell: curl -fsSL https://pyenv.run | bash
+  args:
+    creates: "{{ ansible_env.HOME }}/.pyenv/bin/pyenv"
+  become: false
+
+# rustup default stable is idempotent. We can't reliably introspect its
+# stdout for change detection (output varies across versions), so we
+# unconditionally mark unchanged. The first-run "ok" status is cosmetic
+# only — the toolchain is still installed/selected by rustup itself.
+- name: Set rustup default toolchain to stable
+  ansible.builtin.command: rustup default stable
+  changed_when: false
+  become: false
+
+# fnm is installed via paru (aur_packages). Each shell task runs in a
+# fresh process, so we must eval fnm env to activate it. fnm install
+# is idempotent (skips installed versions) — see comment on rustup above
+# for why we use changed_when: false instead of stdout introspection or
+# a static creates: path (LTS version drifts over time).
+- name: Install Node.js LTS via fnm
+  ansible.builtin.shell: >
+    eval "$(fnm env)" &&
+    fnm install --lts &&
+    fnm default "$(fnm current)"
+  changed_when: false
+  become: false
+
+# Go workspace directories. GOPATH persistence across interactive shell
+# sessions depends on roles/dotfiles (fish shell config).
+- name: Create GOPATH directory
+  ansible.builtin.file:
+    path: "{{ gopath | expanduser }}"
+    state: directory
+  become: false
+
+- name: Create GOPATH bin directory
+  ansible.builtin.file:
+    path: "{{ gopath | expanduser }}/bin"
+    state: directory
+  become: false
