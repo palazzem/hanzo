@@ -64,13 +64,6 @@ docker build -f tests/Containerfile -t hanzo:test .
 - Quote all variable expansions: `"$VAR"`, not `$VAR`.
 - Interactive prompts must read from `/dev/tty` for `curl | bash` compatibility.
 
-### Python
-
-(No Python code remains in the repository after the migration. This section is kept for any future helper scripts.)
-
-- Google-style docstrings.
-- Comments explain "why", never "what".
-
 ## Commands
 
 | Command | Purpose |

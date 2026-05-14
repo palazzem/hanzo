@@ -42,9 +42,10 @@
     name: "{{ gaming_packages }}"
   become: true
 
+# kewlfft.aur.aur accepts a list under `name:`, batching the underlying
+# paru invocation. Avoids per-iteration paru startup + AUR DB read cost.
 - name: Install AUR packages
   kewlfft.aur.aur:
-    name: "{{ item }}"
+    name: "{{ aur_packages }}"
     use: paru
-  loop: "{{ aur_packages }}"
   become: false

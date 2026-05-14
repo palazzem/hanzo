@@ -5,11 +5,17 @@
   become: true
 
 - name: Update hwdb
-  ansible.builtin.shell: systemd-hwdb update && udevadm trigger
+  ansible.builtin.shell: |
+    set -euo pipefail
+    systemd-hwdb update
+    udevadm trigger
   changed_when: true
   become: true
 
 - name: Reload udev rules
-  ansible.builtin.shell: udevadm control --reload-rules && udevadm trigger
+  ansible.builtin.shell: |
+    set -euo pipefail
+    udevadm control --reload-rules
+    udevadm trigger
   changed_when: true
   become: true

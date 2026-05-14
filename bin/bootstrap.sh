@@ -94,16 +94,20 @@ ansible-galaxy collection install -r "$HANZO_DIR/requirements.yml"
 CONFIG_DIR="$HOME/.config/hanzo"
 CONFIG_FILE="$CONFIG_DIR/config.yml"
 
-# Escapes values and writes the YAML config file with restrictive permissions.
-# Uses a subshell umask so the file is never world-readable, even briefly.
+# YAML double-quoted strings treat \ and " as significant. Order matters:
+# escape backslash first so we don't double-escape the backslashes we
+# add in the quote-escape step.
+yaml_escape() {
+    local v="${1//\\/\\\\}"
+    printf '%s' "${v//\"/\\\"}"
+}
+
+# Writes the YAML config file with restrictive permissions. Uses a
+# subshell umask so the file is never world-readable, even briefly.
 write_config() {
-    # YAML double-quoted strings treat \ and " as significant.
-    # Order matters: escape backslash first so we don't double-escape
-    # the backslashes we add in the quote-escape step.
-    local escaped_fullname="${HANZO_FULLNAME//\\/\\\\}"
-    escaped_fullname="${escaped_fullname//\"/\\\"}"
-    local escaped_email="${HANZO_EMAIL//\\/\\\\}"
-    escaped_email="${escaped_email//\"/\\\"}"
+    local escaped_fullname escaped_email
+    escaped_fullname=$(yaml_escape "$HANZO_FULLNAME")
+    escaped_email=$(yaml_escape "$HANZO_EMAIL")
 
     mkdir -p "$CONFIG_DIR"
     chmod 0700 "$CONFIG_DIR"
@@ -117,10 +121,12 @@ EOF
 if [ -f "$CONFIG_FILE" ]; then
     log_info "Configuration already exists at $CONFIG_FILE"
 elif [ -n "${HANZO_FULLNAME:-}" ] && [ -n "${HANZO_EMAIL:-}" ]; then
-    # Unattended mode: env vars are set (e.g., container testing)
-    # Newlines in env vars would inject arbitrary lines into the config file
-    if [[ "$HANZO_FULLNAME" == *$'\n'* ]] || [[ "$HANZO_EMAIL" == *$'\n'* ]]; then
-        log_error "HANZO_FULLNAME and HANZO_EMAIL must not contain newlines"
+    # Unattended mode: env vars are set (e.g., container testing).
+    # Newlines and carriage returns would inject arbitrary lines into
+    # the YAML config file; YAML parsers handle \r inconsistently so we
+    # reject both.
+    if [[ "$HANZO_FULLNAME" == *[$'\n\r']* ]] || [[ "$HANZO_EMAIL" == *[$'\n\r']* ]]; then
+        log_error "HANZO_FULLNAME and HANZO_EMAIL must not contain newlines or carriage returns"
         exit 1
     fi
 

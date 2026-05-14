@@ -1,21 +1,24 @@
 ---
 # Infrastructure tools — Terraform ecosystem and Google Cloud SDK.
 
+# kewlfft.aur.aur accepts a list under `name:`, batching the underlying
+# paru invocation. Avoids per-iteration paru startup + AUR DB read cost.
 - name: Install infrastructure AUR packages
   kewlfft.aur.aur:
-    name: "{{ item }}"
+    name: "{{ infra_aur_packages }}"
     use: paru
-  loop: "{{ infra_aur_packages }}"
   become: false
 
 # Google Cloud SDK ships an installer script. We split download from
 # execution so we can: (a) avoid risky-shell-pipe (curl | bash), and
 # (b) replace the curl call with get_url (idempotent, retry-aware).
+# Cache lives under $HOME (mode 0700) to avoid /tmp symlink-race
+# surface and shared-/tmp visibility on multi-user systems.
 - name: Download Google Cloud SDK installer
   ansible.builtin.get_url:
     url: https://sdk.cloud.google.com
-    dest: /tmp/hanzo-gcloud-installer.sh
-    mode: "0755"
+    dest: "{{ ansible_env.HOME }}/.cache/hanzo/gcloud-installer.sh"
+    mode: "0700"
   become: false
 
 # Prompts must be disabled for unattended runs. Install directory
@@ -24,7 +27,7 @@
 # mode, so the installer script isn't on disk to execute.
 - name: Install Google Cloud SDK
   ansible.builtin.command:
-    cmd: "/tmp/hanzo-gcloud-installer.sh --disable-prompts --install-dir={{ ansible_env.HOME }}/.local/share"
+    cmd: "{{ ansible_env.HOME }}/.cache/hanzo/gcloud-installer.sh --disable-prompts --install-dir={{ ansible_env.HOME }}/.local/share"
     creates: "{{ ansible_env.HOME }}/.local/share/google-cloud-sdk"
   when: not ansible_check_mode
   become: false

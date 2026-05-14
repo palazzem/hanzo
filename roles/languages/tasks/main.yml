@@ -8,18 +8,20 @@
 
 # pyenv ships an installer script. Download + execute is split so we
 # can avoid risky-shell-pipe and use idempotent get_url instead of curl.
+# Cache lives under $HOME (mode 0700) to avoid /tmp symlink-race surface
+# and shared-/tmp visibility on multi-user systems.
 - name: Download pyenv installer
   ansible.builtin.get_url:
     url: https://pyenv.run
-    dest: /tmp/hanzo-pyenv-installer.sh
-    mode: "0755"
+    dest: "{{ ansible_env.HOME }}/.cache/hanzo/pyenv-installer.sh"
+    mode: "0700"
   become: false
 
 # Skipped in check mode: get_url doesn't actually download the file
 # in check mode, so the installer script isn't on disk to execute.
 - name: Install pyenv via pyenv-installer
   ansible.builtin.command:
-    cmd: /tmp/hanzo-pyenv-installer.sh
+    cmd: "{{ ansible_env.HOME }}/.cache/hanzo/pyenv-installer.sh"
     creates: "{{ ansible_env.HOME }}/.pyenv/bin/pyenv"
   when: not ansible_check_mode
   become: false
@@ -42,9 +44,10 @@
 # a static creates: path (LTS version drifts over time).
 # Skipped in check mode: fnm binary comes from the packages role.
 - name: Install Node.js LTS via fnm
-  ansible.builtin.shell: >
-    eval "$(fnm env)" &&
-    fnm install --lts &&
+  ansible.builtin.shell: |
+    set -euo pipefail
+    eval "$(fnm env)"
+    fnm install --lts
     fnm default "$(fnm current)"
   changed_when: false
   when: not ansible_check_mode
@@ -52,16 +55,12 @@
 
 # Go workspace directories. GOPATH persistence across interactive shell
 # sessions depends on roles/dotfiles (fish shell config).
-- name: Create GOPATH directory
+- name: Create GOPATH directories
   ansible.builtin.file:
-    path: "{{ gopath | expanduser }}"
+    path: "{{ item }}"
     state: directory
     mode: "0755"
-  become: false
-
-- name: Create GOPATH bin directory
-  ansible.builtin.file:
-    path: "{{ gopath | expanduser }}/bin"
-    state: directory
-    mode: "0755"
+  loop:
+    - "{{ gopath | expanduser }}"
+    - "{{ gopath | expanduser }}/bin"
   become: false

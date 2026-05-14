@@ -27,8 +27,12 @@ RUN ansible-galaxy collection install -r requirements.yml
 RUN ansible-playbook playbook.yml --check
 
 # Stage 2: --check WITH user config.
-#   Exercises: pre_tasks include_vars success path, git identity injection,
-#   pull-branch git_adopt (existing .dotfiles, existing .claude/.git).
+#   Exercises: pre_tasks include_vars success path and git identity
+#   injection (community.general.git_config in check mode). The
+#   git_adopt stat probes still select the pull branch when .git exists,
+#   but the pull/clone/adopt tasks themselves are gated by
+#   `not ansible_check_mode` so only the branching logic — not the
+#   actual git operations — is exercised here.
 RUN mkdir -p /home/testuser/.dotfiles/.git && \
     mkdir -p /home/testuser/.claude/.git && \
     mkdir -p /home/testuser/.config/hanzo && \
