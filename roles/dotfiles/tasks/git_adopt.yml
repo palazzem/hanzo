@@ -68,6 +68,22 @@
   changed_when: true
   become: false
 
+# Workaround for ansible.builtin.git: when `version` is specified (we
+# pin to `main` to satisfy ansible-lint's latest[git] rule), the
+# module's pre-clone `git ls-remote` probe runs with `cwd=dest`. On a
+# fresh clone the dest doesn't exist yet, and git fails with
+# "fatal: not a git repository: (null)". Pre-create dest as an empty
+# directory so the probe has a valid cwd; `git clone` then populates it.
+- name: Pre-create clone destination at {{ git_dest }}
+  ansible.builtin.file:
+    path: "{{ git_dest }}"
+    state: directory
+    mode: "0755"
+  when:
+    - not dotfiles_dest_dir.stat.exists
+    - not ansible_check_mode
+  become: false
+
 - name: Clone repository to {{ git_dest }}
   ansible.builtin.git:
     repo: "{{ git_repo }}"
