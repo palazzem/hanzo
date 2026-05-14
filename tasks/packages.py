@@ -8,6 +8,8 @@ see CLAUDE.md for the full contract.
 from pyinfra import host
 from pyinfra.operations import pacman, server
 
+from tasks.helpers import shell_paru_install
+
 # ---------------------------------------------------------------------------
 # Official repo packages (pacman)
 # ---------------------------------------------------------------------------
@@ -48,8 +50,6 @@ pacman.packages(
 
 server.shell(
     name="Install AUR packages via paru",
-    commands=[
-        "paru -S --needed --noconfirm " + " ".join(host.data.aur_packages),
-    ],
+    commands=[shell_paru_install(host.data.aur_packages)],
     _sudo=False,
 )

@@ -17,6 +17,9 @@ import shlex
 from pyinfra import host, logger
 from pyinfra.operations import server
 
+from tasks.helpers import shell_git_pull
+
+
 # ---------------------------------------------------------------------------
 # Resolve paths — expand ~ to the actual home directory at runtime
 # ---------------------------------------------------------------------------
@@ -26,14 +29,13 @@ _dotfiles_dir = os.path.expanduser(host.data.dotfiles_dir)
 # Clone or update the dotfiles repository
 # ---------------------------------------------------------------------------
 # Mirrors the clone-or-pull pattern from bootstrap.sh: check for .git to
-# decide between clone and pull. --ff-only prevents merge commits if the
-# local branch has diverged unexpectedly.
+# decide between clone and pull. os.path.isdir() evaluates at control time
+# (Python parse), not deploy time — safe because Hanzo always targets @local.
+# Pull uses --ff-only with a graceful fallback (see helpers.shell_git_pull).
 if os.path.isdir(os.path.join(_dotfiles_dir, ".git")):
     server.shell(
         name="Pull latest dotfiles changes",
-        commands=[
-            f"git -C {shlex.quote(_dotfiles_dir)} pull --ff-only",
-        ],
+        commands=[shell_git_pull(_dotfiles_dir)],
         _sudo=False,
     )
 else:
@@ -88,14 +90,13 @@ else:
 # agents, settings.json). The repo uses an ignore-all .gitignore that
 # whitelists only config files, so untracked runtime files (memory/,
 # projects/, credentials) are preserved across all code paths.
+# Expanded on the control machine — safe because Hanzo always targets @local.
 _claude_config_dir = os.path.expanduser(host.data.claude_config_dir)
 
 if os.path.isdir(os.path.join(_claude_config_dir, ".git")):
     server.shell(
         name="Pull latest claude-config changes",
-        commands=[
-            f"git -C {shlex.quote(_claude_config_dir)} pull --ff-only",
-        ],
+        commands=[shell_git_pull(_claude_config_dir)],
         _sudo=False,
     )
 elif os.path.isdir(_claude_config_dir):
