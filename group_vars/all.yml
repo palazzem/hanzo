@@ -44,7 +44,9 @@ gaming_packages:
   - ffmpeg
 
 aur_packages:
+  - claude-desktop-bin
   - fnm-bin
+  - wifiman-desktop
 
 # ---------------------------------------------------------------------------
 # System configuration (roles/system)
