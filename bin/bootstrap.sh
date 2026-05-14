@@ -10,6 +10,7 @@ set -euo pipefail
 GREEN='\033[0;32m'
 BLUE='\033[0;34m'
 YELLOW='\033[1;33m'
+RED='\033[0;31m'
 NC='\033[0m'
 
 log_info()    { echo -e "${GREEN}[hanzo]${NC} $1"; }
@@ -54,13 +55,13 @@ else
 fi
 
 # ---------------------------------------------------------------------------
-# Step 3: Install pyinfra via uv tool
+# Step 3: Install Ansible via uv tool
 # ---------------------------------------------------------------------------
-if uv tool list 2>/dev/null | grep -q "^pyinfra"; then
-    log_info "pyinfra is already installed"
+if uv tool list 2>/dev/null | grep -q "^ansible-core"; then
+    log_info "ansible-core is already installed"
 else
-    log_info "Installing pyinfra..."
-    uv tool install pyinfra
+    log_info "Installing ansible-core..."
+    uv tool install ansible-core
 fi
 
 # ---------------------------------------------------------------------------
@@ -80,25 +81,35 @@ else
 fi
 
 # ---------------------------------------------------------------------------
+# Step 4b: Install Ansible Galaxy collections
+# ---------------------------------------------------------------------------
+log_info "Installing Ansible Galaxy collections..."
+ansible-galaxy collection install -r "$HANZO_DIR/requirements.yml"
+
+# ---------------------------------------------------------------------------
 # Step 5: User configuration
 # When piped from curl, stdin is the pipe — read from /dev/tty to reach
 # the terminal for interactive prompts.
 # ---------------------------------------------------------------------------
 CONFIG_DIR="$HOME/.config/hanzo"
-CONFIG_FILE="$CONFIG_DIR/config"
+CONFIG_FILE="$CONFIG_DIR/config.yml"
 
-# Escapes values and writes the config file with restrictive permissions.
+# Escapes values and writes the YAML config file with restrictive permissions.
 # Uses a subshell umask so the file is never world-readable, even briefly.
 write_config() {
-    # Double quotes in values would break the KEY="value" format
-    local escaped_fullname="${HANZO_FULLNAME//\"/\\\"}"
-    local escaped_email="${HANZO_EMAIL//\"/\\\"}"
+    # YAML double-quoted strings treat \ and " as significant.
+    # Order matters: escape backslash first so we don't double-escape
+    # the backslashes we add in the quote-escape step.
+    local escaped_fullname="${HANZO_FULLNAME//\\/\\\\}"
+    escaped_fullname="${escaped_fullname//\"/\\\"}"
+    local escaped_email="${HANZO_EMAIL//\\/\\\\}"
+    escaped_email="${escaped_email//\"/\\\"}"
 
     mkdir -p "$CONFIG_DIR"
     chmod 0700 "$CONFIG_DIR"
     (umask 077 && cat > "$CONFIG_FILE" << EOF
-HANZO_FULLNAME="$escaped_fullname"
-HANZO_EMAIL="$escaped_email"
+hanzo_fullname: "$escaped_fullname"
+hanzo_email: "$escaped_email"
 EOF
     )
 }
@@ -142,7 +153,7 @@ fi
 log_info "Running provisioner..."
 echo ""
 cd "$HANZO_DIR"
-pyinfra @local deploy.py
+ansible-playbook playbook.yml
 
 echo ""
 log_info "Done! Run 'hanzo' to re-provision at any time."
