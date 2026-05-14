@@ -1,0 +1,76 @@
+---
+# Developer tools — uv CLI tools and npm global packages.
+#
+# Prerequisites: packages role installs uv, languages role installs
+# fnm/Node.js. In `--check` mode those installs are simulated, so the
+# binaries are missing — gate the whole role on `not ansible_check_mode`.
+
+# Single `uv tool list` call returns all installed tools, avoiding an
+# O(N) probe per package in the install loop. argv form keeps tokens
+# explicit and bypasses shell parsing.
+- name: List installed uv tools
+  ansible.builtin.command:
+    argv:
+      - uv
+      - tool
+      - list
+  register: devtools_uv_tool_list
+  changed_when: false
+  failed_when: false
+  when: not ansible_check_mode
+  become: false
+
+# `uv tool list` output format: "toolname vX.Y.Z" per line. Anchor on
+# "^toolname " to avoid false matches (e.g. ipython vs. ipython-extra).
+# `regex_escape` defends against tool names containing regex
+# metacharacters (none today, but cheap insurance).
+# The `when:` gate ensures this only runs when the tool is missing, so
+# every actual execution represents a real change — explicit
+# `changed_when: true` satisfies ansible-lint's no-changed-when rule.
+- name: Install uv tools
+  ansible.builtin.command:
+    argv:
+      - uv
+      - tool
+      - install
+      - "{{ item }}"
+  loop: "{{ uv_tools }}"
+  when:
+    - not ansible_check_mode
+    - >
+      devtools_uv_tool_list.stdout_lines | default([])
+      | select('match', '^' ~ (item | regex_escape) ~ ' ') | list | length == 0
+  changed_when: true
+  become: false
+
+# Single `npm list -g --depth=0 --parseable` call returns one line per
+# installed global, formatted as the package's filesystem path. Matching
+# on a trailing path segment avoids the O(N) per-package probe.
+- name: List installed npm global packages
+  ansible.builtin.shell: |
+    set -euo pipefail
+    eval "$(fnm env)"
+    npm list -g --depth=0 --parseable
+  register: devtools_npm_installed
+  changed_when: false
+  failed_when: false
+  when: not ansible_check_mode
+  become: false
+
+# End-anchored match on `/<pkgname>` catches both scoped
+# (`/.../node_modules/@anthropic-ai/claude-code`) and unscoped
+# (`/.../node_modules/typescript`) install paths without false positives
+# on prefix-collisions.
+- name: Install npm global packages
+  ansible.builtin.shell: |
+    set -euo pipefail
+    eval "$(fnm env)"
+    npm install -g {{ item | quote }}
+  loop: "{{ npm_global_packages }}"
+  when:
+    - not ansible_check_mode
+    - >
+      devtools_npm_installed.stdout_lines | default([])
+      | select('match', '.*/' ~ (item | regex_escape) ~ '$') | list | length == 0
+  changed_when: true
+  become: false

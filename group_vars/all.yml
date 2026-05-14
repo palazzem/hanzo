@@ -1,0 +1,131 @@
+---
+# ---------------------------------------------------------------------------
+# Package lists (roles/packages)
+# ---------------------------------------------------------------------------
+
+base_packages:
+  - fzf
+  - htop
+  - neovim
+  - uv
+  - tree
+  - wget
+  - jq
+  - yq
+  - httpie
+  - whois
+  - tmux
+
+docker_packages:
+  - docker
+  - docker-buildx
+  - docker-compose
+
+archive_packages:
+  - 7zip
+  - unrar
+
+ai_packages:
+  - ollama-rocm
+
+audio_packages:
+  - sof-firmware
+
+asus_packages:
+  - asusctl
+  - rog-control-center
+
+runtime_packages:
+  - rustup
+  - go
+
+gaming_packages:
+  - cachyos-gaming-applications
+  - ffmpeg
+
+aur_packages:
+  - fnm-bin
+
+# ---------------------------------------------------------------------------
+# System configuration (roles/system)
+# ---------------------------------------------------------------------------
+
+system_groups:
+  - docker
+
+# Supplementary groups: system_groups + kernel-managed groups.
+user_groups:
+  - docker
+  - render
+  - video
+
+system_services:
+  - docker
+  - ollama
+  - asusd
+
+# User-scoped systemd services (systemctl --user).
+user_services:
+  - ssh-agent
+
+system_locale: en_US.UTF-8
+
+# ---------------------------------------------------------------------------
+# Dotfiles and Claude configuration (roles/dotfiles)
+# ---------------------------------------------------------------------------
+
+dotfiles_repo: https://github.com/palazzem/dotfiles.git
+dotfiles_dir: ~/.dotfiles
+
+claude_config_repo: https://github.com/palazzem/claude-config.git
+claude_config_dir: ~/.claude
+
+# ---------------------------------------------------------------------------
+# GZ302 (ASUS ROG Flow Z13) hardware configuration (roles/hardware)
+# ---------------------------------------------------------------------------
+
+# OLED kernel param: disables PSR-SU and Panel Replay to prevent scrolling
+# artifacts and flicker on the Strix Halo OLED panel (kernel 7.0+).
+gz302_oled_kernel_param: "amdgpu.dcdebugmask=0x600"
+
+# GPU modprobe options for Radeon 8060S (RDNA 3.5, Strix Halo).
+# All power features except GFXOFF (bit 15) which causes GPU hangs.
+gz302_amdgpu_ppfeaturemask: "0xffff7fff"
+# Disable Adaptive Backlight Management (not applicable to OLED panels).
+gz302_amdgpu_abmlevel: 0
+# Disable scatter-gather display to prevent OLED flicker under memory pressure.
+gz302_amdgpu_sg_display: 0
+# Disable Compute Wavefront Save-Restore to prevent GPU hangs on RDNA 3.5.
+gz302_amdgpu_cwsr_enable: 0
+
+# F-row defaults to media keys; press Fn for standard F1-F12.
+gz302_hid_fnlock_default: 0
+
+# ASUS USB identifiers for keyboard, touchpad, and lightbar devices.
+gz302_asus_usb_vendor: "0b05"
+gz302_asus_keyboard_product: "1a30"
+gz302_asus_lightbar_product: "18c6"
+
+# Keyboard hwdb remap: Copilot key -> KEY_PROG1.
+# Bound in Hyprland to launch alacritty -e claude.
+gz302_keyboard_scancode: "70072"
+gz302_keyboard_target_key: prog1
+
+# ---------------------------------------------------------------------------
+# Development tools (roles/devtools, roles/infra)
+# ---------------------------------------------------------------------------
+
+uv_tools:
+  - ipython
+  - pre-commit
+  - checkov
+
+infra_aur_packages:
+  - terraform
+  - tflint-bin
+  - tfupdate-bin
+
+npm_global_packages:
+  - "@anthropic-ai/claude-code"
+
+gopath: ~/programs/go

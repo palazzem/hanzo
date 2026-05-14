@@ -1,21 +1,21 @@
 # AMD GPU configuration for Radeon 8060S (RDNA 3.5, Strix Halo)
 # Managed by Hanzo. Do not edit manually.
 
-# {{ data.gz302_amdgpu_ppfeaturemask }}: all power feature bits enabled except bit 15 (GFXOFF).
+# {{ gz302_amdgpu_ppfeaturemask }}: all power feature bits enabled except bit 15 (GFXOFF).
 # GFXOFF causes GPU hangs under rapid power-state transitions on the
 # Strix Halo iGPU.
-options amdgpu ppfeaturemask={{ data.gz302_amdgpu_ppfeaturemask }}
+options amdgpu ppfeaturemask={{ gz302_amdgpu_ppfeaturemask }}
 
 # Disable Adaptive Backlight Management. Not applicable to OLED panels
 # (driver skips ABM when DPCD reports oled=1), but explicit disable is
 # belt-and-suspenders.
-options amdgpu abmlevel={{ data.gz302_amdgpu_abmlevel }}
+options amdgpu abmlevel={{ gz302_amdgpu_abmlevel }}
 
 # Disable scatter-gather display on this APU. Prevents OLED flicker
 # under memory pressure.
-options amdgpu sg_display={{ data.gz302_amdgpu_sg_display }}
+options amdgpu sg_display={{ gz302_amdgpu_sg_display }}
 
 # Disable Compute Wavefront Save-Restore. Prevents GPU hangs and
 # graphical artifacts caused by register file synchronization issues
 # on RDNA 3.5.
-options amdgpu cwsr_enable={{ data.gz302_amdgpu_cwsr_enable }}
+options amdgpu cwsr_enable={{ gz302_amdgpu_cwsr_enable }}

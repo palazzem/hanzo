@@ -1,0 +1,95 @@
+---
+# Reusable 3-path git clone/pull/adopt logic.
+#
+# Handles three scenarios:
+#   1. .git exists → pull latest changes
+#   2. Directory exists but no .git → adopt in-place (init, fetch, reset)
+#   3. Nothing exists → clone fresh
+#
+# Variables:
+#   git_repo: Repository URL
+#   git_dest: Destination directory (absolute path)
+#
+# Registered variables are scoped to this include invocation in Ansible
+# — they do not leak across multiple include_tasks calls of this same
+# file in the parent role.
+#
+# Check mode: the git module sets cwd to `dest` before running its
+# probing commands. When `dest` doesn't exist (the clone branch), git
+# fails with "not a git repository: (null)". The shell-based adopt
+# branch likewise can't run without a real working tree. Both git
+# branches (pull + clone) and the adopt branch therefore skip in
+# check mode — the stat probes still run, so check mode validates
+# variable resolution and task structure even when the side-effecting
+# tasks are bypassed.
+
+- name: Check git repository presence at {{ git_dest }}
+  ansible.builtin.stat:
+    path: "{{ git_dest }}/.git"
+  register: dotfiles_git_dir
+
+- name: Check destination directory at {{ git_dest }}
+  ansible.builtin.stat:
+    path: "{{ git_dest }}"
+  register: dotfiles_dest_dir
+
+- name: Pull latest changes at {{ git_dest }}
+  ansible.builtin.git:
+    repo: "{{ git_repo }}"
+    dest: "{{ git_dest }}"
+    version: main
+    update: true
+  when:
+    - dotfiles_git_dir.stat.exists
+    - not ansible_check_mode
+  become: false
+
+# Adopt existing directory as a git repo: init, fetch remote, and
+# hard-reset to overwrite tracked files (repo is source of truth)
+# while leaving untracked runtime files untouched.
+#
+# set -euo pipefail aborts on any sub-command failure so we never leave
+# a half-initialised .git in place. | quote escapes both interpolations
+# even though values come from group_vars (defense in depth, per CLAUDE.md).
+- name: Adopt directory as git repo at {{ git_dest }}
+  ansible.builtin.shell: |
+    set -euo pipefail
+    git init {{ git_dest | quote }}
+    git -C {{ git_dest | quote }} remote set-url origin {{ git_repo | quote }} 2>/dev/null \
+      || git -C {{ git_dest | quote }} remote add origin {{ git_repo | quote }}
+    git -C {{ git_dest | quote }} fetch origin
+    git -C {{ git_dest | quote }} reset --hard origin/main
+    git -C {{ git_dest | quote }} branch -M main
+    git -C {{ git_dest | quote }} branch --set-upstream-to=origin/main
+  when:
+    - dotfiles_dest_dir.stat.exists
+    - not dotfiles_git_dir.stat.exists
+    - not ansible_check_mode
+  changed_when: true
+  become: false
+
+# Workaround for ansible.builtin.git: when `version` is specified (we
+# pin to `main` to satisfy ansible-lint's latest[git] rule), the
+# module's pre-clone `git ls-remote` probe runs with `cwd=dest`. On a
+# fresh clone the dest doesn't exist yet, and git fails with
+# "fatal: not a git repository: (null)". Pre-create dest as an empty
+# directory so the probe has a valid cwd; `git clone` then populates it.
+- name: Pre-create clone destination at {{ git_dest }}
+  ansible.builtin.file:
+    path: "{{ git_dest }}"
+    state: directory
+    mode: "0755"
+  when:
+    - not dotfiles_dest_dir.stat.exists
+    - not ansible_check_mode
+  become: false
+
+- name: Clone repository to {{ git_dest }}
+  ansible.builtin.git:
+    repo: "{{ git_repo }}"
+    dest: "{{ git_dest }}"
+    version: main
+  when:
+    - not dotfiles_dest_dir.stat.exists
+    - not ansible_check_mode
+  become: false

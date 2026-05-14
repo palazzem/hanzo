@@ -1,0 +1,74 @@
+---
+# System configuration — groups, services, and locale.
+
+# Groups must exist before any consumer task (e.g., a future file write
+# with `group: docker`) can resolve them. `check_mode: false` ensures
+# they're always created, even when other system-role tasks are skipped
+# in check mode — keeping group state consistent across check and live
+# runs.
+- name: Ensure system groups exist
+  ansible.builtin.group:
+    name: "{{ item }}"
+    system: true
+  loop: "{{ system_groups }}"
+  check_mode: false
+  become: true
+
+# Skipped in check mode: render/video groups are kernel-managed and may
+# not exist on the test machine (e.g., inside the CI container), even
+# though they always exist on a real CachyOS system after first boot.
+- name: Add user to supplementary groups
+  ansible.builtin.user:
+    name: "{{ ansible_facts['user_id'] }}"
+    groups: "{{ user_groups }}"
+    append: true
+  when: not ansible_check_mode
+  become: true
+
+# /run/systemd/system is the canonical "systemd is running as PID 1"
+# probe (it's how systemd's own tools — including `systemctl` — detect
+# their environment). When absent (containers, chroots), `systemd_service`
+# emits a "chroot or systemd is offline" warning and falls back to
+# manually writing enable symlinks. Skip the service tasks in those
+# environments to keep playbook output clean; real CachyOS hosts have
+# the path and run the tasks normally.
+- name: Detect running systemd
+  ansible.builtin.stat:
+    path: /run/systemd/system
+  register: system_systemd_running
+  check_mode: false
+
+- name: Enable and start system services
+  ansible.builtin.systemd_service:
+    name: "{{ item }}"
+    state: started
+    enabled: true
+  loop: "{{ system_services }}"
+  when:
+    - not ansible_check_mode
+    - system_systemd_running.stat.exists
+  become: true
+
+# User-scope systemd also needs an active session bus (XDG_RUNTIME_DIR
+# is set by pam_systemd on login). The systemd-running check above
+# covers most cases; the XDG check covers headless SSH where systemd
+# is running system-wide but no user session is set up.
+- name: Enable and start user services
+  ansible.builtin.systemd_service:
+    name: "{{ item }}"
+    state: started
+    enabled: true
+    scope: user
+  loop: "{{ user_services }}"
+  when:
+    - not ansible_check_mode
+    - system_systemd_running.stat.exists
+    - "'XDG_RUNTIME_DIR' in ansible_facts['env']"
+  become: false
+
+- name: Set system locale
+  ansible.builtin.lineinfile:
+    path: /etc/locale.conf
+    regexp: "^LANG="
+    line: "LANG={{ system_locale }}"
+  become: true

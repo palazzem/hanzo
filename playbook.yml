@@ -1,0 +1,55 @@
+---
+- name: Provision CachyOS workstation
+  hosts: localhost
+  connection: local
+  become: false
+  gather_facts: true
+  # Restrict fact gathering to the subsets actually consumed by the
+  # roles:
+  #   - min:      ansible_facts['user_id'], ansible_facts['env']
+  #   - hardware: ansible_facts['product_name'] (from /sys/class/dmi/id)
+  #   - virtual:  ansible_facts['virtualization_type'] (container guard)
+  # Skipping unused subsets (network, ohai, facter) cuts startup time
+  # on every run, especially noticeable in the CI container build.
+  gather_subset:
+    - "!all"
+    - min
+    - hardware
+    - virtual
+
+  pre_tasks:
+    # Identity config is optional: load it only when present so first-run
+    # and unattended scenarios work without a pre-existing config file.
+    # The dotfiles role gates git identity injection on `hanzo_fullname is
+    # defined`, so a missing config silently skips injection rather than
+    # erroring.
+    - name: Check for Hanzo user configuration
+      ansible.builtin.stat:
+        path: "{{ ansible_facts.env.HOME }}/.config/hanzo/config.yml"
+      register: hanzo_config_stat
+
+    - name: Load Hanzo user configuration if present
+      ansible.builtin.include_vars:
+        file: "{{ ansible_facts.env.HOME }}/.config/hanzo/config.yml"
+      when: hanzo_config_stat.stat.exists
+
+    # Shared cache directory used by roles that download upstream
+    # installer scripts (pyenv, gcloud). Lives under $HOME with mode
+    # 0700 so other local users cannot observe or race the file.
+    # check_mode: false ensures the dir exists even in `--check` runs,
+    # so subsequent get_url tasks have a valid dest parent.
+    - name: Ensure Hanzo cache directory exists
+      ansible.builtin.file:
+        path: "{{ ansible_facts.env.HOME }}/.cache/hanzo"
+        state: directory
+        mode: "0700"
+      check_mode: false
+
+  roles:
+    - packages
+    - system
+    - languages
+    - devtools
+    - infra
+    - dotfiles
+    - hardware

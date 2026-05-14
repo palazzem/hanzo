@@ -1,0 +1,51 @@
+---
+# Package installation — official repos (pacman) and AUR (paru).
+
+- name: Install base development packages
+  community.general.pacman:
+    name: "{{ base_packages }}"
+    update_cache: true
+  become: true
+
+- name: Install Docker packages
+  community.general.pacman:
+    name: "{{ docker_packages }}"
+  become: true
+
+- name: Install archive tools
+  community.general.pacman:
+    name: "{{ archive_packages }}"
+  become: true
+
+- name: Install AI packages
+  community.general.pacman:
+    name: "{{ ai_packages }}"
+  become: true
+
+- name: Install audio firmware
+  community.general.pacman:
+    name: "{{ audio_packages }}"
+  become: true
+
+- name: Install ASUS packages
+  community.general.pacman:
+    name: "{{ asus_packages }}"
+  become: true
+
+- name: Install language runtimes
+  community.general.pacman:
+    name: "{{ runtime_packages }}"
+  become: true
+
+- name: Install gaming and multimedia
+  community.general.pacman:
+    name: "{{ gaming_packages }}"
+  become: true
+
+# kewlfft.aur.aur accepts a list under `name:`, batching the underlying
+# paru invocation. Avoids per-iteration paru startup + AUR DB read cost.
+- name: Install AUR packages
+  kewlfft.aur.aur:
+    name: "{{ aur_packages }}"
+    use: paru
+  become: false

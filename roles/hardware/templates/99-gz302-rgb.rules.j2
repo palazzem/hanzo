@@ -3,4 +3,4 @@
 #
 # Grants unprivileged access to the ASUS keyboard USB device so that
 # rog-control-center can control RGB without running as root.
-SUBSYSTEMS=="usb", ATTRS{idVendor}=="{{ data.gz302_asus_usb_vendor }}", ATTRS{idProduct}=="{{ data.gz302_asus_keyboard_product }}", TAG+="uaccess"
+SUBSYSTEMS=="usb", ATTRS{idVendor}=="{{ gz302_asus_usb_vendor }}", ATTRS{idProduct}=="{{ gz302_asus_keyboard_product }}", TAG+="uaccess"

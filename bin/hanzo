@@ -1,15 +1,14 @@
 #!/usr/bin/env bash
-# Hanzo CLI wrapper — runs the pyinfra provisioner.
-# Usage: hanzo [pyinfra-args...]
+# Hanzo CLI wrapper — runs the Ansible provisioner.
+# Usage: hanzo [ansible-playbook-args...]
 # Examples:
 #   hanzo              # full provisioning run
-#   hanzo --dry        # dry run (shows what would change)
+#   hanzo --check      # dry run (shows what would change)
 
 set -euo pipefail
 
 HANZO_DIR="$(cd "$(dirname "$(readlink -f "$0")")/.." && pwd)"
 
-# pyinfra resolves local.include() paths and group_data/ relative to CWD
 cd "$HANZO_DIR"
 
-exec pyinfra @local deploy.py "$@"
+exec ansible-playbook playbook.yml "$@"

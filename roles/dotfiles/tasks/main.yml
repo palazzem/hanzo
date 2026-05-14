@@ -1,0 +1,47 @@
+---
+# Dotfiles and Claude Code configuration setup.
+#
+# Clones or updates the dotfiles and claude-config repositories,
+# runs the dotfiles installer, and injects git identity from
+# the Hanzo configuration. Identity injection is gated by
+# `hanzo_fullname is defined` — these vars are only present when
+# ~/.config/hanzo/config.yml exists (loaded in playbook.yml pre_tasks).
+
+- name: Setup dotfiles repository
+  ansible.builtin.include_tasks: git_adopt.yml
+  vars:
+    git_repo: "{{ dotfiles_repo }}"
+    git_dest: "{{ dotfiles_dir | expanduser }}"
+
+# install.sh is the dotfiles repo's own installer. Re-runnable by design;
+# there is no clean change signal, so we mark it unchanged unconditionally.
+# Skipped in check mode: the clone above is simulated, so install.sh
+# isn't on disk to execute.
+- name: Run dotfiles installer
+  ansible.builtin.command:
+    cmd: "{{ dotfiles_dir | expanduser }}/install.sh"
+  changed_when: false
+  when: not ansible_check_mode
+  become: false
+
+- name: Set git user.name
+  community.general.git_config:
+    name: user.name
+    value: "{{ hanzo_fullname }}"
+    scope: global
+  when: hanzo_fullname is defined
+  become: false
+
+- name: Set git user.email
+  community.general.git_config:
+    name: user.email
+    value: "{{ hanzo_email }}"
+    scope: global
+  when: hanzo_email is defined
+  become: false
+
+- name: Setup claude-config repository
+  ansible.builtin.include_tasks: git_adopt.yml
+  vars:
+    git_repo: "{{ claude_config_repo }}"
+    git_dest: "{{ claude_config_dir | expanduser }}"
