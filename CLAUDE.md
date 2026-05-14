@@ -53,7 +53,6 @@ docker build -f tests/Containerfile -t hanzo:test .
 - Use `$(...)` for command substitution, never backticks.
 - Quote all variable expansions: `"$VAR"`, not `$VAR`.
 - Interactive prompts must read from `/dev/tty` for `curl | bash` compatibility.
-- Exception: systemd hooks that must run best-effort (e.g., suspend hooks) may omit `set -euo pipefail` with a comment explaining why.
 
 ### Python
 
