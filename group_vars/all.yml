@@ -70,6 +70,22 @@ virtualization_packages:
   - virt-viewer
   - virtiofsd
 
+# Security & secrets (AUR). 1password and 1password-cli are signed by
+# AgileBits — see onepassword_gpg_key below. proton-vpn-gtk-app is the
+# official Proton AG GTK client (replaces the legacy protonvpn-gui /
+# python-proton-client). paru resolves its many python-proton-* AUR
+# dependencies recursively.
+security_aur_packages:
+  - 1password
+  - 1password-cli
+  - proton-vpn-gtk-app
+
+# AgileBits PGP signing key fingerprint. Both 1password and 1password-cli
+# PKGBUILDs declare validpgpkeys=('3FEF9748469ADBE15DA7CA80AC2D62742012EA22');
+# makepkg refuses to build until this public key is in the building
+# user's GPG keyring.
+onepassword_gpg_key: "3FEF9748469ADBE15DA7CA80AC2D62742012EA22"
+
 # ---------------------------------------------------------------------------
 # System configuration (roles/system)
 # ---------------------------------------------------------------------------

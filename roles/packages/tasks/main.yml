@@ -65,3 +65,48 @@
     name: "{{ comm_aur_packages }}"
     use: paru
   become: false
+
+# 1password and 1password-cli AUR PKGBUILDs declare validpgpkeys for the
+# AgileBits signing key. makepkg / paru verify against the *building
+# user's* GPG keyring and refuse to build until the key is imported.
+# kewlfft.aur.aur does not seed keyrings, so we import the key here.
+#
+# Two-task pattern: a read-only `gpg --list-keys` probe registers rc=0
+# when the key is present and rc=2 when missing; the recv-keys task is
+# gated on that result. The probe is `changed_when: false` (pure read)
+# and `check_mode: false` so the conditional has a defined rc value in
+# `--check` runs as well. The import sets `changed_when: true` because
+# every actual execution represents a real change — satisfies
+# ansible-lint's no-changed-when rule without disabling it.
+- name: Check for AgileBits PGP signing key in user keyring
+  ansible.builtin.command:
+    argv:
+      - gpg
+      - --list-keys
+      - "{{ onepassword_gpg_key }}"
+  register: packages_onepassword_key_check
+  changed_when: false
+  failed_when: false
+  check_mode: false
+  become: false
+
+- name: Import AgileBits PGP signing key
+  ansible.builtin.command:
+    argv:
+      - gpg
+      - --keyserver
+      - hkps://keyserver.ubuntu.com
+      - --recv-keys
+      - "{{ onepassword_gpg_key }}"
+  when: packages_onepassword_key_check.rc != 0
+  changed_when: true
+  become: false
+
+# kewlfft.aur.aur accepts a list under `name:`, batching the underlying
+# paru invocation. proton-vpn-gtk-app pulls many python-proton-* AUR
+# dependencies — paru resolves them recursively.
+- name: Install security AUR packages
+  kewlfft.aur.aur:
+    name: "{{ security_aur_packages }}"
+    use: paru
+  become: false
