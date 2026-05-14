@@ -24,7 +24,8 @@ ENV SKIP_HARDWARE_CHECK=1
 RUN pyinfra -y @local deploy.py --dry
 
 # Exercises: dotfiles pull branch (existing .dotfiles), identity injection,
-# and claude-config pull branch (existing .claude repo)
+# and claude-config pull branch (existing .claude repo).
+# Also serves as the positive-path test for the config key allowlist.
 RUN mkdir -p /home/testuser/.dotfiles/.git && \
     mkdir -p /home/testuser/.claude/.git && \
     mkdir -p /home/testuser/.config/hanzo && \

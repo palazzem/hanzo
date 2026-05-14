@@ -16,7 +16,7 @@ config.SUDO = False
 # The file uses KEY="value" shell syntax. We parse it into host.data so
 # every task can access values via host.data.hanzo_fullname, etc.
 # ---------------------------------------------------------------------------
-# Update this set when adding new config keys to bin/bootstrap.sh.
+# Mirrors the keys written by bin/bootstrap.sh; keep both in sync.
 _ALLOWED_CONFIG_KEYS = {"hanzo_fullname", "hanzo_email"}
 
 _config_path = os.path.expanduser("~/.config/hanzo/config")
@@ -31,7 +31,7 @@ if os.path.isfile(_config_path):
                 continue
             _key = _key.strip().lower()
             if _key not in _ALLOWED_CONFIG_KEYS:
-                logger.warning(f"Ignoring unknown config key: {_key}")
+                logger.warning("Ignoring unknown config key: %s", _key)
                 continue
             _value = _value.strip().strip('"').strip("'")
             # Only set if not already defined by group_data or CLI args.

@@ -91,14 +91,14 @@ CONFIG_FILE="$CONFIG_DIR/config"
 # Uses a subshell umask so the file is never world-readable, even briefly.
 write_config() {
     # Double quotes in values would break the KEY="value" format
-    HANZO_FULLNAME="${HANZO_FULLNAME//\"/\\\"}"
-    HANZO_EMAIL="${HANZO_EMAIL//\"/\\\"}"
+    local escaped_fullname="${HANZO_FULLNAME//\"/\\\"}"
+    local escaped_email="${HANZO_EMAIL//\"/\\\"}"
 
     mkdir -p "$CONFIG_DIR"
     chmod 0700 "$CONFIG_DIR"
     (umask 077 && cat > "$CONFIG_FILE" << EOF
-HANZO_FULLNAME="$HANZO_FULLNAME"
-HANZO_EMAIL="$HANZO_EMAIL"
+HANZO_FULLNAME="$escaped_fullname"
+HANZO_EMAIL="$escaped_email"
 EOF
     )
 }
