@@ -45,6 +45,7 @@ docker build -f tests/Containerfile -t hanzo:test .
 - `_sudo=True` for system operations (package installs, service management, config writes).
 - `_sudo=False` for user-space operations (paru, pyenv, dotfiles).
 - Use `tasks/packages.py` as the reference implementation.
+- Use `shlex.quote()` for any interpolated values in `server.shell` commands.
 
 ### Shell Scripts
 
@@ -64,6 +65,12 @@ docker build -f tests/Containerfile -t hanzo:test .
 |---------|---------|
 | `pre-commit run --all-files` | Lint all files |
 | `docker build -f tests/Containerfile -t hanzo:test .` | Build and test in CachyOS container |
+
+## Environment Variables
+
+| Variable | Purpose |
+|----------|---------|
+| `SKIP_HARDWARE_CHECK` | Set to `1` to bypass DMI-based hardware detection in `deploy.py`. Used in CI (see `tests/Containerfile`) where `/sys/class/dmi/id/product_name` is unavailable. |
 
 ## Task Completion Checklist
 
