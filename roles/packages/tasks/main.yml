@@ -42,10 +42,21 @@
     name: "{{ gaming_packages }}"
   become: true
 
+- name: Install communication packages
+  community.general.pacman:
+    name: "{{ comm_packages }}"
+  become: true
+
 # kewlfft.aur.aur accepts a list under `name:`, batching the underlying
 # paru invocation. Avoids per-iteration paru startup + AUR DB read cost.
 - name: Install AUR packages
   kewlfft.aur.aur:
     name: "{{ aur_packages }}"
+    use: paru
+  become: false
+
+- name: Install communication AUR packages
+  kewlfft.aur.aur:
+    name: "{{ comm_aur_packages }}"
     use: paru
   become: false
