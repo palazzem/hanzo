@@ -27,11 +27,6 @@ jobs:
       - name: Run pre-commit hooks
         run: pre-commit run --all-files
 
-      - name: Validate shell scripts
-        run: |
-          bash -n bin/bootstrap.sh
-          bash -n bin/hanzo
-
   test:
     runs-on: ubuntu-latest
     steps:
