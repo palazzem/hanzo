@@ -47,6 +47,7 @@
 
   roles:
     - packages
+    - virtualization
     - system
     - languages
     - devtools

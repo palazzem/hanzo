@@ -1,0 +1,85 @@
+---
+# Virtualization stack — KVM/QEMU + libvirt for running Windows 11 (and
+# other) guests via virt-manager.
+#
+# Layout follows Pattern B (self-contained domain role): this role
+# installs its own packages, while group membership (libvirt, kvm) and
+# the persistent enablement of libvirtd.socket are driven from
+# group_vars/all.yml and consumed by roles/system. Role ordering in
+# playbook.yml is `packages → virtualization → system` so the libvirt
+# and kvm groups (created post-install by these packages) exist before
+# roles/system appends the user to them.
+#
+# The post-install block below activates libvirtd.socket here so the
+# virsh probe in the same play has a listener — roles/system runs
+# after us and adds enabled: true for cross-reboot persistence. On
+# subsequent runs (libvirtd.socket already enabled+running at boot),
+# state: started is a no-op.
+
+- name: Install virtualization packages
+  community.general.pacman:
+    name: "{{ virtualization_packages }}"
+  become: true
+
+# Skip the whole block in:
+#   - --check mode: pacman simulated the install, so libvirtd / virsh
+#     aren't really present.
+#   - containers (docker/podman/generic): libvirtd cannot start without
+#     PID-1 systemd and /dev/kvm. Mirrors the container guard in
+#     roles/hardware/tasks/main.yml.
+- name: Configure libvirt default network
+  when:
+    - not ansible_check_mode
+    - ansible_facts['virtualization_type'] | default('') not in ['docker', 'container', 'podman']
+  block:
+    # Activate the socket here (without enabling it) so the virsh probe
+    # below has a listener. Persistence (enabled: true, survives reboot)
+    # is roles/system's job via the system_services loop. systemd_service
+    # is idempotent: if the socket is already running, this is a no-op.
+    - name: Ensure libvirtd socket is active
+      ansible.builtin.systemd_service:
+        name: libvirtd.socket
+        state: started
+      become: true
+
+    # Libvirt ships the `default` NAT network (192.168.122.0/24) as an
+    # inactive, non-autostart definition. virt-manager's "New VM" wizard
+    # fails with "network 'default' is not active" until both flags flip.
+    # We probe state once with `virsh net-info` (changed_when: false,
+    # failed_when: false — mirrors the devtools probe pattern) and then
+    # conditionally run net-autostart and net-start based on rc + parsed
+    # output.
+    - name: Probe libvirt default network state
+      ansible.builtin.command:
+        argv:
+          - virsh
+          - net-info
+          - default
+      register: virtualization_default_net_info
+      changed_when: false
+      failed_when: false
+      become: true
+
+    - name: Enable autostart for libvirt default network
+      ansible.builtin.command:
+        argv:
+          - virsh
+          - net-autostart
+          - default
+      when:
+        - virtualization_default_net_info.rc == 0
+        - virtualization_default_net_info.stdout is not search('Autostart:\s+yes')
+      changed_when: true
+      become: true
+
+    - name: Start libvirt default network
+      ansible.builtin.command:
+        argv:
+          - virsh
+          - net-start
+          - default
+      when:
+        - virtualization_default_net_info.rc == 0
+        - virtualization_default_net_info.stdout is not search('Active:\s+yes')
+      changed_when: true
+      become: true
