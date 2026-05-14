@@ -75,9 +75,13 @@
 # when the key is present and rc=2 when missing; the recv-keys task is
 # gated on that result. The probe is `changed_when: false` (pure read)
 # and `check_mode: false` so the conditional has a defined rc value in
-# `--check` runs as well. The import sets `changed_when: true` because
-# every actual execution represents a real change — satisfies
-# ansible-lint's no-changed-when rule without disabling it.
+# `--check` runs as well. `failed_when` allows the documented rc=0/rc=2
+# outcomes but surfaces unexpected gpg errors (locked keyring, missing
+# binary) instead of silently falling through to a network import. The
+# import sets `changed_when: true` because every actual execution
+# represents a real change — satisfies ansible-lint's no-changed-when
+# rule without disabling it. Network retries protect against transient
+# keyserver flakiness, which is the dominant failure mode here.
 - name: Check for AgileBits PGP signing key in user keyring
   ansible.builtin.command:
     argv:
@@ -86,7 +90,7 @@
       - "{{ onepassword_gpg_key }}"
   register: packages_onepassword_key_check
   changed_when: false
-  failed_when: false
+  failed_when: packages_onepassword_key_check.rc not in [0, 2]
   check_mode: false
   become: false
 
@@ -95,16 +99,17 @@
     argv:
       - gpg
       - --keyserver
-      - hkps://keyserver.ubuntu.com
+      - "{{ onepassword_gpg_keyserver }}"
       - --recv-keys
       - "{{ onepassword_gpg_key }}"
+  register: packages_onepassword_key_import
   when: packages_onepassword_key_check.rc != 0
   changed_when: true
+  retries: 3
+  delay: 5
+  until: packages_onepassword_key_import is succeeded
   become: false
 
-# kewlfft.aur.aur accepts a list under `name:`, batching the underlying
-# paru invocation. proton-vpn-gtk-app pulls many python-proton-* AUR
-# dependencies — paru resolves them recursively.
 - name: Install security AUR packages
   kewlfft.aur.aur:
     name: "{{ security_aur_packages }}"

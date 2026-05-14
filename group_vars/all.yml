@@ -86,6 +86,11 @@ security_aur_packages:
 # user's GPG keyring.
 onepassword_gpg_key: "3FEF9748469ADBE15DA7CA80AC2D62742012EA22"
 
+# Keyserver used to fetch the AgileBits PGP key. keyserver.ubuntu.com is
+# the project's chosen mirror — more reliable than keys.openpgp.org for
+# AUR build flows. Swappable here without editing role logic.
+onepassword_gpg_keyserver: "hkps://keyserver.ubuntu.com"
+
 # ---------------------------------------------------------------------------
 # System configuration (roles/system)
 # ---------------------------------------------------------------------------
