@@ -1,0 +1,52 @@
+---
+# ASUS ROG Flow Z13 (GZ302) hardware fixes.
+#
+# Fixes: GPU modprobe, HID modprobe, OLED kernel param, initramfs,
+# suspend hook, keyboard hwdb remap, RGB udev rule.
+
+- name: Deploy GPU modprobe config
+  ansible.builtin.template:
+    src: amdgpu.conf.j2
+    dest: /etc/modprobe.d/amdgpu.conf
+    mode: "0644"
+  become: true
+  notify: Rebuild initramfs
+
+- name: Deploy HID modprobe config
+  ansible.builtin.template:
+    src: hid_asus.conf.j2
+    dest: /etc/modprobe.d/hid_asus.conf
+    mode: "0644"
+  become: true
+  notify: Rebuild initramfs
+
+- name: Ensure OLED kernel param in cmdline
+  ansible.builtin.lineinfile:
+    path: /etc/kernel/cmdline
+    regexp: 'amdgpu\.dcdebugmask='
+    line: "{{ gz302_oled_kernel_param }}"
+  become: true
+  notify: Rebuild initramfs
+
+- name: Deploy suspend/resume hook
+  ansible.builtin.template:
+    src: gz302-suspend.sh.j2
+    dest: /usr/lib/systemd/system-sleep/gz302-suspend.sh
+    mode: "0755"
+  become: true
+
+- name: Deploy keyboard hwdb remap
+  ansible.builtin.template:
+    src: 90-gz302-keyboard.hwdb.j2
+    dest: /etc/udev/hwdb.d/90-gz302-keyboard.hwdb
+    mode: "0644"
+  become: true
+  notify: Update hwdb
+
+- name: Deploy RGB udev rule
+  ansible.builtin.template:
+    src: 99-gz302-rgb.rules.j2
+    dest: /etc/udev/rules.d/99-gz302-rgb.rules
+    mode: "0644"
+  become: true
+  notify: Reload udev rules

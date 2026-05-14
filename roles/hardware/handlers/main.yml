@@ -1,0 +1,15 @@
+---
+- name: Rebuild initramfs
+  ansible.builtin.command: mkinitcpio -P
+  changed_when: true
+  become: true
+
+- name: Update hwdb
+  ansible.builtin.shell: systemd-hwdb update && udevadm trigger
+  changed_when: true
+  become: true
+
+- name: Reload udev rules
+  ansible.builtin.shell: udevadm control --reload-rules && udevadm trigger
+  changed_when: true
+  become: true
