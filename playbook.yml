@@ -1,0 +1,29 @@
+---
+- name: Provision CachyOS workstation
+  hosts: localhost
+  connection: local
+  become: false
+  gather_facts: true
+
+  pre_tasks:
+    # Mirror deploy.py's graceful behaviour: load identity config only if
+    # the file exists. Missing config => the dotfiles role skips git
+    # identity injection via the `when: hanzo_fullname is defined` guards.
+    - name: Check for Hanzo user configuration
+      ansible.builtin.stat:
+        path: "{{ ansible_env.HOME }}/.config/hanzo/config.yml"
+      register: hanzo_config_stat
+
+    - name: Load Hanzo user configuration if present
+      ansible.builtin.include_vars:
+        file: "{{ ansible_env.HOME }}/.config/hanzo/config.yml"
+      when: hanzo_config_stat.stat.exists
+
+  roles:
+    - packages
+    - system
+    - languages
+    - devtools
+    - infra
+    - dotfiles
+    - hardware
