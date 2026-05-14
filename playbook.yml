@@ -6,9 +6,9 @@
   gather_facts: true
   # Restrict fact gathering to the subsets actually consumed by the
   # roles:
-  #   - min:      ansible_user_id, ansible_env (default identity / env)
-  #   - hardware: ansible_product_name (from /sys/class/dmi/id)
-  #   - virtual:  ansible_virtualization_type (container guard)
+  #   - min:      ansible_facts['user_id'], ansible_facts['env']
+  #   - hardware: ansible_facts['product_name'] (from /sys/class/dmi/id)
+  #   - virtual:  ansible_facts['virtualization_type'] (container guard)
   # Skipping unused subsets (network, ohai, facter) cuts startup time
   # on every run, especially noticeable in the CI container build.
   gather_subset:
@@ -25,12 +25,12 @@
     # erroring.
     - name: Check for Hanzo user configuration
       ansible.builtin.stat:
-        path: "{{ ansible_env.HOME }}/.config/hanzo/config.yml"
+        path: "{{ ansible_facts.env.HOME }}/.config/hanzo/config.yml"
       register: hanzo_config_stat
 
     - name: Load Hanzo user configuration if present
       ansible.builtin.include_vars:
-        file: "{{ ansible_env.HOME }}/.config/hanzo/config.yml"
+        file: "{{ ansible_facts.env.HOME }}/.config/hanzo/config.yml"
       when: hanzo_config_stat.stat.exists
 
     # Shared cache directory used by roles that download upstream
@@ -40,7 +40,7 @@
     # so subsequent get_url tasks have a valid dest parent.
     - name: Ensure Hanzo cache directory exists
       ansible.builtin.file:
-        path: "{{ ansible_env.HOME }}/.cache/hanzo"
+        path: "{{ ansible_facts.env.HOME }}/.cache/hanzo"
         state: directory
         mode: "0700"
       check_mode: false

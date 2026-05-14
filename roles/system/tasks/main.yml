@@ -19,7 +19,7 @@
 # though they always exist on a real CachyOS system after first boot.
 - name: Add user to supplementary groups
   ansible.builtin.user:
-    name: "{{ ansible_user_id }}"
+    name: "{{ ansible_facts['user_id'] }}"
     groups: "{{ user_groups }}"
     append: true
   when: not ansible_check_mode
@@ -49,7 +49,7 @@
   loop: "{{ user_services }}"
   when:
     - not ansible_check_mode
-    - ansible_env.XDG_RUNTIME_DIR is defined
+    - "'XDG_RUNTIME_DIR' in ansible_facts['env']"
   become: false
 
 - name: Set system locale

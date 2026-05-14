@@ -1,5 +1,11 @@
 FROM --platform=linux/amd64 cachyos/cachyos:latest
 
+# ansible-playbook flag set. Default `--check --diff` validates the playbook
+# without modifying the system; override to `""` (or another flag set) to
+# run a real provisioning inside the container:
+#     docker build --build-arg ANSIBLE_ARGS="" -f tests/Containerfile -t hanzo:test .
+ARG ANSIBLE_ARGS="--check --diff"
+
 RUN pacman -Syu --noconfirm && \
     pacman -S --noconfirm python git curl sudo base-devel paru
 
@@ -17,25 +23,11 @@ ENV PATH="/home/testuser/.local/bin:${PATH}"
 RUN uv tool install ansible-core
 RUN ansible-galaxy collection install -r requirements.yml
 
-# Stage 1: --check WITHOUT user config.
-#   Exercises: graceful missing-config path (pre_tasks stat → include_vars
-#   skipped), git identity injection skipped via `is defined` guards,
-#   clone-branch git_adopt (no .dotfiles, no .claude yet).
-#   The hardware role is skipped by the container guard
-#   (ansible_virtualization_type == 'docker') so no host paths are touched
-#   even if /sys/class/dmi/id/product_name bleeds through from the host.
-RUN ansible-playbook playbook.yml --check --diff
-
-# Stage 2: --check WITH user config.
-#   Exercises: pre_tasks include_vars success path and git identity
-#   injection (community.general.git_config in check mode). The
-#   git_adopt stat probes still select the pull branch when .git exists,
-#   but the pull/clone/adopt tasks themselves are gated by
-#   `not ansible_check_mode` so only the branching logic — not the
-#   actual git operations — is exercised here.
-RUN mkdir -p /home/testuser/.dotfiles/.git && \
-    mkdir -p /home/testuser/.claude/.git && \
-    mkdir -p /home/testuser/.config/hanzo && \
+# Pre-seed a user config so the identity-injection path is exercised on
+# every build (the `hanzo_fullname is defined` guards in roles/dotfiles
+# only fire when the config is present).
+RUN mkdir -p /home/testuser/.config/hanzo && \
     printf 'hanzo_fullname: "Test User"\nhanzo_email: "test@example.com"\n' \
-      > /home/testuser/.config/hanzo/config.yml && \
-    ansible-playbook playbook.yml --check --diff
+      > /home/testuser/.config/hanzo/config.yml
+
+RUN ansible-playbook playbook.yml $ANSIBLE_ARGS

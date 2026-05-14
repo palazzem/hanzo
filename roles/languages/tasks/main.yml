@@ -13,7 +13,7 @@
 - name: Download pyenv installer
   ansible.builtin.get_url:
     url: https://pyenv.run
-    dest: "{{ ansible_env.HOME }}/.cache/hanzo/pyenv-installer.sh"
+    dest: "{{ ansible_facts.env.HOME }}/.cache/hanzo/pyenv-installer.sh"
     mode: "0700"
   become: false
 
@@ -21,8 +21,8 @@
 # in check mode, so the installer script isn't on disk to execute.
 - name: Install pyenv via pyenv-installer
   ansible.builtin.command:
-    cmd: "{{ ansible_env.HOME }}/.cache/hanzo/pyenv-installer.sh"
-    creates: "{{ ansible_env.HOME }}/.pyenv/bin/pyenv"
+    cmd: "{{ ansible_facts.env.HOME }}/.cache/hanzo/pyenv-installer.sh"
+    creates: "{{ ansible_facts.env.HOME }}/.pyenv/bin/pyenv"
   when: not ansible_check_mode
   become: false
 

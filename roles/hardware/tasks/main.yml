@@ -1,16 +1,20 @@
 ---
 # Hardware-specific fixes, gated by DMI product name AND container guard.
 #
-# ansible_product_name is gathered by ansible.builtin.setup from
+# ansible_facts['product_name'] is gathered by ansible.builtin.setup from
 # /sys/class/dmi/id/product_name. On Linux Docker running ON the
 # target host, that file is bind-mounted into the container — so a
 # pure DMI check would mis-trigger inside the container. We AND in
-# ansible_virtualization_type to ensure we never write to host paths
-# from inside docker/podman.
+# ansible_facts['virtualization_type'] to ensure we never write to host
+# paths from inside docker/podman.
+#
+# `'product_name' in ansible_facts` short-circuits the second condition
+# so the `'GZ302' in ...` check is safe even when the DMI fact is
+# missing (e.g., when `gather_subset` doesn't include `hardware`).
 
 - name: Include GZ302 hardware fixes
   ansible.builtin.include_tasks: gz302.yml
   when:
-    - ansible_product_name is defined
-    - "'GZ302' in ansible_product_name"
-    - ansible_virtualization_type | default('') not in ['docker', 'container', 'podman']
+    - "'product_name' in ansible_facts"
+    - "'GZ302' in ansible_facts['product_name']"
+    - ansible_facts['virtualization_type'] | default('') not in ['docker', 'container', 'podman']
