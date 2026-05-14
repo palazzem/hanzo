@@ -1,11 +1,24 @@
 {
   "permissions": {
     "deny": [
-      "Bash(*pyinfra*)",
+      "Bash(ansible)",
+      "Bash(ansible *)",
+      "Bash(ansible-playbook)",
+      "Bash(ansible-playbook *)",
       "Bash(hanzo)",
       "Bash(hanzo *)",
-      "Bash(*bin/hanzo*)",
-      "Bash(*bootstrap.sh*)"
+      "Bash(./bin/hanzo)",
+      "Bash(./bin/hanzo *)",
+      "Bash(bin/hanzo)",
+      "Bash(bin/hanzo *)",
+      "Bash(./bin/bootstrap.sh)",
+      "Bash(./bin/bootstrap.sh *)",
+      "Bash(bin/bootstrap.sh)",
+      "Bash(bin/bootstrap.sh *)",
+      "Bash(bash bin/bootstrap.sh)",
+      "Bash(bash bin/bootstrap.sh *)",
+      "Bash(sh bin/bootstrap.sh)",
+      "Bash(sh bin/bootstrap.sh *)"
     ]
   }
 }
