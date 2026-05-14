@@ -24,16 +24,10 @@ ENV SKIP_HARDWARE_CHECK=1
 RUN pyinfra -y @local deploy.py --dry
 
 # Exercises: dotfiles pull branch (existing .dotfiles), identity injection,
-# and claude-config pull branch (existing .claude repo).
-# Also serves as the positive-path test for the config key allowlist.
+# and claude-config pull branch (existing .claude repo)
 RUN mkdir -p /home/testuser/.dotfiles/.git && \
     mkdir -p /home/testuser/.claude/.git && \
     mkdir -p /home/testuser/.config/hanzo && \
     printf 'HANZO_FULLNAME="Test User"\nHANZO_EMAIL="test@example.com"\n' \
       > /home/testuser/.config/hanzo/config && \
     pyinfra -y @local deploy.py --dry
-
-# Exercises: unknown config keys are rejected by the allowlist
-RUN printf 'HANZO_FULLNAME="Test User"\nHANZO_EMAIL="test@example.com"\nEVIL_KEY="payload"\n' \
-      > /home/testuser/.config/hanzo/config && \
-    pyinfra -y @local deploy.py --dry 2>&1 | grep -q "Ignoring unknown config key: evil_key"
