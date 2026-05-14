@@ -28,7 +28,7 @@ def _git_pull_ff_cmd(repo_dir: str) -> str:
     """
     return (
         f"git -C {shlex.quote(repo_dir)} pull --ff-only"
-        " || echo 'WARNING: fast-forward failed; local branch may have diverged — skipping pull'"
+        " || echo 'WARNING: fast-forward failed; local branch may have diverged — skipping pull' >&2"
     )
 
 
