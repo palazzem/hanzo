@@ -24,7 +24,7 @@ RUN ansible-galaxy collection install -r requirements.yml
 #   The hardware role is skipped by the container guard
 #   (ansible_virtualization_type == 'docker') so no host paths are touched
 #   even if /sys/class/dmi/id/product_name bleeds through from the host.
-RUN ansible-playbook playbook.yml --check
+RUN ansible-playbook playbook.yml --check --diff
 
 # Stage 2: --check WITH user config.
 #   Exercises: pre_tasks include_vars success path and git identity
@@ -38,4 +38,4 @@ RUN mkdir -p /home/testuser/.dotfiles/.git && \
     mkdir -p /home/testuser/.config/hanzo && \
     printf 'hanzo_fullname: "Test User"\nhanzo_email: "test@example.com"\n' \
       > /home/testuser/.config/hanzo/config.yml && \
-    ansible-playbook playbook.yml --check
+    ansible-playbook playbook.yml --check --diff
