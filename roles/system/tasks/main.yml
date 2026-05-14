@@ -1,0 +1,40 @@
+---
+# System configuration — groups, services, and locale.
+
+- name: Ensure system groups exist
+  ansible.builtin.group:
+    name: "{{ item }}"
+    system: true
+  loop: "{{ system_groups }}"
+  become: true
+
+- name: Add user to supplementary groups
+  ansible.builtin.user:
+    name: "{{ ansible_user_id }}"
+    groups: "{{ user_groups }}"
+    append: true
+  become: true
+
+- name: Enable and start system services
+  ansible.builtin.systemd_service:
+    name: "{{ item }}"
+    state: started
+    enabled: true
+  loop: "{{ system_services }}"
+  become: true
+
+- name: Enable and start user services
+  ansible.builtin.systemd_service:
+    name: "{{ item }}"
+    state: started
+    enabled: true
+    scope: user
+  loop: "{{ user_services }}"
+  become: false
+
+- name: Set system locale
+  ansible.builtin.lineinfile:
+    path: /etc/locale.conf
+    regexp: "^LANG="
+    line: "LANG={{ system_locale }}"
+  become: true
