@@ -1,21 +1,13 @@
 ---
 # ASUS ROG Flow Z13 (GZ302) hardware fixes.
 #
-# Fixes: GPU modprobe, HID modprobe, OLED kernel param, initramfs,
+# Fixes: GPU modprobe, OLED kernel param, initramfs,
 # suspend hook, keyboard hwdb remap, RGB udev rule.
 
 - name: Deploy GPU modprobe config
   ansible.builtin.template:
     src: amdgpu.conf.j2
     dest: /etc/modprobe.d/amdgpu.conf
-    mode: "0644"
-  become: true
-  notify: Rebuild initramfs
-
-- name: Deploy HID modprobe config
-  ansible.builtin.template:
-    src: hid_asus.conf.j2
-    dest: /etc/modprobe.d/hid_asus.conf
     mode: "0644"
   become: true
   notify: Rebuild initramfs
