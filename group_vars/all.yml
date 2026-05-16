@@ -138,9 +138,6 @@ gz302_amdgpu_sg_display: 0
 # Disable Compute Wavefront Save-Restore to prevent GPU hangs on RDNA 3.5.
 gz302_amdgpu_cwsr_enable: 0
 
-# F-row defaults to media keys; press Fn for standard F1-F12.
-gz302_hid_fnlock_default: 0
-
 # ASUS USB identifiers for keyboard, touchpad, and lightbar devices.
 gz302_asus_usb_vendor: "0b05"
 gz302_asus_keyboard_product: "1a30"
