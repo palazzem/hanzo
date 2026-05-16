@@ -124,9 +124,9 @@ claude_config_dir: ~/.claude
 # GZ302 (ASUS ROG Flow Z13) hardware configuration (roles/hardware)
 # ---------------------------------------------------------------------------
 
-# OLED kernel param: disables PSR-SU and Panel Replay to prevent scrolling
-# artifacts and flicker on the Strix Halo OLED panel (kernel 7.0+).
-gz302_oled_kernel_param: "amdgpu.dcdebugmask=0x600"
+# Disable Panel Replay (DC_DISABLE_REPLAY=0x400) on the Strix Halo OLED panel
+# to prevent scrolling artifacts and flicker on DCN 3.5.
+gz302_oled_kernel_param: "amdgpu.dcdebugmask=0x400"
 
 # Force ABM off: kernel auto-skip on OLED was reverted in 2024; PPD engages
 # ABM on battery and causes visible gamma/red-shift on AMD OLED panels.
