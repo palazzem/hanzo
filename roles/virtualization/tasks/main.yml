@@ -1,54 +1,48 @@
 ---
-# Virtualization stack — KVM/QEMU + libvirt packages and minimal
-# persistent config for running Windows 11 (and other) guests via
-# virt-manager.
+# KVM/QEMU + libvirt for Windows 11 guests via virt-manager.
 #
-# Lifecycle: libvirtd.socket is NOT enabled at boot — the user starts
-# it manually (`sudo systemctl start libvirtd.socket`) when a VM
-# session is needed. To make virt-manager fully usable after that
-# single command, this role flips one persistent config flag on
-# libvirt's `default` NAT network so it autostarts whenever libvirtd
-# starts. End result: one systemctl command brings up libvirtd, the
-# default network (virbr0), the per-network dnsmasq, and the iptables
-# rules — no separate `virsh net-start` step needed.
+# libvirtd.socket is intentionally left disabled at boot — libvirtd has
+# no useful work outside an active VM session, and socket-only
+# activation keeps the resource cost at zero until something connects.
 #
-# dnsmasq is in virtualization_packages because libvirt's default NAT
-# network spawns it as a per-network process (DHCP + DNS to guests on
-# virbr0). It is not a host-wide DNS server and never runs unless
-# libvirtd has brought the default network up.
+# The role's only persistent state change is `Autostart: yes` on
+# libvirt's `default` NAT network. Without it, libvirtd starts with the
+# network in libvirt's shipped inactive state and new-VM creation fails
+# with "network 'default' is not active".
 #
-# Group membership (libvirt, kvm) is handled by roles/system via
-# user_groups so the user can talk to libvirtd and /dev/kvm without
-# polkit prompts once libvirtd is running.
+# dnsmasq is libvirt's DHCP/DNS provider for the virbr0 subnet
+# (192.168.122.0/24), spawned per-network by libvirtd; it never runs as
+# a system-wide daemon.
+#
+# libvirt/kvm group membership is in user_groups and applied by
+# roles/system. This role must run first because the libvirt and
+# qemu-desktop post-install hooks are what create those groups.
 
 - name: Install virtualization packages
   community.general.pacman:
     name: "{{ virtualization_packages }}"
   become: true
 
-# Block runs only on real hosts: skipped in --check mode (pacman is
-# simulated, virsh wouldn't exist on first run) and inside containers
-# (no PID-1 systemd, no /dev/kvm). Mirrors the container guard in
-# roles/hardware/tasks/main.yml.
+# --check simulates the pacman install, so virsh wouldn't exist on
+# first run. Containers lack PID-1 systemd and /dev/kvm, so libvirtd
+# cannot run. Same guard shape as roles/hardware.
 - name: Configure libvirt default network autostart
   when:
     - not ansible_check_mode
     - ansible_facts['virtualization_type'] | default('') not in ['docker', 'container', 'podman']
   block:
-    # Briefly activate libvirtd.socket so virsh has a listener for the
-    # probe and autostart-flag flip below. state: started only — NOT
-    # enabled: true. Boot-time enablement is the user's manual step;
-    # this just lets virsh operate during provisioning.
-    - name: Ensure libvirtd socket is active (transient — not enabled for boot)
+    # virsh needs libvirtd reachable for the probe and the flag flip
+    # below. state: started only — persisting the socket would
+    # contradict the deliberate "off at boot" policy above.
+    - name: Ensure libvirtd socket is active
       ansible.builtin.systemd_service:
         name: libvirtd.socket
         state: started
       become: true
 
-    # Single probe of the default network state. failed_when: false
-    # mirrors the devtools probe pattern: if the network isn't defined
-    # for any reason, the autostart task silently skips rather than
-    # aborting the play.
+    # failed_when: false so the play continues if the `default` network
+    # definition is missing for any reason; the action task below gates
+    # on rc == 0 and silently skips. Same probe shape as roles/devtools.
     - name: Probe libvirt default network state
       ansible.builtin.command:
         argv:
@@ -60,9 +54,9 @@
       failed_when: false
       become: true
 
-    # One-time persistent config: flip the autostart flag so the user's
-    # later `systemctl start libvirtd.socket` also brings the default
-    # network up — that's the one-command UX requested in PR #248.
+    # Gated on the current Autostart state for idempotency. This single
+    # flag is what makes a later `systemctl start libvirtd.socket` also
+    # bring the default NAT network up.
     - name: Enable autostart for libvirt default network
       ansible.builtin.command:
         argv:
