@@ -66,34 +66,19 @@
     use: paru
   become: false
 
-# 1password and 1password-cli AUR PKGBUILDs declare validpgpkeys for the
-# AgileBits signing key. makepkg / paru verify against the *building
-# user's* GPG keyring and refuse to build until the key is imported.
-# kewlfft.aur.aur does not seed keyrings, so we import the key here.
+# 1password and 1password-cli AUR PKGBUILDs pin validpgpkeys to the
+# AgileBits signing key. makepkg verifies against the building user's
+# keyring; kewlfft.aur.aur does not seed it, so we import the key here.
 #
-# Trust chain — enforced explicitly in --check mode (every CI build):
+# Trust chain — enforced under --check so CI catches every break:
 #   1. Probe   — read keyring state. rc=0 present, rc=2 absent.
-#   2. Import  — fetch & import from keyserver when absent. Retries 3x
-#                on transient network failure.
-#   3. Verify  — assert a key matching the expected fingerprint is in
-#                the keyring after import. Fails the play loudly if the
-#                keyserver returned a key with a different fpr or the
-#                import silently failed.
-#   4. Install — kewlfft.aur.aur invokes paru which calls makepkg;
-#                makepkg's own validpgpkeys check cross-verifies the
-#                AUR package signatures against the imported key. Only
-#                exercised in real mode (--check skips the actual build).
-#
-# All three GPG tasks set `check_mode: false` so the full trust-chain
-# precondition is exercised on every --check run — CI green now implies
-# the keyserver fetch + fingerprint assertion both succeeded, not just
-# that the YAML parses. Defense in depth on top of makepkg's
-# validpgpkeys check, which is the load-bearing signature verification
-# in real mode.
-#
-# Lint-rule satisfaction (no rules disabled): probe and verify are pure
-# reads (`changed_when: false`), import declares `changed_when: true`
-# because every actual execution is a real keyring write.
+#   2. Import  — fetch from keyserver when absent. Retries 3x on
+#                transient network failure.
+#   3. Verify  — assert the imported fingerprint matches what we asked
+#                for. Catches a misbehaving keyserver or a silently
+#                failed import before any package is built.
+#   4. Install — kewlfft.aur.aur invokes paru → makepkg → validpgpkeys
+#                cross-check. Only exercised in real mode.
 - name: Check for AgileBits PGP signing key in user keyring
   ansible.builtin.command:
     argv:
@@ -123,11 +108,8 @@
   until: packages_onepassword_key_import is succeeded
   become: false
 
-# Belt-and-suspenders fingerprint assertion: rc == 0 alone confirms the
-# key is in the keyring; the additional substring check against the
-# colons output guards against any future gpg version where rc semantics
-# drift. With `--with-colons`, the fpr appears verbatim on a `fpr:` line,
-# so the substring match is unambiguous.
+# Substring check on the colons output is belt-and-suspenders against
+# future gpg versions where rc semantics drift.
 - name: Verify AgileBits PGP signing key is present after import
   ansible.builtin.command:
     argv:
