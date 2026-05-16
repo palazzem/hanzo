@@ -70,8 +70,6 @@ virtualization_packages:
   - virt-viewer
   - virtiofsd
 
-# 1password and 1password-cli require the AgileBits GPG key — see
-# onepassword_gpg_key.
 security_aur_packages:
   - 1password
   - 1password-cli

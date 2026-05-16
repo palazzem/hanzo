@@ -108,8 +108,6 @@
   until: packages_onepassword_key_import is succeeded
   become: false
 
-# Substring check on the colons output is belt-and-suspenders against
-# future gpg versions where rc semantics drift.
 - name: Verify AgileBits PGP signing key is present after import
   ansible.builtin.command:
     argv:
