@@ -147,7 +147,13 @@ gz302_keyboard_scancode: "70072"
 gz302_keyboard_target_key: prog1
 
 # NetworkManager wifi.powersave for MT7925. NM's default (3 = enabled)
-# causes disconnects and throttled throughput on this chip.
+# causes disconnects and throttled throughput on this chip; 2 = disabled is
+# the cross-distro workaround (Arch, Fedora, Framework, Z13 communities).
+# Trade-off: ~1-2% extra system idle power; does NOT affect suspend (the
+# mt7925_pci_suspend driver callback is a separate code path from runtime
+# nl80211 PS). 1 = ignore is not a substitute because the mt76 driver
+# default is PS-on (the 2023 patch to flip it was rejected upstream).
+# Flip back to 3 if a future kernel/firmware combo fixes the regression.
 # Values: 0 = use default, 1 = ignore, 2 = disable, 3 = enable.
 gz302_wifi_powersave: 2
 
