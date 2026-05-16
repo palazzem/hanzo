@@ -146,6 +146,10 @@ gz302_asus_lightbar_product: "18c6"
 gz302_keyboard_scancode: "70072"
 gz302_keyboard_target_key: prog1
 
+# NetworkManager wifi powersave for MT7925: 2 = disabled. NM default is 3
+# (enabled), which causes disconnects/slow throughput on this chip.
+gz302_wifi_powersave: 2
+
 # ---------------------------------------------------------------------------
 # Development tools (roles/devtools, roles/infra)
 # ---------------------------------------------------------------------------

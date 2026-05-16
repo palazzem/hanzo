@@ -42,3 +42,11 @@
     mode: "0644"
   become: true
   notify: Reload udev rules
+
+- name: Deploy NetworkManager wifi powersave drop-in
+  ansible.builtin.template:
+    src: wifi-powersave.conf.j2
+    dest: /etc/NetworkManager/conf.d/wifi-powersave.conf
+    mode: "0644"
+  become: true
+  notify: Reload NetworkManager
