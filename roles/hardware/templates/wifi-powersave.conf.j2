@@ -1,0 +1,7 @@
+# MediaTek MT7925 NetworkManager powersave override
+# Managed by Hanzo. Do not edit manually.
+#
+# NM defaults to wifi.powersave=3 (enabled). On MT7925 this causes
+# disconnects, throttled upload, and slow throughput. Set to 2 (disabled).
+[connection]
+wifi.powersave = {{ gz302_wifi_powersave }}
