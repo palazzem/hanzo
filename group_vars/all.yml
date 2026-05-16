@@ -60,6 +60,7 @@ comm_aur_packages:
   - zoom
 
 virtualization_packages:
+  - dnsmasq
   - edk2-ovmf
   - libvirt
   - qemu-desktop
