@@ -70,6 +70,20 @@ virtualization_packages:
   - virt-viewer
   - virtiofsd
 
+security_aur_packages:
+  - 1password
+  - 1password-cli
+  - proton-vpn-gtk-app
+
+# Both 1password and 1password-cli PKGBUILDs pin validpgpkeys to this
+# fingerprint; makepkg refuses to build until the matching public key
+# is in the building user's GPG keyring.
+onepassword_gpg_key: "3FEF9748469ADBE15DA7CA80AC2D62742012EA22"
+
+# keyserver.ubuntu.com is more reliable than keys.openpgp.org for AUR
+# build flows.
+onepassword_gpg_keyserver: "hkps://keyserver.ubuntu.com"
+
 # ---------------------------------------------------------------------------
 # System configuration (roles/system)
 # ---------------------------------------------------------------------------

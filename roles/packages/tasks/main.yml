@@ -65,3 +65,66 @@
     name: "{{ comm_aur_packages }}"
     use: paru
   become: false
+
+# 1password and 1password-cli AUR PKGBUILDs pin validpgpkeys to the
+# AgileBits signing key. makepkg verifies against the building user's
+# keyring; kewlfft.aur.aur does not seed it, so we import the key here.
+#
+# Trust chain — enforced under --check so CI catches every break:
+#   1. Probe   — read keyring state. rc=0 present, rc=2 absent.
+#   2. Import  — fetch from keyserver when absent. Retries 3x on
+#                transient network failure.
+#   3. Verify  — assert the imported fingerprint matches what we asked
+#                for. Catches a misbehaving keyserver or a silently
+#                failed import before any package is built.
+#   4. Install — kewlfft.aur.aur invokes paru → makepkg → validpgpkeys
+#                cross-check. Only exercised in real mode.
+- name: Check for AgileBits PGP signing key in user keyring
+  ansible.builtin.command:
+    argv:
+      - gpg
+      - --list-keys
+      - "{{ onepassword_gpg_key }}"
+  register: packages_onepassword_key_check
+  changed_when: false
+  failed_when: packages_onepassword_key_check.rc not in [0, 2]
+  check_mode: false
+  become: false
+
+- name: Import AgileBits PGP signing key
+  ansible.builtin.command:
+    argv:
+      - gpg
+      - --keyserver
+      - "{{ onepassword_gpg_keyserver }}"
+      - --recv-keys
+      - "{{ onepassword_gpg_key }}"
+  register: packages_onepassword_key_import
+  when: packages_onepassword_key_check.rc != 0
+  changed_when: true
+  check_mode: false
+  retries: 3
+  delay: 5
+  until: packages_onepassword_key_import is succeeded
+  become: false
+
+- name: Verify AgileBits PGP signing key is present after import
+  ansible.builtin.command:
+    argv:
+      - gpg
+      - --with-colons
+      - --list-keys
+      - "{{ onepassword_gpg_key }}"
+  register: packages_onepassword_key_verify
+  changed_when: false
+  failed_when: >-
+    packages_onepassword_key_verify.rc != 0
+    or onepassword_gpg_key not in packages_onepassword_key_verify.stdout
+  check_mode: false
+  become: false
+
+- name: Install security AUR packages
+  kewlfft.aur.aur:
+    name: "{{ security_aur_packages }}"
+    use: paru
+  become: false
