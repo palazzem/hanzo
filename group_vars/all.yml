@@ -89,7 +89,6 @@ system_services:
   - docker
   - ollama
   - asusd
-  - libvirtd.socket
 
 # User-scoped systemd services (systemctl --user).
 user_services:
