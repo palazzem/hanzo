@@ -59,6 +59,17 @@ aur_packages:
 comm_aur_packages:
   - zoom
 
+virtualization_packages:
+  - dnsmasq
+  - edk2-ovmf
+  - libvirt
+  - qemu-desktop
+  - spice-vdagent
+  - swtpm
+  - virt-manager
+  - virt-viewer
+  - virtiofsd
+
 # ---------------------------------------------------------------------------
 # System configuration (roles/system)
 # ---------------------------------------------------------------------------
@@ -69,6 +80,8 @@ system_groups:
 # Supplementary groups: system_groups + kernel-managed groups.
 user_groups:
   - docker
+  - kvm
+  - libvirt
   - render
   - video
 

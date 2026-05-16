@@ -1,0 +1,70 @@
+---
+# KVM/QEMU + libvirt for Windows 11 guests via virt-manager.
+#
+# libvirtd.socket is intentionally left disabled at boot — libvirtd has
+# no useful work outside an active VM session, and socket-only
+# activation keeps the resource cost at zero until something connects.
+#
+# The role's only persistent state change is `Autostart: yes` on
+# libvirt's `default` NAT network. Without it, libvirtd starts with the
+# network in libvirt's shipped inactive state and new-VM creation fails
+# with "network 'default' is not active".
+#
+# dnsmasq is libvirt's DHCP/DNS provider for the virbr0 subnet
+# (192.168.122.0/24), spawned per-network by libvirtd; it never runs as
+# a system-wide daemon.
+#
+# libvirt/kvm group membership is in user_groups and applied by
+# roles/system. This role must run first because the libvirt and
+# qemu-desktop post-install hooks are what create those groups.
+
+- name: Install virtualization packages
+  community.general.pacman:
+    name: "{{ virtualization_packages }}"
+  become: true
+
+# --check simulates the pacman install, so virsh wouldn't exist on
+# first run. Containers lack PID-1 systemd and /dev/kvm, so libvirtd
+# cannot run. Same guard shape as roles/hardware.
+- name: Configure libvirt default network autostart
+  when:
+    - not ansible_check_mode
+    - ansible_facts['virtualization_type'] | default('') not in ['docker', 'container', 'podman']
+  block:
+    # virsh needs libvirtd reachable for the probe and the flag flip
+    # below. state: started only — persisting the socket would
+    # contradict the deliberate "off at boot" policy above.
+    - name: Ensure libvirtd socket is active
+      ansible.builtin.systemd_service:
+        name: libvirtd.socket
+        state: started
+      become: true
+
+    # failed_when: false so the play continues if the `default` network
+    # definition is missing for any reason; the action task below gates
+    # on rc == 0 and silently skips. Same probe shape as roles/devtools.
+    - name: Probe libvirt default network state
+      ansible.builtin.command:
+        argv:
+          - virsh
+          - net-info
+          - default
+      register: virtualization_default_net_info
+      changed_when: false
+      failed_when: false
+      become: true
+
+    # Gated on the current Autostart state for idempotency. This single
+    # flag is what makes a later `systemctl start libvirtd.socket` also
+    # bring the default NAT network up.
+    - name: Enable autostart for libvirt default network
+      ansible.builtin.command:
+        argv:
+          - virsh
+          - net-autostart
+          - default
+      when:
+        - virtualization_default_net_info.rc == 0
+        - virtualization_default_net_info.stdout is not search('Autostart:\s+yes')
+      changed_when: true
+      become: true
