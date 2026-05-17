@@ -32,13 +32,6 @@
   become: true
   notify: Update hwdb
 
-- name: Remove legacy RGB udev rule
-  ansible.builtin.file:
-    path: /etc/udev/rules.d/99-gz302-rgb.rules
-    state: absent
-  become: true
-  notify: Reload udev rules
-
 - name: Deploy NetworkManager wifi powersave drop-in
   ansible.builtin.template:
     src: wifi-powersave.conf.j2
