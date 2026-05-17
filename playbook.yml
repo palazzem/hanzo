@@ -59,24 +59,19 @@
           become: true
           tags: [always]
 
-        - name: Run foundation role
-          ansible.builtin.import_role:
-            name: foundation
-          tags: [foundation, always]
-
-        # Hardware runs early so the MT7925 wifi-powersave drop-in is in
-        # place before the AUR-heavy roles below start downloading.
-        # NM's default powersave (3) silently stalls long-running curl
-        # transfers on this chip — Firefox masks it, but paru/makepkg do
-        # not. flush_handlers forces "Reload NetworkManager" to fire now
-        # rather than at end-of-play.
+        # Hardware runs first so the MT7925 wifi-powersave fix is
+        # applied before any other role starts downloading. The wifi
+        # handler is flushed inside the role; the boot-regen handler
+        # fires once at end-of-play.
         - name: Run hardware role
           ansible.builtin.import_role:
             name: hardware
           tags: [hardware]
 
-        - name: Flush handlers so hardware fixes take effect immediately
-          ansible.builtin.meta: flush_handlers
+        - name: Run foundation role
+          ansible.builtin.import_role:
+            name: foundation
+          tags: [foundation, always]
 
         - name: Run desktop role
           ansible.builtin.import_role:
