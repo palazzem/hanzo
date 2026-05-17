@@ -47,14 +47,6 @@
     mode: "0755"
   become: true
 
-- name: Deploy keyboard hwdb remap
-  ansible.builtin.template:
-    src: 90-gz302-keyboard.hwdb.j2
-    dest: /etc/udev/hwdb.d/90-gz302-keyboard.hwdb
-    mode: "0644"
-  become: true
-  notify: Update hwdb
-
 - name: Deploy NetworkManager wifi powersave drop-in
   ansible.builtin.template:
     src: wifi-powersave.conf.j2

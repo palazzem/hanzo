@@ -23,11 +23,6 @@ hardware_gz302_asus_usb_vendor: "0b05"
 hardware_gz302_asus_keyboard_product: "1a30"
 hardware_gz302_asus_lightbar_product: "18c6"
 
-# Keyboard hwdb remap: Copilot key -> KEY_PROG1.
-# Bound in Hyprland to launch alacritty -e claude.
-hardware_gz302_keyboard_scancode: "70072"
-hardware_gz302_keyboard_target_key: prog1
-
 # NetworkManager wifi.powersave for MT7925. NM's default (3 = enabled)
 # causes disconnects and throttled throughput on this chip; 2 = disabled is
 # the cross-distro workaround (Arch, Fedora, Framework, Z13 communities).

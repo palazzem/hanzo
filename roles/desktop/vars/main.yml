@@ -19,3 +19,8 @@ desktop_aur:
 
 desktop_user_groups:
   - video
+
+desktop_pacman_remove:
+  - alacritty
+  - firefox
+  - konsole
