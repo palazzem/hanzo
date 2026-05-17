@@ -1,19 +1,6 @@
 ---
 # System configuration — groups, services, and locale.
 
-# Groups must exist before any consumer task (e.g., a future file write
-# with `group: docker`) can resolve them. `check_mode: false` ensures
-# they're always created, even when other system-role tasks are skipped
-# in check mode — keeping group state consistent across check and live
-# runs.
-- name: Ensure system groups exist
-  ansible.builtin.group:
-    name: "{{ item }}"
-    system: true
-  loop: "{{ system_groups }}"
-  check_mode: false
-  become: true
-
 # Skipped in check mode: render/video groups are kernel-managed and may
 # not exist on the test machine (e.g., inside the CI container), even
 # though they always exist on a real CachyOS system after first boot.
