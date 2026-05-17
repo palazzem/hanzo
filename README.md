@@ -20,12 +20,11 @@ curl -L https://raw.githubusercontent.com/palazzem/hanzo/main/bin/bootstrap.sh |
 
 This will:
 
-1. Ask for your sudo password (once)
-2. Install [uv](https://docs.astral.sh/uv/) and [ansible-core](https://docs.ansible.com/ansible-core/)
-3. Clone this repository to `~/.local/src/hanzo`
-4. Install required Galaxy collections (`community.general`, `kewlfft.aur`)
-5. Prompt for your name and email (first run only)
-6. Run the full provisioning
+1. Install [uv](https://docs.astral.sh/uv/) and [ansible-core](https://docs.ansible.com/ansible-core/)
+2. Clone this repository to `~/.local/src/hanzo`
+3. Install required Galaxy collections (`community.general`, `kewlfft.aur`)
+4. Prompt for your name and email (first run only)
+5. Run the full provisioning (prompts once for your sudo password)
 
 ## Usage
 

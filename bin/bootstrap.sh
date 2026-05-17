@@ -31,18 +31,7 @@ echo -e "${GREEN}CachyOS System Provisioner${NC}"
 echo ""
 
 # ---------------------------------------------------------------------------
-# Step 1: Sudo — ask password once, keep the ticket alive in background
-# ---------------------------------------------------------------------------
-log_info "Requesting sudo access (you may be prompted for your password)..."
-sudo -v
-
-# Provisioning takes long enough for the sudo ticket to expire mid-run
-while true; do sudo -n true; sleep 50; done 2>/dev/null &
-SUDO_KEEPALIVE_PID=$!
-trap 'kill "$SUDO_KEEPALIVE_PID" 2>/dev/null' EXIT
-
-# ---------------------------------------------------------------------------
-# Step 2: Install uv (Astral's Python package manager)
+# Step 1: Install uv (Astral's Python package manager)
 # ---------------------------------------------------------------------------
 if command -v uv >/dev/null 2>&1; then
     log_info "uv is already installed: $(uv --version)"
@@ -55,7 +44,7 @@ else
 fi
 
 # ---------------------------------------------------------------------------
-# Step 3: Install Ansible via uv tool
+# Step 2: Install Ansible via uv tool
 # ---------------------------------------------------------------------------
 if uv tool list 2>/dev/null | grep -q "^ansible-core"; then
     log_info "ansible-core is already installed"
@@ -65,7 +54,7 @@ else
 fi
 
 # ---------------------------------------------------------------------------
-# Step 4: Clone or update the Hanzo repository
+# Step 3: Clone or update the Hanzo repository
 # ---------------------------------------------------------------------------
 HANZO_REPO="https://github.com/palazzem/hanzo.git"
 HANZO_DIR="$HOME/.local/src/hanzo"
@@ -81,7 +70,7 @@ else
 fi
 
 # ---------------------------------------------------------------------------
-# Step 4b: Install Ansible Galaxy collections
+# Step 4: Install Ansible Galaxy collections
 # ---------------------------------------------------------------------------
 log_info "Installing Ansible Galaxy collections..."
 ansible-galaxy collection install -r "$HANZO_DIR/requirements.yml"
@@ -158,8 +147,7 @@ fi
 # ---------------------------------------------------------------------------
 log_info "Running provisioner..."
 echo ""
-cd "$HANZO_DIR"
-ansible-playbook playbook.yml
+"$HANZO_DIR/bin/hanzo"
 
 echo ""
 log_info "Done! Run 'hanzo' to re-provision at any time."

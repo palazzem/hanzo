@@ -11,4 +11,4 @@ HANZO_DIR="$(cd "$(dirname "$(readlink -f "$0")")/.." && pwd)"
 
 cd "$HANZO_DIR"
 
-exec ansible-playbook playbook.yml "$@"
+exec ansible-playbook playbook.yml --ask-become-pass "$@"
