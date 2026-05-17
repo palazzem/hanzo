@@ -100,7 +100,7 @@ case "${1:-}" in
         # cascading into a hung resume. Unbind before suspend, rebind after.
         log "Unbinding ASUS HID devices..."
         : > "$STATE_DIR/asus-hid"
-        for hid_dev in /sys/bus/hid/devices/0003:{{ gz302_asus_usb_vendor | upper }}:*; do
+        for hid_dev in /sys/bus/hid/devices/0003:{{ hardware_gz302_asus_usb_vendor | upper }}:*; do
             [[ -e "$hid_dev" ]] || continue
             dev_name=$(basename "$hid_dev")
             if [[ -e "$hid_dev/driver" ]]; then
@@ -153,13 +153,13 @@ case "${1:-}" in
             [[ -f "$dev/idVendor" && -f "$dev/idProduct" ]] || continue
             vid=$(<"$dev/idVendor")
             pid=$(<"$dev/idProduct")
-            [[ "$vid" == "{{ gz302_asus_usb_vendor }}" ]] || continue
+            [[ "$vid" == "{{ hardware_gz302_asus_usb_vendor }}" ]] || continue
 
             case "$pid" in
-                {{ gz302_asus_keyboard_product }})
+                {{ hardware_gz302_asus_keyboard_product }})
                     reset_usb_device "$dev" "keyboard/touchpad"
                     ;;
-                {{ gz302_asus_lightbar_product }})
+                {{ hardware_gz302_asus_lightbar_product }})
                     reset_usb_device "$dev" "lightbar"
                     ;;
             esac

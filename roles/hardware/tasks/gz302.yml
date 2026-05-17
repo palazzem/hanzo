@@ -36,7 +36,7 @@
   ansible.builtin.lineinfile:
     path: /etc/kernel/cmdline
     regexp: 'amdgpu\.dcdebugmask='
-    line: "{{ gz302_oled_kernel_param }}"
+    line: "{{ hardware_gz302_oled_kernel_param }}"
   become: true
   notify: Rebuild initramfs
 

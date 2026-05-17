@@ -5,3 +5,36 @@ hardware_asus_packages:
 
 hardware_asus_services:
   - asusd
+
+# Disable Panel Replay (DC_DISABLE_REPLAY=0x400) on the Strix Halo OLED panel
+# to prevent scrolling artifacts and flicker on DCN 3.5.
+hardware_gz302_oled_kernel_param: "amdgpu.dcdebugmask=0x400"
+
+# Force ABM off: kernel auto-skip on OLED was reverted in 2024; PPD engages
+# ABM on battery and causes visible gamma/red-shift on AMD OLED panels.
+hardware_gz302_amdgpu_abmlevel: 0
+# Disable scatter-gather display to prevent flicker on unified-memory APUs under memory pressure.
+hardware_gz302_amdgpu_sg_display: 0
+# Disable Compute Wavefront Save-Restore to prevent GPU hangs on RDNA 3.5.
+hardware_gz302_amdgpu_cwsr_enable: 0
+
+# ASUS USB identifiers for keyboard, touchpad, and lightbar devices.
+hardware_gz302_asus_usb_vendor: "0b05"
+hardware_gz302_asus_keyboard_product: "1a30"
+hardware_gz302_asus_lightbar_product: "18c6"
+
+# Keyboard hwdb remap: Copilot key -> KEY_PROG1.
+# Bound in Hyprland to launch alacritty -e claude.
+hardware_gz302_keyboard_scancode: "70072"
+hardware_gz302_keyboard_target_key: prog1
+
+# NetworkManager wifi.powersave for MT7925. NM's default (3 = enabled)
+# causes disconnects and throttled throughput on this chip; 2 = disabled is
+# the cross-distro workaround (Arch, Fedora, Framework, Z13 communities).
+# Trade-off: ~1-2% extra system idle power; does NOT affect suspend (the
+# mt7925_pci_suspend driver callback is a separate code path from runtime
+# nl80211 PS). 1 = ignore is not a substitute because the mt76 driver
+# default is PS-on (the 2023 patch to flip it was rejected upstream).
+# Flip back to 3 if a future kernel/firmware combo fixes the regression.
+# Values: 0 = use default, 1 = ignore, 2 = disable, 3 = enable.
+hardware_gz302_wifi_powersave: 2
