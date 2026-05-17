@@ -1,7 +1,0 @@
-# ASUS ROG Flow Z13 (GZ302) -- RGB unprivileged USB access
-# Managed by Hanzo. Do not edit manually.
-#
-# Grants unprivileged access to the ASUS keyboard and lightbar USB devices
-# so that rog-control-center can control RGB without running as root.
-SUBSYSTEMS=="usb", ATTRS{idVendor}=="{{ gz302_asus_usb_vendor }}", ATTRS{idProduct}=="{{ gz302_asus_keyboard_product }}", TAG+="uaccess"
-SUBSYSTEMS=="usb", ATTRS{idVendor}=="{{ gz302_asus_usb_vendor }}", ATTRS{idProduct}=="{{ gz302_asus_lightbar_product }}", TAG+="uaccess"

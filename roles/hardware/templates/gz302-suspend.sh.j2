@@ -48,7 +48,9 @@ reset_usb_device() {
 case "${1:-}" in
     pre)
         log "=== Pre-suspend hook starting ==="
-        mkdir -p "$STATE_DIR"
+        # Does not defend against wrong-owner dirs or symlinked targets;
+        # /run write capability already requires root, so threat is thin.
+        install -d -m 0700 -o root -g root "$STATE_DIR"
 
         # --- 1. Disable NHI and constrain xHCI wakeup in a single PCI scan ---
         # NHI (Thunderbolt) controllers send spurious wakeup signals that cause

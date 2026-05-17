@@ -12,14 +12,6 @@
   changed_when: true
   become: true
 
-- name: Reload udev rules
-  ansible.builtin.shell: |
-    set -euo pipefail
-    udevadm control --reload-rules
-    udevadm trigger
-  changed_when: true
-  become: true
-
 - name: Reload NetworkManager
   ansible.builtin.systemd_service:
     name: NetworkManager
