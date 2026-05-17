@@ -11,11 +11,6 @@
     name: "{{ audio_packages }}"
   become: true
 
-- name: Install ASUS packages
-  community.general.pacman:
-    name: "{{ asus_packages }}"
-  become: true
-
 - name: Install gaming and multimedia
   community.general.pacman:
     name: "{{ gaming_packages }}"

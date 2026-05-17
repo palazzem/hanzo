@@ -1,6 +1,29 @@
 ---
 # ASUS ROG Flow Z13 (GZ302) hardware fixes.
 
+- name: Install ASUS packages
+  community.general.pacman:
+    name: "{{ hardware_asus_packages }}"
+  become: true
+
+- name: Detect running systemd
+  ansible.builtin.stat:
+    path: /run/systemd/system
+  register: hardware_systemd_running
+  check_mode: false
+  become: false
+
+- name: Enable and start ASUS services
+  ansible.builtin.systemd_service:
+    name: "{{ item }}"
+    state: started
+    enabled: true
+  loop: "{{ hardware_asus_services }}"
+  when:
+    - not ansible_check_mode
+    - hardware_systemd_running.stat.exists
+  become: true
+
 - name: Deploy GPU modprobe config
   ansible.builtin.template:
     src: amdgpu.conf.j2

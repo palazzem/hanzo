@@ -10,10 +10,6 @@ archive_packages:
 audio_packages:
   - sof-firmware
 
-asus_packages:
-  - asusctl
-  - rog-control-center
-
 gaming_packages:
   - cachyos-gaming-applications
   - ffmpeg
@@ -52,8 +48,7 @@ user_groups:
   - libvirt
   - video
 
-system_services:
-  - asusd
+system_services: []
 
 # User-scoped systemd services (systemctl --user).
 user_services:
