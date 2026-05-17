@@ -50,20 +50,6 @@ user_groups:
 
 system_services: []
 
-# User-scoped systemd services (systemctl --user).
-user_services:
-  - ssh-agent
-
-# ---------------------------------------------------------------------------
-# Dotfiles and Claude configuration (roles/dotfiles)
-# ---------------------------------------------------------------------------
-
-dotfiles_repo: https://github.com/palazzem/dotfiles.git
-dotfiles_dir: ~/.dotfiles
-
-claude_config_repo: https://github.com/palazzem/claude-config.git
-claude_config_dir: ~/.claude
-
 # ---------------------------------------------------------------------------
 # GZ302 (ASUS ROG Flow Z13) hardware configuration (roles/hardware)
 # ---------------------------------------------------------------------------

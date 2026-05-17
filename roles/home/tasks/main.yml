@@ -1,17 +1,9 @@
 ---
-# Dotfiles and Claude Code configuration setup.
-#
-# Clones or updates the dotfiles and claude-config repositories,
-# runs the dotfiles installer, and injects git identity from
-# the Hanzo configuration. Identity injection is gated by
-# `hanzo_fullname is defined` — these vars are only present when
-# ~/.config/hanzo/config.yml exists (loaded in playbook.yml pre_tasks).
-
 - name: Setup dotfiles repository
   ansible.builtin.include_tasks: git_adopt.yml
   vars:
-    git_repo: "{{ dotfiles_repo }}"
-    git_dest: "{{ dotfiles_dir | expanduser }}"
+    git_repo: "{{ home_dotfiles_repo }}"
+    git_dest: "{{ home_dotfiles_dir | expanduser }}"
 
 # install.sh is the dotfiles repo's own installer. Re-runnable by design;
 # there is no clean change signal, so we mark it unchanged unconditionally.
@@ -19,7 +11,7 @@
 # isn't on disk to execute.
 - name: Run dotfiles installer
   ansible.builtin.command:
-    cmd: "{{ dotfiles_dir | expanduser }}/install.sh"
+    cmd: "{{ home_dotfiles_dir | expanduser }}/install.sh"
   changed_when: false
   when: not ansible_check_mode
   become: false
@@ -43,5 +35,28 @@
 - name: Setup claude-config repository
   ansible.builtin.include_tasks: git_adopt.yml
   vars:
-    git_repo: "{{ claude_config_repo }}"
-    git_dest: "{{ claude_config_dir | expanduser }}"
+    git_repo: "{{ home_claude_config_repo }}"
+    git_dest: "{{ home_claude_config_dir | expanduser }}"
+
+- name: Detect running systemd
+  ansible.builtin.stat:
+    path: /run/systemd/system
+  register: home_systemd_running
+  check_mode: false
+
+# User-scope systemd also needs an active session bus (XDG_RUNTIME_DIR
+# is set by pam_systemd on login). The systemd-running check above
+# covers most cases; the XDG check covers headless SSH where systemd
+# is running system-wide but no user session is set up.
+- name: Enable and start user services
+  ansible.builtin.systemd_service:
+    name: "{{ item }}"
+    state: started
+    enabled: true
+    scope: user
+  loop: "{{ home_user_services }}"
+  when:
+    - not ansible_check_mode
+    - home_systemd_running.stat.exists
+    - "'XDG_RUNTIME_DIR' in ansible_facts['env']"
+  become: false
