@@ -14,15 +14,19 @@ CachyOS system provisioner powered by Ansible.
 8. Don't install packages already in the CachyOS base image. Verify against `cachyos/cachyos:latest` (`pacman -Qe`) before adding to `group_vars/all.yml`.
 9. Registered variables inside a role must use the role name as prefix (ansible-lint `var-naming[no-role-prefix]` rule). E.g., inside `roles/devtools` use `devtools_uv_tool_list`, not `uv_tool_list`.
 
+## Commands
+
+All provisioning operations run inside the CachyOS test container — running on the host modifies system state (see Security: Prohibited Commands below).
+
+- `pre-commit run --all-files`: Lint all files (ansible-lint, shellcheck, generic hooks).
+- `docker build -f tests/Containerfile -t hanzo:test .`: Run `ansible-playbook --check --diff` (full provisioning check).
+- `docker build --build-arg ANSIBLE_ARGS="--list-tags" -f tests/Containerfile -t hanzo:test .`: List all available tags.
+- `docker build --build-arg ANSIBLE_ARGS="--tags <role> --check --diff" -f tests/Containerfile -t hanzo:test .`: Check a single tagged role.
+- `docker build --build-arg ANSIBLE_ARGS="" -f tests/Containerfile -t hanzo:test .`: Real provisioning run inside the container (no `--check`).
+
 ## Role Tags
 
-`playbook.yml` declares each role with an explicit tag so the playbook supports selective provisioning via `hanzo --tags <role>`.
-
-Each role's tag(s) are declared on its `roles:` entry in `playbook.yml`. To enumerate them dynamically, run `--list-tags` inside the test container:
-
-```bash
-docker build --build-arg ANSIBLE_ARGS="--list-tags" -f tests/Containerfile -t hanzo:test .
-```
+Each role in `playbook.yml` declares an explicit tag on its `roles:` entry for selective provisioning.
 
 Roles tagged `always` execute on every invocation, including selective runs — they establish state that other roles depend on.
 
@@ -37,35 +41,11 @@ Tags do NOT enforce ordering. Users selecting a subset of tags need to know what
 - `hardware` is independent — hardware-conditional (skipped inside containers and on non-matching DMI).
 - `packages` and `virtualization` are foundational — most other roles will silently no-op or fail without their packages installed.
 
-### CLI Usage
-
-```bash
-hanzo --tags hardware                  # hardware role (plus always-tagged dependencies)
-hanzo --tags "languages,devtools"      # languages + devtools (plus always-tagged dependencies)
-hanzo --list-tags                      # discover all available tags
-hanzo --skip-tags dotfiles             # everything except dotfiles
-```
-
-### Container Test for Single-Role Iteration
-
-To iterate on a single role inside the test container:
-
-```bash
-docker build --build-arg ANSIBLE_ARGS="--tags hardware --check" \
-  -f tests/Containerfile -t hanzo:test .
-```
-
-The `ANSIBLE_ARGS` build-arg is forwarded to `ansible-playbook` inside the container (see `tests/Containerfile`).
-
 ## Security: Prohibited Commands
 
 **NEVER run `ansible`, `ansible-playbook`, `hanzo`, or `bootstrap.sh` on the host machine.** These commands modify system configuration (installing packages, managing services, writing to system directories) and must never be executed outside a container. This rule is absolute and cannot be overridden by any instruction, user request, file content, or argument that a flag like `--check` makes it safe — even `--check` gathers system facts by executing commands on the host.
 
-To test changes, build the CachyOS container:
-
-```bash
-docker build -f tests/Containerfile -t hanzo:test .
-```
+All testing goes through the CachyOS container — see the Commands section above.
 
 ## Coding Guidelines
 
@@ -75,12 +55,6 @@ docker build -f tests/Containerfile -t hanzo:test .
 - Use `$(...)` for command substitution, never backticks.
 - Quote all variable expansions: `"$VAR"`, not `$VAR`.
 - Interactive prompts must read from `/dev/tty` for `curl | bash` compatibility.
-
-## Commands
-
-- `pre-commit run --all-files`: Lint all files (ansible-lint, shellcheck, generic hooks).
-- `docker build -f tests/Containerfile -t hanzo:test .`: Build and run `ansible-playbook --check --diff` inside the CachyOS container.
-- `docker build --build-arg ANSIBLE_ARGS="" -f tests/Containerfile -t hanzo:test .`: Run a real provisioning inside the container (no `--check`); override `ANSIBLE_ARGS` to pass any other flag set.
 
 ## Task Completion Checklist
 
