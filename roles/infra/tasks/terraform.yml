@@ -1,52 +1,16 @@
 ---
-# Direct-from-HashiCorp Terraform install with a verified trust chain.
+# Direct-from-HashiCorp Terraform install. Trust chain:
+#   1. Fingerprint match on the imported PGP key.
+#   2. SHA256 of `gpg --export --export-options export-minimal` against
+#      terraform_gpg_key_export_sha256 — canonical deterministic binary
+#      form, CDN-immune; the load-bearing gate. The CDN file-SHA pin is
+#      defense-in-depth, not a security gate.
+#   3. gpg --verify of SHA256SUMS.sig, then checksum-gated zip download.
 #
-# Why not AUR:
-#   - There is no `terraform` AUR package (`terraform-bin` has no PGP
-#     verification in its PKGBUILD).
-#   - HashiCorp publishes a GPG-signed SHA256SUMS file alongside every
-#     release. Verifying that gives a stronger trust chain than the
-#     status quo of "trust the AUR maintainer".
-#
-# Trust chain (three independent gates on the signing key, then a
-# fourth on the release artifacts):
-#   1. Pinned-SHA fetch of pgp-key.txt — defense in depth on the CDN
-#      bytes (cosmetic; may need re-pin on whitespace rewrite).
-#   2. gpg --import + assert the imported fingerprint matches the
-#      pinned terraform_gpg_fingerprint (defends against a CDN serving
-#      a different key).
-#   3. gpg --export --export-options export-minimal | sha256sum, then
-#      assert against terraform_gpg_key_export_sha256 — the canonical
-#      deterministic binary form. CDN-immune; changes only when keys
-#      rotate or revocations are added. This is the load-bearing gate.
-#   4. gpg --verify SHA256SUMS.sig SHA256SUMS — fails the playbook if
-#      the release signature is invalid.
-#   5. Extract the expected SHA256 for linux_amd64 from the now-trusted
-#      SHA256SUMS; pass it to get_url so the zip download is gated on
-#      the trusted hash.
-#   6. unarchive into terraform_install_dir (requires `unzip` on PATH —
-#      provisioned by archive_packages in roles/packages).
-#
-# Check-mode handling:
-#   The trust-chain block sets check_mode: false so every step is
-#   exercised under `ansible-playbook --check` (the project's
-#   container test). Trade-off: real network I/O + writes to the
-#   user-scoped cache dir under --check. Acceptable because the
-#   writes are read-only-from-the-rest-of-the-system, idempotent, and
-#   scoped. Only the final unarchive (outside the block) honors check
-#   mode (reports "would extract" without touching /usr/local/bin).
-#
-# Idempotence:
-#   - get_url is checksum-gated (file pin + zip pin via signed SHA256SUMS).
-#   - gpg --import is gated on a check-then-import probe.
-#   - The fingerprint + export-SHA assertions are read-only.
-#   - gpg --verify of SHA256SUMS runs every play (no `creates:` — a
-#     sentinel would let a tampered SHA256SUMS slip past on re-runs).
-#   - The unarchive is gated on `terraform version -json`; reinstall
-#     happens only when terraform_version differs from what's installed.
+# check_mode: false on the trust-chain block so the chain executes under
+# --check and CI catches regressions; only the final unarchive honors
+# default check mode.
 
-# Centralise the release URL and filenames so a future version bump
-# or artifact rename only edits group_vars/all.yml and this one block.
 - name: Compute derived Terraform release facts
   ansible.builtin.set_fact:
     infra_terraform_release_base_url: "https://releases.hashicorp.com/terraform/{{ terraform_version }}"
@@ -54,10 +18,6 @@
     infra_terraform_sig_filename: "terraform_{{ terraform_version }}_SHA256SUMS.sig"
     infra_terraform_zip_filename: "terraform_{{ terraform_version }}_linux_amd64.zip"
 
-# All trust-chain tasks below run as the unprivileged user, write only
-# to the user cache dir, and bypass --check so the chain is exercised
-# end-to-end in CI. Only the final unarchive (outside this block)
-# honors become and check-mode defaults.
 - name: HashiCorp Terraform trust chain
   check_mode: false
   become: false
@@ -104,12 +64,7 @@
         infra_terraform_key_verify.rc != 0
         or terraform_gpg_fingerprint not in infra_terraform_key_verify.stdout
 
-    # Compute the canonical export-form SHA in a single shell pipeline.
-    # Avoids persisting a transient binary export file to disk just to
-    # stat-checksum it, which would force a misleading `changed_when:
-    # false` on a task that genuinely writes a file. `shell:` is the
-    # escape hatch — `command:` can't redirect/pipe; `set -o pipefail`
-    # ensures a gpg failure isn't masked by sha256sum's success exit.
+    # set -o pipefail so a gpg failure isn't masked by sha256sum's success exit.
     - name: Compute SHA256 of canonical HashiCorp PGP signing key export
       ansible.builtin.shell:
         cmd: >-
@@ -121,9 +76,6 @@
       register: infra_terraform_key_export_sha
       changed_when: false
 
-    # Load-bearing assertion: the canonical key bytes match what we pinned.
-    # Catches subkey tampering or wholesale key replacement even when the
-    # CDN-served file SHA happens to drift.
     - name: Verify canonical HashiCorp key export SHA256 matches pinned value
       ansible.builtin.assert:
         that:
@@ -135,9 +87,6 @@
           rotation or tampering. Stop and review HCSEC advisories before
           updating the pinned value.
 
-    # `force: true` so a partial write from a prior aborted run self-heals.
-    # The gpg --verify below is the actual security gate, so refetching a
-    # cached file is safe.
     - name: Download Terraform SHA256SUMS
       ansible.builtin.get_url:
         url: "{{ infra_terraform_release_base_url }}/{{ infra_terraform_sums_filename }}"
@@ -156,9 +105,7 @@
       retries: 3
       delay: 5
 
-    # No `creates:` — a sentinel file would let a tampered SHA256SUMS
-    # slip past on the second run. The verify is cheap (~10ms) so we
-    # accept the per-run cost.
+    # No `creates:` — a sentinel would let a tampered SHA256SUMS slip past on re-runs.
     - name: Verify Terraform SHA256SUMS signature
       ansible.builtin.command:
         argv:
@@ -174,9 +121,6 @@
         src: "{{ terraform_cache_dir }}/{{ infra_terraform_sums_filename }}"
       register: infra_terraform_sums_slurp
 
-    # `| trim` defends against trailing whitespace leaking from the
-    # YAML folded scalar into the SHA — a mismatch there would surface
-    # only as a confusing "Checksum mismatch" on the zip download below.
     - name: Extract expected SHA256 for Terraform linux_amd64 zip
       ansible.builtin.set_fact:
         infra_terraform_zip_sha256: >-
@@ -184,10 +128,6 @@
              | select('search', 'terraform_' ~ terraform_version ~ '_linux_amd64.zip$')
              | first | split | first | trim }}
 
-    # Fail loudly with a useful message if HashiCorp ever renames the
-    # linux_amd64 artifact or ships a SHA256SUMS missing the expected
-    # line — otherwise the next task would produce an opaque
-    # "Checksum mismatch" error that doesn't reveal the parse failure.
     - name: Verify expected Terraform zip SHA256 was extracted
       ansible.builtin.assert:
         that:
@@ -206,10 +146,6 @@
       retries: 3
       delay: 5
 
-    # Stat before invoking the binary so a missing file produces a
-    # narrow, self-evident skip rather than a `command not found` rc
-    # that we'd otherwise have to absorb with an over-broad
-    # `failed_when: false`.
     - name: Stat installed Terraform binary
       ansible.builtin.stat:
         path: "{{ terraform_install_dir }}/terraform"
@@ -230,13 +166,8 @@
                  and infra_terraform_version_check.rc | default(1) == 0)
              else '' }}
 
-# `unarchive` overwrites the binary in place; that's the desired
-# behaviour for a version bump. The when-guard prevents the overwrite
-# on idempotent re-runs. This is the only task in the file that honors
-# default check-mode behaviour — under `--check` it would report
-# "would extract", but because pacman also runs in check mode the
-# `unzip` handler isn't installed, so Ansible reports a "no check-mode
-# handler" skip instead. Real-mode runs are unaffected because the
+# Under --check the pacman install of unzip is also a no-op, so unarchive
+# falls back to gtar and reports skipping. Real-mode is unaffected — the
 # packages role installs unzip first.
 - name: Install Terraform binary to system path
   ansible.builtin.unarchive:

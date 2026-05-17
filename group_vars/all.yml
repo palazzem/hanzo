@@ -70,9 +70,8 @@ virtualization_packages:
   - virt-viewer
   - virtiofsd
 
-# Security tools shipped Arch-signed in extra/. Keep these on pacman
-# rather than AUR so we never replace a signed Arch binary with an
-# unsigned community PKGBUILD that happens to share the name.
+# proton-vpn-gtk-app ships Arch-signed in extra/; AUR would replace it
+# with an unsigned community PKGBUILD of the same name.
 security_packages:
   - proton-vpn-gtk-app
 
@@ -175,41 +174,16 @@ uv_tools:
 infra_aur_packages:
   - tflint-bin
 
-# Terraform — installed directly from HashiCorp releases (not AUR).
-# Trust chain:
-#   1. Fetch HashiCorp's PGP key from .well-known. Pin its CDN-served
-#      SHA256 (terraform_gpg_key_sha256) as a defense-in-depth integrity
-#      check — the CDN may rewrite trailing whitespace, so this pin is
-#      cosmetic and re-pinned on every key update.
-#   2. Import the key, then assert the imported fingerprint matches
-#      terraform_gpg_fingerprint AND assert the canonical export-form
-#      SHA256 matches terraform_gpg_key_export_sha256. The export form
-#      (gpg --export --export-options export-minimal) is the canonical
-#      deterministic binary representation of the key — CDN-immune,
-#      changes only when subkeys/revocations change. This is the
-#      load-bearing trust gate; the fingerprint check catches a wrong
-#      key, the export-SHA catches a tampered subkey set.
-#   3. Download the SHA256SUMS file + its .sig and verify with gpg.
-#   4. Extract the linux_amd64 zip's expected SHA256 from the now-
-#      trusted SHA256SUMS file; pass it to get_url's checksum: to
-#      gate the zip download.
-#   5. Unarchive into terraform_install_dir.
+# Trust-chain rationale lives in roles/infra/tasks/terraform.yml.
 terraform_version: "1.15.3"
 terraform_install_dir: "/usr/local/bin"
-# Shared cache for HashiCorp release artifacts and the imported PGP key.
-# The directory itself is created (mode 0700) by the playbook pre_task.
+# Created (mode 0700) by the playbook pre_task.
 terraform_cache_dir: "{{ ansible_facts.env.HOME }}/.cache/hanzo"
-# HashiCorp PGP fingerprint (HCSEC-2026-03 extended expiry 2030-03-01).
 terraform_gpg_fingerprint: "C874011F0AB405110D02105534365D9472D7468F"
 terraform_gpg_key_url: "https://www.hashicorp.com/.well-known/pgp-key.txt"
-# Defense-in-depth integrity check on the served key file. Implementer
-# re-fetches the file and re-pins on the day of implementation; the
-# CDN may rewrite trailing whitespace. NOT the trust gate.
+# CDN bytes pin — defense-in-depth. Re-pin on every key update.
 terraform_gpg_key_sha256: "c2f5bc1163bd8d15a711616b587bcede212d045a5b8b52df01c74095897cd065"
-# Load-bearing trust gate. SHA256 of `gpg --export --export-options
-# export-minimal <fingerprint>` — canonical deterministic binary form,
-# CDN-immune. Changes only when HashiCorp rotates subkeys or revokes.
-# Mirrors the pattern adopted by PR D for the same reason.
+# Canonical export-form SHA — load-bearing trust gate.
 terraform_gpg_key_export_sha256: "1dcb9278c4b0705614e9825fabb43781fa4bfcc2bf870a6c505cf4ed01ea1ff3"
 
 npm_global_packages:
