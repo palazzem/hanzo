@@ -27,11 +27,13 @@
       ansible.builtin.stat:
         path: "{{ ansible_facts.env.HOME }}/.config/hanzo/config.yml"
       register: hanzo_config_stat
+      tags: [always]
 
     - name: Load Hanzo user configuration if present
       ansible.builtin.include_vars:
         file: "{{ ansible_facts.env.HOME }}/.config/hanzo/config.yml"
       when: hanzo_config_stat.stat.exists
+      tags: [always]
 
     # Shared cache directory used by roles that download upstream
     # installer scripts (pyenv, gcloud). Lives under $HOME with mode
@@ -44,13 +46,22 @@
         state: directory
         mode: "0700"
       check_mode: false
+      tags: [always]
 
   roles:
-    - packages
-    - virtualization
-    - system
-    - languages
-    - devtools
-    - infra
-    - dotfiles
-    - hardware
+    - role: packages
+      tags: [packages]
+    - role: virtualization
+      tags: [virtualization]
+    - role: system
+      tags: [system, always]
+    - role: languages
+      tags: [languages]
+    - role: devtools
+      tags: [devtools]
+    - role: infra
+      tags: [infra]
+    - role: dotfiles
+      tags: [dotfiles]
+    - role: hardware
+      tags: [hardware]

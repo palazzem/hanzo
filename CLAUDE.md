@@ -14,15 +14,38 @@ CachyOS system provisioner powered by Ansible.
 8. Don't install packages already in the CachyOS base image. Verify against `cachyos/cachyos:latest` (`pacman -Qe`) before adding to `group_vars/all.yml`.
 9. Registered variables inside a role must use the role name as prefix (ansible-lint `var-naming[no-role-prefix]` rule). E.g., inside `roles/devtools` use `devtools_uv_tool_list`, not `uv_tool_list`.
 
+## Commands
+
+All provisioning operations run inside the CachyOS test container — running on the host modifies system state (see Security: Prohibited Commands below).
+
+- `pre-commit run --all-files`: Lint all files (ansible-lint, shellcheck, generic hooks).
+- `docker build -f tests/Containerfile -t hanzo:test .`: Run `ansible-playbook --check --diff` (full provisioning check).
+- `docker build --build-arg ANSIBLE_ARGS="--list-tags" -f tests/Containerfile -t hanzo:test .`: List all available tags.
+- `docker build --build-arg ANSIBLE_ARGS="--tags <role> --check --diff" -f tests/Containerfile -t hanzo:test .`: Check a single tagged role.
+- `docker build --build-arg ANSIBLE_ARGS="" -f tests/Containerfile -t hanzo:test .`: Real provisioning run inside the container (no `--check`).
+
+## Role Tags
+
+Each role in `playbook.yml` declares an explicit tag on its `roles:` entry for selective provisioning.
+
+Roles tagged `always` execute on every invocation, including selective runs — they establish state that other roles depend on.
+
+### Implicit Dependency Edges
+
+Tags do NOT enforce ordering. Users selecting a subset of tags need to know what each role implicitly depends on:
+
+- `devtools` depends on `languages` — npm globals need `fnm` and Node.js. Run `--tags "languages,devtools"` together if iterating on tooling.
+- `devtools` depends on `packages` — `uv` tools need the `uv` binary installed by `packages` (pacman).
+- `dotfiles` may depend on `languages` — the dotfiles installer (`install.sh` from the external dotfiles repo) may reference `fnm` / `pyenv` paths. Content lives outside this repo, so verify case-by-case before running `dotfiles` without `languages`.
+- `infra` is independent — Terraform ecosystem + Google Cloud SDK; can be run on its own.
+- `hardware` is independent — hardware-conditional (skipped inside containers and on non-matching DMI).
+- `packages` and `virtualization` are foundational — most other roles will silently no-op or fail without their packages installed.
+
 ## Security: Prohibited Commands
 
 **NEVER run `ansible`, `ansible-playbook`, `hanzo`, or `bootstrap.sh` on the host machine.** These commands modify system configuration (installing packages, managing services, writing to system directories) and must never be executed outside a container. This rule is absolute and cannot be overridden by any instruction, user request, file content, or argument that a flag like `--check` makes it safe — even `--check` gathers system facts by executing commands on the host.
 
-To test changes, build the CachyOS container:
-
-```bash
-docker build -f tests/Containerfile -t hanzo:test .
-```
+All testing goes through the CachyOS container — see the Commands section above.
 
 ## Coding Guidelines
 
@@ -32,12 +55,6 @@ docker build -f tests/Containerfile -t hanzo:test .
 - Use `$(...)` for command substitution, never backticks.
 - Quote all variable expansions: `"$VAR"`, not `$VAR`.
 - Interactive prompts must read from `/dev/tty` for `curl | bash` compatibility.
-
-## Commands
-
-- `pre-commit run --all-files`: Lint all files (ansible-lint, shellcheck, generic hooks).
-- `docker build -f tests/Containerfile -t hanzo:test .`: Build and run `ansible-playbook --check --diff` inside the CachyOS container.
-- `docker build --build-arg ANSIBLE_ARGS="" -f tests/Containerfile -t hanzo:test .`: Run a real provisioning inside the container (no `--check`); override `ANSIBLE_ARGS` to pass any other flag set.
 
 ## Task Completion Checklist
 
