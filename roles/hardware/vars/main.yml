@@ -1,0 +1,7 @@
+---
+hardware_asus_packages:
+  - asusctl
+  - rog-control-center
+
+hardware_asus_services:
+  - asusd
