@@ -18,7 +18,7 @@ CachyOS system provisioner powered by Ansible.
 
 `playbook.yml` declares each role with an explicit tag so the playbook supports selective provisioning via `hanzo --tags <role>`.
 
-Current roles and their tags:
+Current roles and their tags (source of truth: `playbook.yml`; update both together when adding or renaming roles):
 
 | Role           | Tag(s)                |
 |----------------|-----------------------|
@@ -39,6 +39,8 @@ Tasks and roles tagged `always` run on every invocation, even with `--tags <some
 - `system` role — locale, system groups, and services that any selective role run depends on.
 
 A future PR will introduce a dedicated `foundation` role that takes over the `always` responsibility, at which point `system` will be deleted.
+
+To opt out of always-tagged tasks (e.g., to run a hardware role in isolation without re-running the `system` role), pass `--skip-tags always` alongside `--tags <role>`. This skips both the `pre_tasks` and the `system` role — only use it when the cache dir and locale/groups/services state are already known to be in place.
 
 ### Implicit Dependency Edges
 
