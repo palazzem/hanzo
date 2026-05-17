@@ -1,6 +1,11 @@
 ---
 # Infrastructure tools — Terraform ecosystem and Google Cloud SDK.
 
+- name: Install infrastructure packages
+  community.general.pacman:
+    name: "{{ infra_packages }}"
+  become: true
+
 # kewlfft.aur.aur accepts a list under `name:`, batching the underlying
 # paru invocation. Avoids per-iteration paru startup + AUR DB read cost.
 - name: Install infrastructure AUR packages
@@ -8,11 +13,6 @@
     name: "{{ infra_aur_packages }}"
     use: paru
   become: false
-
-# include_tasks rejects `become:` as an invalid TaskInclude attribute;
-# rule 4 is satisfied by per-task become: inside terraform.yml.
-- name: Install Terraform from HashiCorp releases
-  ansible.builtin.include_tasks: terraform.yml
 
 # Google Cloud SDK ships an installer script. We split download from
 # execution so we can: (a) avoid risky-shell-pipe (curl | bash), and

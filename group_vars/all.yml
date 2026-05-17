@@ -24,7 +24,6 @@ docker_packages:
 archive_packages:
   - 7zip
   - unrar
-  - unzip
 
 ai_packages:
   - ollama-rocm
@@ -70,8 +69,6 @@ virtualization_packages:
   - virt-viewer
   - virtiofsd
 
-# proton-vpn-gtk-app ships Arch-signed in extra/; AUR would replace it
-# with an unsigned community PKGBUILD of the same name.
 security_packages:
   - proton-vpn-gtk-app
 
@@ -171,20 +168,11 @@ uv_tools:
   - pre-commit
   - checkov
 
+infra_packages:
+  - terraform
+
 infra_aur_packages:
   - tflint-bin
-
-# Trust-chain rationale lives in roles/infra/tasks/terraform.yml.
-terraform_version: "1.15.3"
-terraform_install_dir: "/usr/local/bin"
-# Created (mode 0700) by the playbook pre_task.
-terraform_cache_dir: "{{ ansible_facts.env.HOME }}/.cache/hanzo"
-terraform_gpg_fingerprint: "C874011F0AB405110D02105534365D9472D7468F"
-terraform_gpg_key_url: "https://www.hashicorp.com/.well-known/pgp-key.txt"
-# CDN bytes pin — defense-in-depth. Re-pin on every key update.
-terraform_gpg_key_sha256: "c2f5bc1163bd8d15a711616b587bcede212d045a5b8b52df01c74095897cd065"
-# Canonical export-form SHA — load-bearing trust gate.
-terraform_gpg_key_export_sha256: "1dcb9278c4b0705614e9825fabb43781fa4bfcc2bf870a6c505cf4ed01ea1ff3"
 
 npm_global_packages:
   - "@anthropic-ai/claude-code"
