@@ -194,9 +194,12 @@ infra_aur_packages:
 #      trusted SHA256SUMS file; pass it to get_url's checksum: to
 #      gate the zip download.
 #   5. Unarchive into terraform_install_dir.
-# HashiCorp PGP fingerprint (HCSEC-2026-03 extended expiry 2030-03-01).
 terraform_version: "1.15.3"
 terraform_install_dir: "/usr/local/bin"
+# Shared cache for HashiCorp release artifacts and the imported PGP key.
+# The directory itself is created (mode 0700) by the playbook pre_task.
+terraform_cache_dir: "{{ ansible_facts.env.HOME }}/.cache/hanzo"
+# HashiCorp PGP fingerprint (HCSEC-2026-03 extended expiry 2030-03-01).
 terraform_gpg_fingerprint: "C874011F0AB405110D02105534365D9472D7468F"
 terraform_gpg_key_url: "https://www.hashicorp.com/.well-known/pgp-key.txt"
 # Defense-in-depth integrity check on the served key file. Implementer
