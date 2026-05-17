@@ -9,6 +9,16 @@
     use: paru
   become: false
 
+# Terraform is not in the AUR (`terraform-bin` exists but has no PGP
+# verification in its PKGBUILD). Install directly from HashiCorp's
+# release server with a GPG-verified SHA256SUMS trust chain — see
+# terraform.yml for the full flow. `include_tasks` does not accept the
+# `become:` keyword (Ansible rejects it as an invalid TaskInclude
+# attribute); rule 4 is satisfied by the explicit `become:` on every
+# task inside terraform.yml.
+- name: Install Terraform from HashiCorp releases
+  ansible.builtin.include_tasks: terraform.yml
+
 # Google Cloud SDK ships an installer script. We split download from
 # execution so we can: (a) avoid risky-shell-pipe (curl | bash), and
 # (b) replace the curl call with get_url (idempotent, retry-aware).

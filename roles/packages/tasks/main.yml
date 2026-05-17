@@ -52,6 +52,15 @@
     name: "{{ desktop_packages }}"
   become: true
 
+# Security tools shipped in the official Arch extra/ repo (e.g. the
+# Arch-signed proton-vpn-gtk-app). Kept on pacman rather than AUR so
+# we never silently replace a signed Arch binary with an unsigned
+# community PKGBUILD that happens to share the name.
+- name: Install security packages
+  community.general.pacman:
+    name: "{{ security_packages }}"
+  become: true
+
 # kewlfft.aur.aur accepts a list under `name:`, batching the underlying
 # paru invocation. Avoids per-iteration paru startup + AUR DB read cost.
 - name: Install AUR packages

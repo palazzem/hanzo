@@ -1,0 +1,221 @@
+---
+# Direct-from-HashiCorp Terraform install with a verified trust chain.
+#
+# Why not AUR:
+#   - There is no `terraform` AUR package (`terraform-bin` has no PGP
+#     verification in its PKGBUILD).
+#   - HashiCorp publishes a GPG-signed SHA256SUMS file alongside every
+#     release. Verifying that gives a stronger trust chain than the
+#     status quo of "trust the AUR maintainer".
+#
+# Trust chain (three independent gates on the signing key, then a
+# fourth on the release artifacts):
+#   1. Pinned-SHA fetch of pgp-key.txt — defense in depth on the CDN
+#      bytes (cosmetic; may need re-pin on whitespace rewrite).
+#   2. gpg --import + assert the imported fingerprint matches the
+#      pinned terraform_gpg_fingerprint (defends against a CDN serving
+#      a different key).
+#   3. gpg --export --export-options export-minimal | sha256sum, then
+#      assert against terraform_gpg_key_export_sha256 — the canonical
+#      deterministic binary form. CDN-immune; changes only when keys
+#      rotate or revocations are added. This is the load-bearing gate.
+#   4. gpg --verify SHA256SUMS.sig SHA256SUMS — fails the playbook if
+#      the release signature is invalid.
+#   5. Extract the expected SHA256 for linux_amd64 from the now-trusted
+#      SHA256SUMS; pass it to get_url so the zip download is gated on
+#      the trusted hash.
+#   6. unarchive into terraform_install_dir (requires `unzip` on PATH —
+#      provisioned by archive_packages in roles/packages).
+#
+# Check-mode handling:
+#   Every get_url and the slurp set check_mode: false so the trust
+#   chain is exercised under `ansible-playbook --check` (the project's
+#   container test). Trade-off: real network I/O + writes to the
+#   user-scoped cache dir under --check. Acceptable because the
+#   writes are read-only-from-the-rest-of-the-system, idempotent, and
+#   scoped. Only the final unarchive honors check mode (reports
+#   "would extract" without touching /usr/local/bin).
+#
+# Idempotence:
+#   - get_url is checksum-gated (file pin + zip pin via signed SHA256SUMS).
+#   - gpg --import is gated on a check-then-import probe.
+#   - The fingerprint + export-SHA assertions are read-only.
+#   - gpg --verify of SHA256SUMS runs every play (no `creates:` — a
+#     sentinel would let a tampered SHA256SUMS slip past on re-runs).
+#   - The unarchive is gated on `terraform version -json`; reinstall
+#     happens only when terraform_version differs from what's installed.
+
+- name: Ensure HashiCorp PGP key is cached locally
+  ansible.builtin.get_url:
+    url: "{{ terraform_gpg_key_url }}"
+    dest: "{{ ansible_facts.env.HOME }}/.cache/hanzo/hashicorp-pgp-key.txt"
+    checksum: "sha256:{{ terraform_gpg_key_sha256 }}"
+    mode: "0600"
+  check_mode: false
+  become: false
+
+- name: Check for HashiCorp PGP signing key in user keyring
+  ansible.builtin.command:
+    argv:
+      - gpg
+      - --list-keys
+      - "{{ terraform_gpg_fingerprint }}"
+  register: infra_terraform_key_check
+  changed_when: false
+  failed_when: infra_terraform_key_check.rc not in [0, 2]
+  check_mode: false
+  become: false
+
+- name: Import HashiCorp PGP signing key
+  ansible.builtin.command:
+    argv:
+      - gpg
+      - --import
+      - "{{ ansible_facts.env.HOME }}/.cache/hanzo/hashicorp-pgp-key.txt"
+  register: infra_terraform_key_import
+  when: infra_terraform_key_check.rc != 0
+  changed_when: true
+  check_mode: false
+  become: false
+
+- name: Verify HashiCorp PGP signing key fingerprint is present after import
+  ansible.builtin.command:
+    argv:
+      - gpg
+      - --with-colons
+      - --list-keys
+      - "{{ terraform_gpg_fingerprint }}"
+  register: infra_terraform_key_verify
+  changed_when: false
+  failed_when: >-
+    infra_terraform_key_verify.rc != 0
+    or terraform_gpg_fingerprint not in infra_terraform_key_verify.stdout
+  check_mode: false
+  become: false
+
+# Capture the canonical export-form of the key to a file so we can
+# stat-checksum it. `shell:` is the escape hatch here — `command:` can't
+# redirect, and reading binary gpg --export output through stdout capture
+# would mangle non-UTF8 bytes. ansible-lint command-instead-of-shell does
+# not fire because `>` is a genuine shell feature.
+- name: Export HashiCorp PGP signing key in canonical form
+  ansible.builtin.shell:
+    cmd: >-
+      gpg --export --export-options export-minimal
+      "{{ terraform_gpg_fingerprint }}"
+      > "{{ ansible_facts.env.HOME }}/.cache/hanzo/hashicorp-key-export.gpg"
+  changed_when: false
+  check_mode: false
+  become: false
+
+- name: Compute SHA256 of canonical HashiCorp PGP signing key export
+  ansible.builtin.stat:
+    path: "{{ ansible_facts.env.HOME }}/.cache/hanzo/hashicorp-key-export.gpg"
+    checksum_algorithm: sha256
+  register: infra_terraform_key_export_stat
+  check_mode: false
+  become: false
+
+# Load-bearing assertion: the canonical key bytes match what we pinned.
+# Catches subkey tampering or wholesale key replacement even when the
+# CDN-served file SHA happens to drift.
+- name: Verify canonical HashiCorp key export SHA256 matches pinned value
+  ansible.builtin.assert:
+    that:
+      - infra_terraform_key_export_stat.stat.checksum == terraform_gpg_key_export_sha256
+    fail_msg: >-
+      HashiCorp signing key canonical SHA256
+      ({{ infra_terraform_key_export_stat.stat.checksum }}) does not match
+      pinned value ({{ terraform_gpg_key_export_sha256 }}) — possible key
+      rotation or tampering. Stop and review HCSEC advisories before
+      updating the pinned value.
+
+- name: Download Terraform SHA256SUMS
+  ansible.builtin.get_url:
+    url: "https://releases.hashicorp.com/terraform/{{ terraform_version }}/terraform_{{ terraform_version }}_SHA256SUMS"
+    dest: "{{ ansible_facts.env.HOME }}/.cache/hanzo/terraform_{{ terraform_version }}_SHA256SUMS"
+    mode: "0644"
+  check_mode: false
+  become: false
+
+- name: Download Terraform SHA256SUMS signature
+  ansible.builtin.get_url:
+    url: "https://releases.hashicorp.com/terraform/{{ terraform_version }}/terraform_{{ terraform_version }}_SHA256SUMS.sig"
+    dest: "{{ ansible_facts.env.HOME }}/.cache/hanzo/terraform_{{ terraform_version }}_SHA256SUMS.sig"
+    mode: "0644"
+  check_mode: false
+  become: false
+
+# Cannot use `creates:` — a sentinel file would let a tampered
+# SHA256SUMS slip past on the second run. The verify is cheap (~10ms)
+# so we accept the per-run cost.
+- name: Verify Terraform SHA256SUMS signature
+  ansible.builtin.command:
+    argv:
+      - gpg
+      - --quiet
+      - --verify
+      - "{{ ansible_facts.env.HOME }}/.cache/hanzo/terraform_{{ terraform_version }}_SHA256SUMS.sig"
+      - "{{ ansible_facts.env.HOME }}/.cache/hanzo/terraform_{{ terraform_version }}_SHA256SUMS"
+  register: infra_terraform_sums_verify
+  changed_when: false
+  check_mode: false
+  become: false
+
+- name: Read trusted Terraform SHA256SUMS contents
+  ansible.builtin.slurp:
+    src: "{{ ansible_facts.env.HOME }}/.cache/hanzo/terraform_{{ terraform_version }}_SHA256SUMS"
+  register: infra_terraform_sums_slurp
+  check_mode: false
+  become: false
+
+# Pull the linux_amd64 zip's expected SHA256 out of the now-trusted
+# SHA256SUMS file. Splitting on whitespace gives [<sha256>, <filename>].
+- name: Extract expected SHA256 for Terraform linux_amd64 zip
+  ansible.builtin.set_fact:
+    infra_terraform_zip_sha256: >-
+      {{ (infra_terraform_sums_slurp.content | b64decode).splitlines()
+         | select('search', 'terraform_' ~ terraform_version ~ '_linux_amd64.zip$')
+         | first | split | first }}
+
+- name: Download Terraform linux_amd64 zip
+  ansible.builtin.get_url:
+    url: "https://releases.hashicorp.com/terraform/{{ terraform_version }}/terraform_{{ terraform_version }}_linux_amd64.zip"
+    dest: "{{ ansible_facts.env.HOME }}/.cache/hanzo/terraform_{{ terraform_version }}_linux_amd64.zip"
+    checksum: "sha256:{{ infra_terraform_zip_sha256 }}"
+    mode: "0644"
+  check_mode: false
+  become: false
+
+# Check the currently-installed Terraform version so unarchive only
+# fires on first install or version bump. `terraform version -json`
+# emits {"terraform_version": "1.15.3", ...}; we parse the JSON and
+# compare with terraform_version. rc != 0 means "not installed yet".
+- name: Check installed Terraform version
+  ansible.builtin.command:
+    cmd: "{{ terraform_install_dir }}/terraform version -json"
+  register: infra_terraform_version_check
+  changed_when: false
+  failed_when: false
+  check_mode: false
+  become: false
+
+- name: Record installed Terraform version
+  ansible.builtin.set_fact:
+    infra_terraform_installed_version: >-
+      {{ (infra_terraform_version_check.stdout | from_json).terraform_version
+         if infra_terraform_version_check.rc == 0 else '' }}
+
+# `unarchive` overwrites the binary in place; that's the desired
+# behaviour for a version bump. The when-guard prevents the overwrite
+# on idempotent re-runs. This is the ONLY task in the file that honors
+# default check-mode behaviour — under `--check` it reports
+# "would extract" without touching /usr/local/bin.
+- name: Install Terraform binary to system path
+  ansible.builtin.unarchive:
+    src: "{{ ansible_facts.env.HOME }}/.cache/hanzo/terraform_{{ terraform_version }}_linux_amd64.zip"
+    dest: "{{ terraform_install_dir }}"
+    mode: "0755"
+    remote_src: true
+  become: true
+  when: infra_terraform_installed_version != terraform_version
