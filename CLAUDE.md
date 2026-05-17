@@ -4,7 +4,7 @@ CachyOS system provisioner powered by Ansible.
 
 ## Rules
 
-1. Data in `group_vars/all.yml`, logic in `roles/`. Never hardcode package names, paths, or config values in task files. Add them to `group_vars/all.yml` and access via the plain variable name.
+1. Role-scoped data in `roles/<role>/vars/main.yml`; logic in `roles/<role>/tasks/`. `group_vars/all.yml` is reserved for variables that would gain a redundant prefix under Rule 9 (currently the `gz302_*` hardware identifiers consumed by `roles/hardware`). Never hardcode package names, paths, or config values in task files — declare them as variables and reference by name.
 2. Prefer Ansible modules (`community.general.pacman`, `ansible.builtin.template`, `ansible.builtin.systemd_service`, `ansible.builtin.user`, `ansible.builtin.lineinfile`) over `ansible.builtin.shell` / `ansible.builtin.command`. Modules are idempotent for free.
 3. `ansible.builtin.shell` / `ansible.builtin.command` are the escape hatch. Use only when no module exists (e.g., paru via `kewlfft.aur.aur`, fnm version manager). Always include `name:` and either an explicit `changed_when:` clause or a `creates:` argument so ansible-lint's `no-changed-when` rule is satisfied without disabling it.
 4. Explicit `become:` on every task. The playbook default is `become: false`. Every task declares `become: true` (system operations: package installs, service management, config writes) or `become: false` (user-space: paru, dotfiles, language version managers).

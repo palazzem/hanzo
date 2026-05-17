@@ -65,7 +65,7 @@ Hanzo uses Ansible to provision the local machine via `ansible-playbook playbook
 
 - `playbook.yml` — main entry point, lists roles in dependency order
 - `ansible.cfg` — local connection, become defaults, roles path
-- `group_vars/all.yml` — package lists, system configuration, and hardware data
+- `group_vars/all.yml` — hardware identifiers shared by `roles/hardware` and its templates
 - `requirements.yml` — Galaxy collection dependencies (pinned versions)
 - `roles/` — one directory per configured domain; each role declares a tag for selective `--tags <role>` runs
 

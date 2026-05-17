@@ -1,33 +1,4 @@
 ---
-# ---------------------------------------------------------------------------
-# Virtualization (roles/virtualization)
-# ---------------------------------------------------------------------------
-
-virtualization_packages:
-  - dnsmasq
-  - edk2-ovmf
-  - libvirt
-  - qemu-desktop
-  - spice-vdagent
-  - swtpm
-  - virt-manager
-  - virt-viewer
-  - virtiofsd
-
-# ---------------------------------------------------------------------------
-# System configuration (roles/system)
-# ---------------------------------------------------------------------------
-
-user_groups:
-  - kvm
-  - libvirt
-
-system_services: []
-
-# ---------------------------------------------------------------------------
-# GZ302 (ASUS ROG Flow Z13) hardware configuration (roles/hardware)
-# ---------------------------------------------------------------------------
-
 # Disable Panel Replay (DC_DISABLE_REPLAY=0x400) on the Strix Halo OLED panel
 # to prevent scrolling artifacts and flicker on DCN 3.5.
 gz302_oled_kernel_param: "amdgpu.dcdebugmask=0x400"
