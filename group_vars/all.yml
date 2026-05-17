@@ -51,7 +51,7 @@ desktop_packages:
   - spotify-launcher
 
 aur_packages:
-  - claude-desktop-bin
+  - claude-desktop-appimage
   - fnm-bin
   - google-chrome
   - wifiman-desktop
@@ -70,10 +70,12 @@ virtualization_packages:
   - virt-viewer
   - virtiofsd
 
+security_packages:
+  - proton-vpn-gtk-app
+
 security_aur_packages:
   - 1password
   - 1password-cli
-  - proton-vpn-gtk-app
 
 # Both-required GPG trust chain that seeds the user keyring so makepkg's
 # validpgpkeys check passes when building 1Password from the AUR.
@@ -167,10 +169,9 @@ uv_tools:
   - pre-commit
   - checkov
 
-infra_aur_packages:
+infra_packages:
   - terraform
-  - tflint-bin
-  - tfupdate-bin
+  - tflint
 
 npm_global_packages:
   - "@anthropic-ai/claude-code"
