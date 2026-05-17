@@ -1,9 +1,4 @@
 ---
-# Substrate state every provisioned machine needs before any other role
-# runs. `foundation_packages` is the baseline CLI toolchain — installed
-# with `update_cache: true` so the pacman DB is fresh for every
-# subsequent role's installs. `foundation_locale` is written to
-# /etc/locale.conf via lineinfile.
 foundation_packages:
   - fzf
   - htop
