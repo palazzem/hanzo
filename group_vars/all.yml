@@ -118,19 +118,7 @@ gz302_keyboard_target_key: prog1
 gz302_wifi_powersave: 2
 
 # ---------------------------------------------------------------------------
-# Development tools (roles/devtools, roles/infra)
+# Go workspace (roles/languages)
 # ---------------------------------------------------------------------------
-
-uv_tools:
-  - ipython
-  - pre-commit
-  - checkov
-
-infra_packages:
-  - terraform
-  - tflint
-
-npm_global_packages:
-  - "@anthropic-ai/claude-code"
 
 gopath: ~/programs/go

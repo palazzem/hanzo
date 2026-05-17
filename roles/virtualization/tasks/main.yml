@@ -42,7 +42,7 @@
 
     # failed_when: false so the play continues if the `default` network
     # definition is missing for any reason; the action task below gates
-    # on rc == 0 and silently skips. Same probe shape as roles/devtools.
+    # on rc == 0 and silently skips. Same probe shape as roles/tools.
     - name: Probe libvirt default network state
       ansible.builtin.command:
         argv:

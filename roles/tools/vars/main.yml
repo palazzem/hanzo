@@ -1,0 +1,14 @@
+---
+tools_uv_tools:
+  - ipython
+  - pre-commit
+  - checkov
+
+tools_npm_global_packages:
+  - "@anthropic-ai/claude-code"
+
+tools_iac_packages:
+  - terraform
+  - tflint
+
+tools_gcloud_install_dir: "{{ ansible_facts.env.HOME }}/.local/share"

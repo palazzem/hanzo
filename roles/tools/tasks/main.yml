@@ -1,0 +1,12 @@
+---
+- name: Include Python user tools tasks
+  ansible.builtin.include_tasks: python_tools.yml
+
+- name: Include Node user tools tasks
+  ansible.builtin.include_tasks: node_tools.yml
+
+- name: Include IaC tasks
+  ansible.builtin.include_tasks: iac.yml
+
+- name: Include Google Cloud SDK tasks
+  ansible.builtin.include_tasks: cloud.yml

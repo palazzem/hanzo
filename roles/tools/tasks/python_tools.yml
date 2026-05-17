@@ -1,0 +1,34 @@
+---
+# Single `uv tool list` call returns all installed tools, avoiding an
+# O(N) probe per package in the install loop. argv form keeps tokens
+# explicit and bypasses shell parsing.
+- name: List installed uv tools
+  ansible.builtin.command:
+    argv:
+      - uv
+      - tool
+      - list
+  register: tools_uv_tool_list
+  changed_when: false
+  failed_when: false
+  when: not ansible_check_mode
+  become: false
+
+# `uv tool list` output is "toolname vX.Y.Z" per line. Anchor on
+# "^toolname " to avoid prefix collisions (ipython vs. ipython-extra).
+# `regex_escape` defends against tool names with regex metacharacters.
+- name: Install uv tools
+  ansible.builtin.command:
+    argv:
+      - uv
+      - tool
+      - install
+      - "{{ item }}"
+  loop: "{{ tools_uv_tools }}"
+  when:
+    - not ansible_check_mode
+    - >
+      tools_uv_tool_list.stdout_lines | default([])
+      | select('match', '^' ~ (item | regex_escape) ~ ' ') | list | length == 0
+  changed_when: true
+  become: false

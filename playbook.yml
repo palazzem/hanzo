@@ -50,10 +50,8 @@
       tags: [system, always]
     - role: languages
       tags: [languages]
-    - role: devtools
-      tags: [devtools]
-    - role: infra
-      tags: [infra]
+    - role: tools
+      tags: [tools]
     - role: dotfiles
       tags: [dotfiles]
     - role: security
