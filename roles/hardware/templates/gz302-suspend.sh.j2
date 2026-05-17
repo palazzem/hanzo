@@ -48,7 +48,7 @@ reset_usb_device() {
 case "${1:-}" in
     pre)
         log "=== Pre-suspend hook starting ==="
-        # Use `install -d` instead of `mkdir -p`.
+        # Why `install -d` (not the more conventional `mkdir -p`):
         # WHAT IT DOES:
         #   1. Atomic mode + ownership in one syscall -- no umask race
         #      where the dir is briefly world-readable before chmod lands.
