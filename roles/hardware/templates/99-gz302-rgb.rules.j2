@@ -1,9 +1,0 @@
-# ASUS ROG Flow Z13 (GZ302) -- RGB unprivileged USB access
-# Managed by Hanzo. Do not edit manually.
-#
-# Residual (see #254): the keyboard hidraw still carries uaccess, so HID
-# reports remain decodable as keystrokes by a seat-local process. The
-# 1a30 rule is kept until real-hardware testing confirms it is safe to
-# drop without breaking rog-control-center / openrgb capability detection.
-SUBSYSTEM=="hidraw", ATTRS{idVendor}=="{{ gz302_asus_usb_vendor }}", ATTRS{idProduct}=="{{ gz302_asus_keyboard_product }}", TAG+="uaccess"
-SUBSYSTEM=="hidraw", ATTRS{idVendor}=="{{ gz302_asus_usb_vendor }}", ATTRS{idProduct}=="{{ gz302_asus_lightbar_product }}", TAG+="uaccess"

@@ -1,8 +1,5 @@
 ---
 # ASUS ROG Flow Z13 (GZ302) hardware fixes.
-#
-# Fixes: GPU modprobe, OLED kernel param, initramfs,
-# suspend hook, keyboard hwdb remap, RGB udev rule.
 
 - name: Deploy GPU modprobe config
   ansible.builtin.template:
@@ -35,11 +32,10 @@
   become: true
   notify: Update hwdb
 
-- name: Deploy RGB udev rule
-  ansible.builtin.template:
-    src: 99-gz302-rgb.rules.j2
-    dest: /etc/udev/rules.d/99-gz302-rgb.rules
-    mode: "0644"
+- name: Remove legacy RGB udev rule
+  ansible.builtin.file:
+    path: /etc/udev/rules.d/99-gz302-rgb.rules
+    state: absent
   become: true
   notify: Reload udev rules
 
