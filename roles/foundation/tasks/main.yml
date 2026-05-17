@@ -1,0 +1,33 @@
+---
+# Substrate setup that every other role implicitly depends on. The role
+# is tagged `[foundation, always]` in playbook.yml so a selective
+# `--tags <role>` run still establishes this state first.
+
+# Shared cache directory used by roles that download upstream installer
+# scripts (pyenv, gcloud) or fetch verification material (trust). Lives
+# under $HOME with mode 0700 so other local users cannot observe or race
+# the file. check_mode: false ensures the dir exists even in `--check`
+# runs, so subsequent get_url tasks have a valid dest parent.
+- name: Ensure Hanzo cache directory exists
+  ansible.builtin.file:
+    path: "{{ ansible_facts.env.HOME }}/.cache/hanzo"
+    state: directory
+    mode: "0700"
+  check_mode: false
+  become: false
+
+- name: Set system locale
+  ansible.builtin.lineinfile:
+    path: /etc/locale.conf
+    regexp: "^LANG="
+    line: "LANG={{ foundation_locale }}"
+  become: true
+
+# update_cache: true is the canonical pacman DB refresh for the whole
+# provisioning run — foundation is the first role, so every subsequent
+# pacman install sees a fresh database without re-doing the work.
+- name: Install baseline development packages
+  community.general.pacman:
+    name: "{{ foundation_packages }}"
+    update_cache: true
+  become: true
