@@ -3,19 +3,6 @@
 # Package lists (roles/packages)
 # ---------------------------------------------------------------------------
 
-base_packages:
-  - fzf
-  - htop
-  - neovim
-  - uv
-  - tree
-  - wget
-  - jq
-  - yq
-  - httpie
-  - whois
-  - tmux
-
 docker_packages:
   - docker
   - docker-buildx
@@ -93,8 +80,6 @@ system_services:
 # User-scoped systemd services (systemctl --user).
 user_services:
   - ssh-agent
-
-system_locale: en_US.UTF-8
 
 # ---------------------------------------------------------------------------
 # Dotfiles and Claude configuration (roles/dotfiles)

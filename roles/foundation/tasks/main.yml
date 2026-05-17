@@ -1,0 +1,21 @@
+---
+- name: Ensure Hanzo cache directory exists
+  ansible.builtin.file:
+    path: "{{ ansible_facts.env.HOME }}/.cache/hanzo"
+    state: directory
+    mode: "0700"
+  check_mode: false
+  become: false
+
+- name: Set system locale
+  ansible.builtin.lineinfile:
+    path: /etc/locale.conf
+    regexp: "^LANG="
+    line: "LANG={{ foundation_locale }}"
+  become: true
+
+- name: Install baseline development packages
+  community.general.pacman:
+    name: "{{ foundation_packages }}"
+    update_cache: true
+  become: true

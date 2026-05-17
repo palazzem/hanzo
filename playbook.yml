@@ -35,20 +35,9 @@
       when: hanzo_config_stat.stat.exists
       tags: [always]
 
-    # Shared cache directory used by roles that download upstream
-    # installer scripts (pyenv, gcloud). Lives under $HOME with mode
-    # 0700 so other local users cannot observe or race the file.
-    # check_mode: false ensures the dir exists even in `--check` runs,
-    # so subsequent get_url tasks have a valid dest parent.
-    - name: Ensure Hanzo cache directory exists
-      ansible.builtin.file:
-        path: "{{ ansible_facts.env.HOME }}/.cache/hanzo"
-        state: directory
-        mode: "0700"
-      check_mode: false
-      tags: [always]
-
   roles:
+    - role: foundation
+      tags: [foundation, always]
     - role: packages
       tags: [packages]
     - role: virtualization

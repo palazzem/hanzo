@@ -65,10 +65,3 @@
     - system_systemd_running.stat.exists
     - "'XDG_RUNTIME_DIR' in ansible_facts['env']"
   become: false
-
-- name: Set system locale
-  ansible.builtin.lineinfile:
-    path: /etc/locale.conf
-    regexp: "^LANG="
-    line: "LANG={{ system_locale }}"
-  become: true

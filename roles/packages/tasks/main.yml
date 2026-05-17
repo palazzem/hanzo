@@ -1,12 +1,6 @@
 ---
 # Package installation — official repos (pacman) and AUR (paru).
 
-- name: Install base development packages
-  community.general.pacman:
-    name: "{{ base_packages }}"
-    update_cache: true
-  become: true
-
 - name: Install Docker packages
   community.general.pacman:
     name: "{{ docker_packages }}"

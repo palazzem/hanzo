@@ -1,0 +1,14 @@
+---
+foundation_packages:
+  - fzf
+  - htop
+  - neovim
+  - tree
+  - wget
+  - jq
+  - yq
+  - httpie
+  - whois
+  - tmux
+
+foundation_locale: en_US.UTF-8
