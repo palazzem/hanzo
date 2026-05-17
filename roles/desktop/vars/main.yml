@@ -22,11 +22,5 @@ desktop_user_groups:
 
 desktop_pacman_remove:
   - alacritty
-  - cachyos-firefox-settings
-  - cachyos-qtile-settings
   - firefox
-  - firefox-i18n-en-us
-  - firefox-pure
-  - kde-utilities-meta
   - konsole
-  - yakuake

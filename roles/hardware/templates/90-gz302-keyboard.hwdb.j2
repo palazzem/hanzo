@@ -1,7 +1,0 @@
-# ASUS ROG Flow Z13 (GZ302) keyboard remap
-# Managed by Hanzo. Do not edit manually.
-#
-# Remap Copilot key (scancode 0x{{ hardware_gz302_keyboard_scancode }}) to KEY_PROG1.
-# Bound in Hyprland to launch ghostty -e claude.
-evdev:input:b0003v{{ hardware_gz302_asus_usb_vendor | upper }}p{{ hardware_gz302_asus_keyboard_product | upper }}*
- KEYBOARD_KEY_{{ hardware_gz302_keyboard_scancode }}={{ hardware_gz302_keyboard_target_key }}
