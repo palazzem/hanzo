@@ -1,0 +1,15 @@
+---
+virtualization_packages:
+  - dnsmasq
+  - edk2-ovmf
+  - libvirt
+  - qemu-desktop
+  - spice-vdagent
+  - swtpm
+  - virt-manager
+  - virt-viewer
+  - virtiofsd
+
+virtualization_user_groups:
+  - kvm
+  - libvirt

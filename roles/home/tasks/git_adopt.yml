@@ -50,7 +50,7 @@
 #
 # set -euo pipefail aborts on any sub-command failure so we never leave
 # a half-initialised .git in place. | quote escapes both interpolations
-# even though values come from group_vars (defense in depth, per CLAUDE.md).
+# as defense in depth even though the values come from trusted role vars.
 - name: Adopt directory as git repo at {{ git_dest }}
   ansible.builtin.shell: |
     set -euo pipefail

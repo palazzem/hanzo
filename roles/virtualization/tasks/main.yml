@@ -13,14 +13,26 @@
 # dnsmasq is libvirt's DHCP/DNS provider for the virbr0 subnet
 # (192.168.122.0/24), spawned per-network by libvirtd; it never runs as
 # a system-wide daemon.
-#
-# libvirt/kvm group membership is in user_groups and applied by
-# roles/system. This role must run first because the libvirt and
-# qemu-desktop post-install hooks are what create those groups.
 
 - name: Install virtualization packages
   community.general.pacman:
     name: "{{ virtualization_packages }}"
+  become: true
+
+- name: Ensure virtualization groups exist
+  ansible.builtin.group:
+    name: "{{ item }}"
+    system: true
+  loop: "{{ virtualization_user_groups }}"
+  check_mode: false
+  become: true
+
+- name: Add user to virtualization supplementary groups
+  ansible.builtin.user:
+    name: "{{ ansible_facts['user_id'] }}"
+    groups: "{{ virtualization_user_groups }}"
+    append: true
+  when: not ansible_check_mode
   become: true
 
 # --check simulates the pacman install, so virsh wouldn't exist on

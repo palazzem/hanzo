@@ -46,8 +46,6 @@
       tags: [containers]
     - role: trust
       tags: [trust, always]
-    - role: system
-      tags: [system, always]
     - role: languages
       tags: [languages]
     - role: tools
