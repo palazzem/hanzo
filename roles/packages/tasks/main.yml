@@ -112,7 +112,7 @@
     - name: Fetch 1Password GPG key from canonical URL (sha256-pinned)
       ansible.builtin.get_url:
         url: "{{ onepassword_gpg_key_url }}"
-        dest: "{{ ansible_facts.env.HOME }}/.cache/hanzo/1password.asc"
+        dest: "{{ onepassword_gpg_key_asc_path }}"
         checksum: "sha256:{{ onepassword_gpg_key_sha256 }}"
         mode: "0600"
       register: packages_onepassword_key_fetch
@@ -129,12 +129,29 @@
           - --batch
           - --no-tty
           - --import
-          - "{{ ansible_facts.env.HOME }}/.cache/hanzo/1password.asc"
-      register: packages_onepassword_key_import_primary
+          - "{{ onepassword_gpg_key_asc_path }}"
       changed_when: true
       check_mode: false
       become: false
   rescue:
+    # Surface the primary-path failure before falling back so a sha256
+    # mismatch (likely an upstream key rotation) is distinguishable in
+    # CI logs from a network error. Without this, both failure modes
+    # silently degrade to the keyserver path; the downstream
+    # export-sha256 assert still gates safety, but operators lose the
+    # "rotate the pin" signal that should trigger the documented
+    # rotation procedure.
+    - name: Log primary-path failure before keyserver fallback
+      ansible.builtin.debug:
+        msg: >-
+          Primary canonical-URL path failed; falling back to keyserver.
+          get_url result:
+          {{ packages_onepassword_key_fetch.msg
+             | default('no fetch error captured — likely a gpg --import failure') }}.
+          If the network is healthy, upstream may have rotated the key —
+          follow the rotation procedure in group_vars/all.yml rather than
+          relying on the rescue path indefinitely.
+
     - name: Fall back to keyserver for 1Password GPG key
       ansible.builtin.command:
         argv:
@@ -170,13 +187,16 @@
 
 # Export key material in deterministic minimal form so the sha256 is
 # stable across both import paths (export-minimal strips third-party
-# signatures that keyservers may attach).
+# signatures that keyservers may attach). changed_when is false because
+# the .gpg artifact is a transient verification scratch file overwritten
+# on every play (via --yes), not configuration drift; the meaningful
+# signal is the assert two tasks down, not this write.
 - name: Export 1Password GPG key material for verification
   ansible.builtin.command:
     argv:
       - gpg
       - --output
-      - "{{ ansible_facts.env.HOME }}/.cache/hanzo/1password.gpg"
+      - "{{ onepassword_gpg_key_export_path }}"
       - --yes
       - --export-options
       - export-minimal
@@ -188,7 +208,7 @@
 
 - name: Stat exported 1Password GPG key to compute sha256
   ansible.builtin.stat:
-    path: "{{ ansible_facts.env.HOME }}/.cache/hanzo/1password.gpg"
+    path: "{{ onepassword_gpg_key_export_path }}"
     checksum_algorithm: sha256
   register: packages_onepassword_key_export_stat
   check_mode: false

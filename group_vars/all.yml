@@ -100,6 +100,15 @@ onepassword_gpg_key_sha256: "f39e7dd9dedc581ced85732832f217e0de5860a3b80279b5af4
 # the key material itself doesn't hash to this value.
 onepassword_gpg_key_export_sha256: "130fd029182686f52eb17304615d8377e7787a0d5b01a90db6b36de4e56fb05c"
 
+# Filesystem paths for the two GPG artifacts the packages role writes
+# under the shared ~/.cache/hanzo directory (created once by
+# playbook.yml's pre-task). Centralised here per project Rule #1
+# ("Data in group_vars/all.yml, logic in roles/") so the get_url dest,
+# the gpg --import argument, the gpg --output destination, and the
+# stat path all reference a single source of truth.
+onepassword_gpg_key_asc_path: "{{ ansible_facts.env.HOME }}/.cache/hanzo/1password.asc"
+onepassword_gpg_key_export_path: "{{ ansible_facts.env.HOME }}/.cache/hanzo/1password.gpg"
+
 # keyserver.ubuntu.com is more reliable than keys.openpgp.org for AUR
 # build flows. Used only as a fallback when the canonical URL above is
 # unreachable; the post-import verify pins the key material regardless
