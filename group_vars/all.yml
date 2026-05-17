@@ -14,10 +14,6 @@ asus_packages:
   - asusctl
   - rog-control-center
 
-runtime_packages:
-  - rustup
-  - go
-
 gaming_packages:
   - cachyos-gaming-applications
   - ffmpeg
@@ -30,7 +26,6 @@ desktop_packages:
   - spotify-launcher
 
 aur_packages:
-  - fnm-bin
   - google-chrome
   - wifiman-desktop
 
@@ -110,9 +105,3 @@ gz302_keyboard_target_key: prog1
 # Flip back to 3 if a future kernel/firmware combo fixes the regression.
 # Values: 0 = use default, 1 = ignore, 2 = disable, 3 = enable.
 gz302_wifi_powersave: 2
-
-# ---------------------------------------------------------------------------
-# Go workspace (roles/languages)
-# ---------------------------------------------------------------------------
-
-gopath: ~/programs/go
