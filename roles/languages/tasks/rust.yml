@@ -1,0 +1,15 @@
+---
+- name: Install Rust toolchain packages
+  community.general.pacman:
+    name: "{{ languages_rust_packages }}"
+  become: true
+
+# rustup default stable is idempotent. We can't reliably introspect its
+# stdout for change detection (output varies across versions), so we
+# unconditionally mark unchanged. The first-run "ok" status is cosmetic
+# only — the toolchain is still installed/selected by rustup itself.
+- name: Set rustup default toolchain to stable
+  ansible.builtin.command: rustup default stable
+  changed_when: false
+  when: not ansible_check_mode
+  become: false

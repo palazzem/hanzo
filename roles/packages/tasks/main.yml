@@ -16,11 +16,6 @@
     name: "{{ asus_packages }}"
   become: true
 
-- name: Install language runtimes
-  community.general.pacman:
-    name: "{{ runtime_packages }}"
-  become: true
-
 - name: Install gaming and multimedia
   community.general.pacman:
     name: "{{ gaming_packages }}"

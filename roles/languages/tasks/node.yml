@@ -1,0 +1,20 @@
+---
+- name: Install Node.js AUR packages
+  kewlfft.aur.aur:
+    name: "{{ languages_node_packages }}"
+    use: paru
+  become: false
+
+# Each shell task runs in a fresh process, so we must eval fnm env to
+# activate it. fnm install is idempotent (skips installed versions) —
+# see Rust for the changed_when: false rationale; a static creates: path
+# can't pin the LTS version because LTS drifts over time.
+- name: Install Node.js LTS via fnm
+  ansible.builtin.shell: |
+    set -euo pipefail
+    eval "$(fnm env)"
+    fnm install --lts
+    fnm default "$(fnm current)"
+  changed_when: false
+  when: not ansible_check_mode
+  become: false

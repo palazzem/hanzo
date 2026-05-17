@@ -1,0 +1,25 @@
+---
+- name: Install Python toolchain packages
+  community.general.pacman:
+    name: "{{ languages_python_packages }}"
+  become: true
+
+# Download + execute is split (vs. curl | bash) to avoid risky-shell-pipe
+# and to get idempotency via creates: on the execute step. Cache lives
+# under $HOME (mode 0700) to avoid /tmp symlink-race surface and
+# shared-/tmp visibility on multi-user systems.
+- name: Download pyenv installer
+  ansible.builtin.get_url:
+    url: https://pyenv.run
+    dest: "{{ ansible_facts.env.HOME }}/.cache/hanzo/pyenv-installer.sh"
+    mode: "0700"
+  become: false
+
+# Skipped in check mode: get_url doesn't actually download the file in
+# check mode, so the installer script isn't on disk to execute.
+- name: Install pyenv via pyenv-installer
+  ansible.builtin.command:
+    cmd: "{{ ansible_facts.env.HOME }}/.cache/hanzo/pyenv-installer.sh"
+    creates: "{{ ansible_facts.env.HOME }}/.pyenv/bin/pyenv"
+  when: not ansible_check_mode
+  become: false

@@ -1,0 +1,15 @@
+---
+- name: Install Go toolchain packages
+  community.general.pacman:
+    name: "{{ languages_go_packages }}"
+  become: true
+
+- name: Create GOPATH directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: "0755"
+  loop:
+    - "{{ languages_gopath | expanduser }}"
+    - "{{ languages_gopath | expanduser }}/bin"
+  become: false
