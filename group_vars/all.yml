@@ -80,8 +80,30 @@ security_aur_packages:
 # is in the building user's GPG keyring.
 onepassword_gpg_key: "3FEF9748469ADBE15DA7CA80AC2D62742012EA22"
 
+# Canonical URL for the AgileBits / 1Password signing key. Primary trust
+# anchor — preferred over keyserver retrieval because the file is served
+# from 1Password's own infrastructure over HTTPS and pinned by sha256.
+onepassword_gpg_key_url: "https://downloads.1password.com/linux/keys/1password.asc"
+
+# SHA256 of the canonical .asc file at onepassword_gpg_key_url. Pinned so
+# ansible.builtin.get_url refuses to import a tampered or rotated key
+# without an explicit hash update here. Rotation procedure documented in
+# the PR that introduced this pin.
+onepassword_gpg_key_sha256: "f39e7dd9dedc581ced85732832f217e0de5860a3b80279b5af4bc7c6d8157bae"
+
+# SHA256 of `gpg --export-options export-minimal --export <fpr>` for the
+# key above. export-minimal strips third-party signatures so the hash is
+# deterministic regardless of whether the key was imported from the
+# canonical URL or the keyserver fallback. Pinning the binary export
+# (in addition to the fingerprint and the .asc file) closes the trust
+# chain: even a keyring with a matching fingerprint will fail verify if
+# the key material itself doesn't hash to this value.
+onepassword_gpg_key_export_sha256: "130fd029182686f52eb17304615d8377e7787a0d5b01a90db6b36de4e56fb05c"
+
 # keyserver.ubuntu.com is more reliable than keys.openpgp.org for AUR
-# build flows.
+# build flows. Used only as a fallback when the canonical URL above is
+# unreachable; the post-import verify pins the key material regardless
+# of which path succeeded.
 onepassword_gpg_keyserver: "hkps://keyserver.ubuntu.com"
 
 # ---------------------------------------------------------------------------
