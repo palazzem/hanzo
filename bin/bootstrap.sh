@@ -61,11 +61,6 @@ if uv tool list 2>/dev/null | grep -q "^ansible-core"; then
     log_info "ansible-core is already installed"
 else
     log_info "Installing ansible-core..."
-    # Pin ansible-core so a future breaking release never silently lands on a
-    # fresh provision. The ~= (compatible release) form lets 2.20.x bugfix and
-    # security patches flow through while still blocking 2.21+ breaking changes.
-    # The pin lives inline (not in group_vars/all.yml) because bootstrap.sh
-    # runs before Ansible is available to read vars.
     uv tool install 'ansible-core~=2.20.5'
 fi
 
