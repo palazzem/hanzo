@@ -6,14 +6,6 @@
     name: "{{ infra_packages }}"
   become: true
 
-# kewlfft.aur.aur accepts a list under `name:`, batching the underlying
-# paru invocation. Avoids per-iteration paru startup + AUR DB read cost.
-- name: Install infrastructure AUR packages
-  kewlfft.aur.aur:
-    name: "{{ infra_aur_packages }}"
-    use: paru
-  become: false
-
 # Google Cloud SDK ships an installer script. We split download from
 # execution so we can: (a) avoid risky-shell-pipe (curl | bash), and
 # (b) replace the curl call with get_url (idempotent, retry-aware).

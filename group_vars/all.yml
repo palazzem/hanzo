@@ -51,6 +51,7 @@ desktop_packages:
   - spotify-launcher
 
 aur_packages:
+  - claude-desktop-appimage
   - fnm-bin
   - google-chrome
   - wifiman-desktop
@@ -170,9 +171,7 @@ uv_tools:
 
 infra_packages:
   - terraform
-
-infra_aur_packages:
-  - tflint-bin
+  - tflint
 
 npm_global_packages:
   - "@anthropic-ai/claude-code"
