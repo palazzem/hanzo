@@ -1,0 +1,14 @@
+---
+languages_python_packages:
+  - uv
+
+languages_rust_packages:
+  - rustup
+
+languages_go_packages:
+  - go
+
+languages_node_packages:
+  - fnm-bin
+
+languages_gopath: ~/programs/go
