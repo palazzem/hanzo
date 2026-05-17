@@ -37,6 +37,8 @@ Tags do NOT enforce ordering. Users selecting a subset of tags need to know what
 - `devtools` depends on `languages` — npm globals need `fnm` and Node.js. Run `--tags "languages,devtools"` together if iterating on tooling.
 - `devtools` depends on `packages` — `uv` tools need the `uv` binary installed by `packages` (pacman).
 - `dotfiles` may depend on `languages` — the dotfiles installer (`install.sh` from the external dotfiles repo) may reference `fnm` / `pyenv` paths. Content lives outside this repo, so verify case-by-case before running `dotfiles` without `languages`.
+- `trust` is independent — seeds the user GPG keyring under a dual-source verification pattern; safe to run on its own.
+- `security` depends on `trust` — `paru`'s makepkg `validpgpkeys` check for `1password` needs the AgileBits GPG key in the user keyring. `trust` is tagged `always` so any `--tags security` run imports the key first.
 - `infra` is independent — Terraform ecosystem + Google Cloud SDK; can be run on its own.
 - `hardware` is independent — hardware-conditional (skipped inside containers and on non-matching DMI).
 - `packages` and `virtualization` are foundational — most other roles will silently no-op or fail without their packages installed.
