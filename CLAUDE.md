@@ -18,29 +18,13 @@ CachyOS system provisioner powered by Ansible.
 
 `playbook.yml` declares each role with an explicit tag so the playbook supports selective provisioning via `hanzo --tags <role>`.
 
-Current roles and their tags (source of truth: `playbook.yml`; update both together when adding or renaming roles):
+Each role's tag(s) are declared on its `roles:` entry in `playbook.yml`. To enumerate them dynamically, run `--list-tags` inside the test container:
 
-| Role           | Tag(s)                |
-|----------------|-----------------------|
-| `packages`     | `packages`            |
-| `virtualization` | `virtualization`    |
-| `system`       | `system`, `always`    |
-| `languages`    | `languages`           |
-| `devtools`     | `devtools`            |
-| `infra`        | `infra`               |
-| `dotfiles`     | `dotfiles`            |
-| `hardware`     | `hardware`            |
+```bash
+docker build --build-arg ANSIBLE_ARGS="--list-tags" -f tests/Containerfile -t hanzo:test .
+```
 
-### `always` Convention
-
-Tasks and roles tagged `always` run on every invocation, even with `--tags <something-else>`. The play uses this for:
-
-- `pre_tasks` — user-config load and `~/.cache/hanzo` creation (downstream roles assume this directory exists).
-- `system` role — locale, system groups, and services that any selective role run depends on.
-
-A future PR will introduce a dedicated `foundation` role that takes over the `always` responsibility, at which point `system` will be deleted.
-
-To opt out of always-tagged tasks (e.g., to run a hardware role in isolation without re-running the `system` role), pass `--skip-tags always` alongside `--tags <role>`. This skips both the `pre_tasks` and the `system` role — only use it when the cache dir and locale/groups/services state are already known to be in place.
+Roles tagged `always` execute on every invocation, including selective runs — they establish state that other roles depend on.
 
 ### Implicit Dependency Edges
 
@@ -56,8 +40,8 @@ Tags do NOT enforce ordering. Users selecting a subset of tags need to know what
 ### CLI Usage
 
 ```bash
-hanzo --tags hardware                  # hardware role + always-tagged (pre_tasks + system in this PR; pre_tasks + foundation after PR 3)
-hanzo --tags "languages,devtools"      # languages + devtools + always-tagged
+hanzo --tags hardware                  # hardware role (plus always-tagged dependencies)
+hanzo --tags "languages,devtools"      # languages + devtools (plus always-tagged dependencies)
 hanzo --list-tags                      # discover all available tags
 hanzo --skip-tags dotfiles             # everything except dotfiles
 ```
