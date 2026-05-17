@@ -80,16 +80,6 @@ security_aur_packages:
 # is in the building user's GPG keyring.
 onepassword_gpg_key: "3FEF9748469ADBE15DA7CA80AC2D62742012EA22"
 
-# Recompute the two sha256 pins below on any trusted machine (uses an
-# ephemeral GNUPGHOME so the host keyring is untouched):
-#   curl -fsSL https://downloads.1password.com/linux/keys/1password.asc \
-#     | sha256sum                                  # => _sha256
-#   curl -fsSL -o /tmp/1p.asc \
-#     https://downloads.1password.com/linux/keys/1password.asc
-#   GNUPGHOME=$(mktemp -d) gpg --quiet --import /tmp/1p.asc \
-#     && gpg --export-options export-minimal \
-#            --export 3FEF9748469ADBE15DA7CA80AC2D62742012EA22 \
-#     | sha256sum                                  # => _export_sha256
 onepassword_gpg_key_url: "https://downloads.1password.com/linux/keys/1password.asc"
 onepassword_gpg_key_sha256: "f39e7dd9dedc581ced85732832f217e0de5860a3b80279b5af4bc7c6d8157bae"
 

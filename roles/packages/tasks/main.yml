@@ -67,13 +67,11 @@
   become: false
 
 # Seed the user keyring with the AgileBits signing key (kewlfft.aur.aur
-# does not). Trust chain: sha256-pinned canonical URL (primary) with
-# keyserver --recv-keys as rescue. Rescue exists so a 1Password CDN
-# outage does not block fresh installs; it cannot weaken the chain
-# because the export-sha256 assert below pins the key material itself,
-# so a rescue path serving a different key fails the play. That assert
-# (not the fingerprint check) is the load-bearing gate. Every task sets
-# check_mode: false so CI exercises every link under --check.
+# does not). Trust chain: BOTH the sha256-pinned canonical URL AND the
+# keyserver --recv-keys must succeed (no fallback). The export-sha256
+# assert below pins the merged keyring state, so a divergent source
+# fails the play. Every task sets check_mode: false so CI exercises
+# every link under --check.
 - name: Check for AgileBits PGP signing key in user keyring
   ansible.builtin.command:
     argv:
@@ -86,7 +84,7 @@
   check_mode: false
   become: false
 
-- name: Import AgileBits PGP signing key (canonical URL with keyserver fallback)
+- name: Import AgileBits PGP signing key (canonical URL + keyserver, both required)
   when: packages_onepassword_key_check.rc != 0
   block:
     - name: Fetch 1Password GPG key from canonical URL (sha256-pinned)
@@ -113,21 +111,8 @@
       changed_when: true
       check_mode: false
       become: false
-  rescue:
-    # Make a sha256 mismatch (rotate the pin) distinguishable from a
-    # network failure in CI logs; both otherwise degrade silently.
-    - name: Log primary-path failure before keyserver fallback
-      ansible.builtin.debug:
-        msg: >-
-          Primary canonical-URL path failed; falling back to keyserver.
-          get_url result:
-          {{ packages_onepassword_key_fetch.msg
-             | default('no fetch error captured — likely a gpg --import failure') }}.
-          If the network is healthy, upstream may have rotated the key —
-          follow the rotation procedure in group_vars/all.yml rather than
-          relying on the rescue path indefinitely.
 
-    - name: Fall back to keyserver for 1Password GPG key
+    - name: Cross-verify 1Password GPG key from keyserver (must succeed)
       ansible.builtin.command:
         argv:
           - gpg
@@ -137,12 +122,12 @@
           - "{{ onepassword_gpg_keyserver }}"
           - --recv-keys
           - "{{ onepassword_gpg_key }}"
-      register: packages_onepassword_key_import_fallback
+      register: packages_onepassword_key_recv
       changed_when: true
       check_mode: false
       retries: 3
       delay: 5
-      until: packages_onepassword_key_import_fallback is succeeded
+      until: packages_onepassword_key_recv is succeeded
       become: false
 
 - name: Verify AgileBits PGP signing key is present after import
