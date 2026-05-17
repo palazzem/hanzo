@@ -1,66 +1,12 @@
 ---
-# Version managers and language runtimes.
-#
-# Prerequisites: packages role must run first to install rustup, go,
-# fnm-bin, and uv via pacman/paru. In `--check` mode those installs
-# are simulated, so binaries like rustup/fnm are missing — the tasks
-# below that invoke them are gated on `not ansible_check_mode`.
+- name: Configure Python
+  ansible.builtin.include_tasks: python.yml
 
-# pyenv ships an installer script. Download + execute is split so we
-# can avoid risky-shell-pipe and use idempotent get_url instead of curl.
-# Cache lives under $HOME (mode 0700) to avoid /tmp symlink-race surface
-# and shared-/tmp visibility on multi-user systems.
-- name: Download pyenv installer
-  ansible.builtin.get_url:
-    url: https://pyenv.run
-    dest: "{{ ansible_facts.env.HOME }}/.cache/hanzo/pyenv-installer.sh"
-    mode: "0700"
-  become: false
+- name: Configure Rust
+  ansible.builtin.include_tasks: rust.yml
 
-# Skipped in check mode: get_url doesn't actually download the file
-# in check mode, so the installer script isn't on disk to execute.
-- name: Install pyenv via pyenv-installer
-  ansible.builtin.command:
-    cmd: "{{ ansible_facts.env.HOME }}/.cache/hanzo/pyenv-installer.sh"
-    creates: "{{ ansible_facts.env.HOME }}/.pyenv/bin/pyenv"
-  when: not ansible_check_mode
-  become: false
+- name: Configure Node.js
+  ansible.builtin.include_tasks: node.yml
 
-# rustup default stable is idempotent. We can't reliably introspect its
-# stdout for change detection (output varies across versions), so we
-# unconditionally mark unchanged. The first-run "ok" status is cosmetic
-# only — the toolchain is still installed/selected by rustup itself.
-# Skipped in check mode: rustup binary comes from the packages role.
-- name: Set rustup default toolchain to stable
-  ansible.builtin.command: rustup default stable
-  changed_when: false
-  when: not ansible_check_mode
-  become: false
-
-# fnm is installed via paru (aur_packages). Each shell task runs in a
-# fresh process, so we must eval fnm env to activate it. fnm install
-# is idempotent (skips installed versions) — see comment on rustup above
-# for why we use changed_when: false instead of stdout introspection or
-# a static creates: path (LTS version drifts over time).
-# Skipped in check mode: fnm binary comes from the packages role.
-- name: Install Node.js LTS via fnm
-  ansible.builtin.shell: |
-    set -euo pipefail
-    eval "$(fnm env)"
-    fnm install --lts
-    fnm default "$(fnm current)"
-  changed_when: false
-  when: not ansible_check_mode
-  become: false
-
-# Go workspace directories. GOPATH persistence across interactive shell
-# sessions depends on roles/dotfiles (fish shell config).
-- name: Create GOPATH directories
-  ansible.builtin.file:
-    path: "{{ item }}"
-    state: directory
-    mode: "0755"
-  loop:
-    - "{{ gopath | expanduser }}"
-    - "{{ gopath | expanduser }}/bin"
-  become: false
+- name: Configure Go
+  ansible.builtin.include_tasks: go.yml
