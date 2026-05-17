@@ -1,11 +1,6 @@
 ---
 # Package installation — official repos (pacman) and AUR (paru).
 
-- name: Install Docker packages
-  community.general.pacman:
-    name: "{{ docker_packages }}"
-  become: true
-
 - name: Install archive tools
   community.general.pacman:
     name: "{{ archive_packages }}"

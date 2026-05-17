@@ -1,0 +1,20 @@
+---
+- name: Install container packages
+  community.general.pacman:
+    name: "{{ containers_packages }}"
+  become: true
+
+- name: Ensure docker group exists
+  ansible.builtin.group:
+    name: docker
+    system: true
+  check_mode: false
+  become: true
+
+- name: Add user to docker group
+  ansible.builtin.user:
+    name: "{{ ansible_facts['user_id'] }}"
+    groups: docker
+    append: true
+  when: not ansible_check_mode
+  become: true

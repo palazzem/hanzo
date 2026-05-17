@@ -42,6 +42,8 @@
       tags: [packages]
     - role: virtualization
       tags: [virtualization]
+    - role: containers
+      tags: [containers]
     - role: trust
       tags: [trust, always]
     - role: system

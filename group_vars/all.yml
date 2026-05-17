@@ -3,11 +3,6 @@
 # Package lists (roles/packages)
 # ---------------------------------------------------------------------------
 
-docker_packages:
-  - docker
-  - docker-buildx
-  - docker-compose
-
 archive_packages:
   - 7zip
   - unrar
@@ -61,19 +56,13 @@ virtualization_packages:
 # System configuration (roles/system)
 # ---------------------------------------------------------------------------
 
-system_groups:
-  - docker
-
-# Supplementary groups: system_groups + kernel-managed groups.
 user_groups:
-  - docker
   - kvm
   - libvirt
   - render
   - video
 
 system_services:
-  - docker
   - ollama
   - asusd
 
