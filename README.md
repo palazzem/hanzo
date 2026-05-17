@@ -36,6 +36,16 @@ hanzo              # full provisioning run
 hanzo --check      # dry run (shows what would change)
 ```
 
+For selective provisioning, pass `--tags <role>` to run a subset of the playbook:
+
+```bash
+hanzo --tags hardware                  # only the hardware role
+hanzo --tags "languages,devtools"      # languages + devtools
+hanzo --list-tags                      # list all available tags
+```
+
+See [CLAUDE.md's Role Tags section](CLAUDE.md#role-tags) for the full tag list and dependency notes.
+
 `hanzo` accepts any flag that `ansible-playbook` understands.
 
 ## Configuration
@@ -57,7 +67,7 @@ Hanzo uses Ansible to provision the local machine via `ansible-playbook playbook
 - `ansible.cfg` — local connection, become defaults, roles path
 - `group_vars/all.yml` — package lists, system configuration, and hardware data
 - `requirements.yml` — Galaxy collection dependencies (pinned versions)
-- `roles/` — one role per domain (`packages`, `system`, `languages`, `devtools`, `infra`, `dotfiles`, `hardware`)
+- `roles/` — one role per domain (`packages`, `virtualization`, `system`, `languages`, `devtools`, `infra`, `dotfiles`, `hardware`); each is selectable via `--tags <role>` (see [CLAUDE.md](CLAUDE.md#role-tags))
 
 The `hardware` role is dispatched by `ansible_product_name` and skipped automatically inside containers (via `ansible_virtualization_type`).
 
