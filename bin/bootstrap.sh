@@ -33,14 +33,13 @@ echo ""
 # ---------------------------------------------------------------------------
 # Step 1: Install uv (Astral's Python package manager)
 # ---------------------------------------------------------------------------
+export PATH="$HOME/.local/bin:$PATH"
+
 if command -v uv >/dev/null 2>&1; then
     log_info "uv is already installed: $(uv --version)"
 else
     log_info "Installing uv..."
     curl -LsSf https://astral.sh/uv/install.sh | sh
-
-    # uv's installer only modifies shell profiles, not the current session
-    export PATH="$HOME/.local/bin:$PATH"
 fi
 
 # ---------------------------------------------------------------------------
