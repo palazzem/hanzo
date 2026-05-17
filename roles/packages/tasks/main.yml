@@ -68,8 +68,11 @@
 
 # Seed the user keyring with the AgileBits signing key (kewlfft.aur.aur
 # does not). Trust chain: sha256-pinned canonical URL (primary) with
-# keyserver --recv-keys as rescue; the export-sha256 assert below is
-# the load-bearing gate, not the fingerprint check. Every task sets
+# keyserver --recv-keys as rescue. Rescue exists so a 1Password CDN
+# outage does not block fresh installs; it cannot weaken the chain
+# because the export-sha256 assert below pins the key material itself,
+# so a rescue path serving a different key fails the play. That assert
+# (not the fingerprint check) is the load-bearing gate. Every task sets
 # check_mode: false so CI exercises every link under --check.
 - name: Check for AgileBits PGP signing key in user keyring
   ansible.builtin.command:
