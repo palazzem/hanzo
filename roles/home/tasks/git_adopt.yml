@@ -26,12 +26,12 @@
 - name: Check git repository presence at {{ git_dest }}
   ansible.builtin.stat:
     path: "{{ git_dest }}/.git"
-  register: dotfiles_git_dir
+  register: home_git_dir
 
 - name: Check destination directory at {{ git_dest }}
   ansible.builtin.stat:
     path: "{{ git_dest }}"
-  register: dotfiles_dest_dir
+  register: home_dest_dir
 
 - name: Pull latest changes at {{ git_dest }}
   ansible.builtin.git:
@@ -40,7 +40,7 @@
     version: main
     update: true
   when:
-    - dotfiles_git_dir.stat.exists
+    - home_git_dir.stat.exists
     - not ansible_check_mode
   become: false
 
@@ -62,8 +62,8 @@
     git -C {{ git_dest | quote }} branch -M main
     git -C {{ git_dest | quote }} branch --set-upstream-to=origin/main
   when:
-    - dotfiles_dest_dir.stat.exists
-    - not dotfiles_git_dir.stat.exists
+    - home_dest_dir.stat.exists
+    - not home_git_dir.stat.exists
     - not ansible_check_mode
   changed_when: true
   become: false
@@ -80,7 +80,7 @@
     state: directory
     mode: "0755"
   when:
-    - not dotfiles_dest_dir.stat.exists
+    - not home_dest_dir.stat.exists
     - not ansible_check_mode
   become: false
 
@@ -90,6 +90,6 @@
     dest: "{{ git_dest }}"
     version: main
   when:
-    - not dotfiles_dest_dir.stat.exists
+    - not home_dest_dir.stat.exists
     - not ansible_check_mode
   become: false

@@ -1,0 +1,9 @@
+---
+home_dotfiles_repo: https://github.com/palazzem/dotfiles.git
+home_dotfiles_dir: ~/.dotfiles
+
+home_claude_config_repo: https://github.com/palazzem/claude-config.git
+home_claude_config_dir: ~/.claude
+
+home_user_services:
+  - ssh-agent
