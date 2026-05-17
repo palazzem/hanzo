@@ -5,9 +5,14 @@ ai_pacman:
 ai_aur:
   - claude-desktop-appimage
 
-# render is the kernel-managed DRM group; membership is required for
-# direct GPU access (ROCm compute paths consumed by ollama-rocm). udev
-# creates the group when GPU devices appear, so it's absent in
-# containers — gating consumed by the role's user task.
+# ROCm requires membership in both render and video per AMD docs
+# (https://rocm.docs.amd.com/projects/install-on-linux/en/latest/install/prerequisites.html):
+# render gates DRM render-node access, video gates the legacy
+# video-device path. Both are kernel-managed (udev creates them when
+# GPU devices appear), so they're absent in containers — gating
+# consumed by the role's user task. video is also declared in the
+# system role's user_groups for general graphics access; the
+# duplicate append is idempotent.
 ai_user_groups:
   - render
+  - video
