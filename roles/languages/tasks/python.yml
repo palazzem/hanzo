@@ -4,8 +4,10 @@
     name: "{{ languages_python_packages }}"
   become: true
 
-# Cache lives under $HOME (mode 0700) to avoid /tmp symlink-race surface
-# and shared-/tmp visibility on multi-user systems.
+# Download + execute is split (vs. curl | bash) to avoid risky-shell-pipe
+# and to get idempotency via creates: on the execute step. Cache lives
+# under $HOME (mode 0700) to avoid /tmp symlink-race surface and
+# shared-/tmp visibility on multi-user systems.
 - name: Download pyenv installer
   ansible.builtin.get_url:
     url: https://pyenv.run
