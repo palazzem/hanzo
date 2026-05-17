@@ -18,19 +18,3 @@
     append: true
   when: not ansible_check_mode
   become: true
-
-- name: Detect running systemd
-  ansible.builtin.stat:
-    path: /run/systemd/system
-  register: containers_systemd_running
-  check_mode: false
-
-- name: Enable and start docker service
-  ansible.builtin.systemd_service:
-    name: docker
-    state: started
-    enabled: true
-  when:
-    - not ansible_check_mode
-    - containers_systemd_running.stat.exists
-  become: true
