@@ -1,0 +1,18 @@
+---
+desktop_pacman:
+  - 7zip
+  - unrar
+  - sof-firmware
+  - cachyos-gaming-applications
+  - ffmpeg
+  - signal-desktop
+  - moonlight-qt
+  - spotify-launcher
+
+desktop_aur:
+  - google-chrome
+  - wifiman-desktop
+  - zoom
+
+desktop_user_groups:
+  - video

@@ -38,8 +38,8 @@
   roles:
     - role: foundation
       tags: [foundation, always]
-    - role: packages
-      tags: [packages]
+    - role: desktop
+      tags: [desktop]
     - role: virtualization
       tags: [virtualization]
     - role: containers
