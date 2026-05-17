@@ -39,7 +39,7 @@ sudo -v
 # Provisioning takes long enough for the sudo ticket to expire mid-run
 while true; do sudo -n true; sleep 50; done 2>/dev/null &
 SUDO_KEEPALIVE_PID=$!
-trap 'kill $SUDO_KEEPALIVE_PID 2>/dev/null' EXIT
+trap 'kill "$SUDO_KEEPALIVE_PID" 2>/dev/null' EXIT
 
 # ---------------------------------------------------------------------------
 # Step 2: Install uv (Astral's Python package manager)
@@ -61,7 +61,7 @@ if uv tool list 2>/dev/null | grep -q "^ansible-core"; then
     log_info "ansible-core is already installed"
 else
     log_info "Installing ansible-core..."
-    uv tool install ansible-core
+    uv tool install 'ansible-core~=2.20.5'
 fi
 
 # ---------------------------------------------------------------------------
