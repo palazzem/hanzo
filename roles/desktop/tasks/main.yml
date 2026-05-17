@@ -17,3 +17,9 @@
     append: true
   when: not ansible_check_mode
   become: true
+
+- name: Remove desktop pacman packages
+  community.general.pacman:
+    name: "{{ desktop_pacman_remove }}"
+    state: absent
+  become: true

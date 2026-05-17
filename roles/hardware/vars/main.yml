@@ -24,7 +24,7 @@ hardware_gz302_asus_keyboard_product: "1a30"
 hardware_gz302_asus_lightbar_product: "18c6"
 
 # Keyboard hwdb remap: Copilot key -> KEY_PROG1.
-# Bound in Hyprland to launch alacritty -e claude.
+# Bound in Hyprland to launch ghostty -e claude.
 hardware_gz302_keyboard_scancode: "70072"
 hardware_gz302_keyboard_target_key: prog1
 
