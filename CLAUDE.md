@@ -12,7 +12,7 @@ CachyOS system provisioner powered by Ansible.
 6. One role per domain. Every role must declare a tag.
 7. Every task needs `name:`. Descriptive names appear in Ansible output: "Install base development packages", not "packages". Keep Jinja expressions at the end of task names (ansible-lint `name[template]` rule).
 8. Don't install packages already in the CachyOS base image. Verify against `cachyos/cachyos:latest` (`pacman -Qe`) before adding to `group_vars/all.yml`.
-9. Registered variables inside a role must use the role name as prefix (ansible-lint `var-naming[no-role-prefix]` rule). E.g., inside `roles/devtools` use `devtools_uv_tool_list`, not `uv_tool_list`.
+9. Registered variables inside a role must use the role name as prefix (ansible-lint `var-naming[no-role-prefix]` rule). E.g., inside `roles/tools` use `tools_uv_tool_list`, not `uv_tool_list`.
 
 ## Commands
 

@@ -1,11 +1,4 @@
 ---
-# Infrastructure tools — Terraform ecosystem and Google Cloud SDK.
-
-- name: Install infrastructure packages
-  community.general.pacman:
-    name: "{{ infra_packages }}"
-  become: true
-
 # Google Cloud SDK ships an installer script. We split download from
 # execution so we can: (a) avoid risky-shell-pipe (curl | bash), and
 # (b) replace the curl call with get_url (idempotent, retry-aware).
@@ -24,7 +17,7 @@
 # mode, so the installer script isn't on disk to execute.
 - name: Install Google Cloud SDK
   ansible.builtin.command:
-    cmd: "{{ ansible_facts.env.HOME }}/.cache/hanzo/gcloud-installer.sh --disable-prompts --install-dir={{ ansible_facts.env.HOME }}/.local/share"
-    creates: "{{ ansible_facts.env.HOME }}/.local/share/google-cloud-sdk"
+    cmd: "{{ ansible_facts.env.HOME }}/.cache/hanzo/gcloud-installer.sh --disable-prompts --install-dir={{ tools_gcloud_install_dir }}"
+    creates: "{{ tools_gcloud_install_dir }}/google-cloud-sdk"
   when: not ansible_check_mode
   become: false

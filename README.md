@@ -40,7 +40,7 @@ For selective provisioning, pass `--tags <role>` to run a subset of the playbook
 
 ```bash
 hanzo --tags hardware                  # only the hardware role
-hanzo --tags "languages,devtools"      # languages + devtools
+hanzo --tags "languages,tools"         # languages + tools
 hanzo --list-tags                      # list all available tags
 ```
 

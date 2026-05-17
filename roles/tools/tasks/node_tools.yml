@@ -1,0 +1,32 @@
+---
+# Single `npm list -g --depth=0 --parseable` call returns one line per
+# installed global, formatted as the package's filesystem path. Matching
+# on a trailing path segment avoids the O(N) per-package probe.
+- name: List installed npm global packages
+  ansible.builtin.shell: |
+    set -euo pipefail
+    eval "$(fnm env)"
+    npm list -g --depth=0 --parseable
+  register: tools_npm_installed
+  changed_when: false
+  failed_when: false
+  when: not ansible_check_mode
+  become: false
+
+# End-anchored match on `/<pkgname>` catches both scoped
+# (`/.../node_modules/@anthropic-ai/claude-code`) and unscoped
+# (`/.../node_modules/typescript`) install paths without false
+# positives on prefix-collisions.
+- name: Install npm global packages
+  ansible.builtin.shell: |
+    set -euo pipefail
+    eval "$(fnm env)"
+    npm install -g {{ item | quote }}
+  loop: "{{ tools_npm_global_packages }}"
+  when:
+    - not ansible_check_mode
+    - >
+      tools_npm_installed.stdout_lines | default([])
+      | select('match', '.*/' ~ (item | regex_escape) ~ '$') | list | length == 0
+  changed_when: true
+  become: false

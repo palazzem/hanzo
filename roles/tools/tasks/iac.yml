@@ -1,0 +1,5 @@
+---
+- name: Install Infrastructure-as-Code packages
+  community.general.pacman:
+    name: "{{ tools_iac_packages }}"
+  become: true
