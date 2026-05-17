@@ -8,11 +8,14 @@ desktop_pacman:
   - signal-desktop
   - moonlight-qt
   - spotify-launcher
+  - zed
+  - ghostty
 
 desktop_aur:
   - google-chrome
   - wifiman-desktop
   - zoom
+  - darkly
 
 desktop_user_groups:
   - video
