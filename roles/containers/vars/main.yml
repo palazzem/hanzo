@@ -1,0 +1,5 @@
+---
+containers_packages:
+  - docker
+  - docker-buildx
+  - docker-compose
