@@ -11,8 +11,8 @@ ai_aur:
 # video-device path. Both are kernel-managed (udev creates them when
 # GPU devices appear), so they're absent in containers — gating
 # consumed by the role's user task. video is also declared in the
-# system role's user_groups for general graphics access; the
-# duplicate append is idempotent.
+# desktop role's desktop_user_groups for general graphics access;
+# the duplicate append is idempotent.
 ai_user_groups:
   - render
   - video

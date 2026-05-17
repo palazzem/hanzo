@@ -1,32 +1,7 @@
 ---
 # ---------------------------------------------------------------------------
-# Package lists (roles/packages)
+# Virtualization (roles/virtualization)
 # ---------------------------------------------------------------------------
-
-archive_packages:
-  - 7zip
-  - unrar
-
-audio_packages:
-  - sof-firmware
-
-gaming_packages:
-  - cachyos-gaming-applications
-  - ffmpeg
-
-comm_packages:
-  - signal-desktop
-
-desktop_packages:
-  - moonlight-qt
-  - spotify-launcher
-
-aur_packages:
-  - google-chrome
-  - wifiman-desktop
-
-comm_aur_packages:
-  - zoom
 
 virtualization_packages:
   - dnsmasq
@@ -46,7 +21,6 @@ virtualization_packages:
 user_groups:
   - kvm
   - libvirt
-  - video
 
 system_services: []
 

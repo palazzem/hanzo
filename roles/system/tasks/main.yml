@@ -1,9 +1,11 @@
 ---
 # System configuration — groups, services, and locale.
 
-# Skipped in check mode: render/video groups are kernel-managed and may
-# not exist on the test machine (e.g., inside the CI container), even
-# though they always exist on a real CachyOS system after first boot.
+# Skipped in check mode: the kvm and libvirt groups are created by
+# sysusers.d snippets shipped with the qemu and libvirt packages,
+# so they may not exist on the test machine (e.g., inside the CI
+# container) until those packages have actually been installed — which
+# check mode skips.
 - name: Add user to supplementary groups
   ansible.builtin.user:
     name: "{{ ansible_facts['user_id'] }}"
