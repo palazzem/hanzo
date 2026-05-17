@@ -48,7 +48,22 @@ reset_usb_device() {
 case "${1:-}" in
     pre)
         log "=== Pre-suspend hook starting ==="
-        mkdir -p "$STATE_DIR"
+        # Use `install -d` instead of `mkdir -p`.
+        # WHAT IT DOES:
+        #   1. Atomic mode + ownership in one syscall -- no umask race
+        #      where the dir is briefly world-readable before chmod lands.
+        #   2. Idempotent: re-applies 0700 root:root every cycle, auto-
+        #      correcting drift left by a previous run or an operator.
+        #   3. Clearer failure than `mkdir -p` if $STATE_DIR exists as a
+        #      regular file ("exists but is not a directory").
+        # WHAT IT DOES NOT:
+        #   * Does NOT fail on wrong-owner/mode dirs -- it re-applies.
+        #   * Does NOT refuse to follow symlinks. Neither does mkdir -p;
+        #     /run write capability already requires root (out of scope).
+        # No `|| true` guard: a non-zero exit surfaces via the subsequent
+        # `: > "$STATE_DIR/..."` writes in `journalctl -t gz302-suspend`
+        # (hook lacks `set -euo pipefail` by design; see header).
+        install -d -m 0700 -o root -g root "$STATE_DIR"
 
         # --- 1. Disable NHI and constrain xHCI wakeup in a single PCI scan ---
         # NHI (Thunderbolt) controllers send spurious wakeup signals that cause

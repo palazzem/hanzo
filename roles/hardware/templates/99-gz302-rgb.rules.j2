@@ -1,7 +1,28 @@
 # ASUS ROG Flow Z13 (GZ302) -- RGB unprivileged USB access
 # Managed by Hanzo. Do not edit manually.
 #
-# Grants unprivileged access to the ASUS keyboard and lightbar USB devices
-# so that rog-control-center can control RGB without running as root.
-SUBSYSTEMS=="usb", ATTRS{idVendor}=="{{ gz302_asus_usb_vendor }}", ATTRS{idProduct}=="{{ gz302_asus_keyboard_product }}", TAG+="uaccess"
-SUBSYSTEMS=="usb", ATTRS{idVendor}=="{{ gz302_asus_usb_vendor }}", ATTRS{idProduct}=="{{ gz302_asus_lightbar_product }}", TAG+="uaccess"
+# Grants unprivileged access to the ASUS keyboard and lightbar HID control
+# nodes so that rog-control-center can drive RGB without running as root.
+#
+# Why SUBSYSTEM (singular) and not SUBSYSTEMS (plural):
+# SUBSYSTEM== matches only the device's OWN subsystem; ATTRS{} still walks
+# parents to read USB vendor/product. SUBSYSTEMS=="usb" (plural) would walk
+# up to the USB parent and apply TAG+="uaccess" to every child node --
+# hidraw*, input/event*, and the bulk USB endpoint under /dev/bus/usb/ --
+# handing seat-local processes (Flatpak --device=all, browser native
+# messaging hosts, any desktop-user process) three separate keystroke /
+# raw-USB vectors on the keyboard (1a30).
+#
+# This rule eliminates TWO of those three vectors:
+#   * input/event* (the simpler, fully-decoded key-event source) -- CLOSED
+#   * bulk USB endpoint (arbitrary USB control transfers)        -- CLOSED
+#
+# Residual: the keyboard hidraw node ITSELF still carries uaccess, and HID
+# input reports can be decoded as keystrokes by a seat-local process. This
+# is accepted as a trade-off because rog-control-center / openrgb may need
+# direct keyboard hidraw access for capability detection, and we cannot
+# verify "rule is removable" without real-hardware testing. Tracked in
+# issue #254 -- if real-hardware validation shows the keyboard rule is
+# unused, dropping the 1a30 line is a one-line follow-up PR.
+SUBSYSTEM=="hidraw", ATTRS{idVendor}=="{{ gz302_asus_usb_vendor }}", ATTRS{idProduct}=="{{ gz302_asus_keyboard_product }}", TAG+="uaccess"
+SUBSYSTEM=="hidraw", ATTRS{idVendor}=="{{ gz302_asus_usb_vendor }}", ATTRS{idProduct}=="{{ gz302_asus_lightbar_product }}", TAG+="uaccess"
