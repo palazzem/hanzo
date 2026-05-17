@@ -1,0 +1,43 @@
+---
+- name: Install AI pacman packages
+  community.general.pacman:
+    name: "{{ ai_pacman }}"
+  become: true
+
+- name: Install AI AUR packages
+  kewlfft.aur.aur:
+    name: "{{ ai_aur }}"
+    use: paru
+  become: false
+
+- name: Add user to AI supplementary groups
+  ansible.builtin.user:
+    name: "{{ ansible_facts['user_id'] }}"
+    groups: "{{ ai_user_groups }}"
+    append: true
+  when: not ansible_check_mode
+  become: true
+
+# /run/systemd/system is the canonical "systemd is running as PID 1"
+# probe. When absent (containers, chroots), `systemd_service` emits a
+# "chroot or systemd is offline" warning and falls back to writing
+# enable symlinks manually. Skip the service task in those environments
+# to keep playbook output clean; real CachyOS hosts have the path and
+# run the task normally.
+- name: Detect running systemd
+  ansible.builtin.stat:
+    path: /run/systemd/system
+  register: ai_systemd_running
+  check_mode: false
+  become: false
+
+- name: Enable and start AI services
+  ansible.builtin.systemd_service:
+    name: "{{ item }}"
+    state: started
+    enabled: true
+  loop: "{{ ai_services }}"
+  when:
+    - not ansible_check_mode
+    - ai_systemd_running.stat.exists
+  become: true

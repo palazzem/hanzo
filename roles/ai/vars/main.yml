@@ -1,0 +1,12 @@
+---
+ai_pacman:
+  - ollama-rocm
+
+ai_aur:
+  - claude-desktop-appimage
+
+ai_user_groups:
+  - render
+
+ai_services:
+  - ollama
