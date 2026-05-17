@@ -1,0 +1,117 @@
+---
+# Dual-source GPG trust establishment for a single upstream (one entry
+# from trust_gpg_keys). BOTH the sha256-pinned canonical URL AND the
+# keyserver --recv-keys must succeed (no fallback). The export-sha256
+# assertion below pins the merged keyring state, so a divergent source
+# fails the play. Every task sets check_mode: false so CI exercises
+# every link under --check.
+- name: Check user keyring for GPG signing key {{ trust_gpg_key.name }}
+  ansible.builtin.command:
+    argv:
+      - gpg
+      - --list-keys
+      - "{{ trust_gpg_key.fingerprint }}"
+  register: trust_gpg_key_check
+  changed_when: false
+  failed_when: trust_gpg_key_check.rc not in [0, 2]
+  check_mode: false
+  become: false
+
+- name: Import GPG signing key via canonical URL and keyserver (both required) — {{ trust_gpg_key.name }}
+  when: trust_gpg_key_check.rc != 0
+  block:
+    - name: Fetch GPG key from canonical URL (sha256-pinned) — {{ trust_gpg_key.name }}
+      ansible.builtin.get_url:
+        url: "{{ trust_gpg_key.url }}"
+        dest: "{{ trust_gpg_key.asc_path }}"
+        checksum: "sha256:{{ trust_gpg_key.asc_sha256 }}"
+        mode: "0600"
+      register: trust_gpg_key_fetch
+      check_mode: false
+      retries: 3
+      delay: 5
+      until: trust_gpg_key_fetch is succeeded
+      become: false
+
+    - name: Import GPG key from canonical .asc file — {{ trust_gpg_key.name }}
+      ansible.builtin.command:
+        argv:
+          - gpg
+          - --batch
+          - --no-tty
+          - --import
+          - "{{ trust_gpg_key.asc_path }}"
+      changed_when: true
+      check_mode: false
+      become: false
+
+    - name: Cross-verify GPG key from keyserver (must succeed) — {{ trust_gpg_key.name }}
+      ansible.builtin.command:
+        argv:
+          - gpg
+          - --batch
+          - --no-tty
+          - --keyserver
+          - "{{ trust_gpg_key.keyserver }}"
+          - --recv-keys
+          - "{{ trust_gpg_key.fingerprint }}"
+      register: trust_gpg_key_recv
+      changed_when: true
+      check_mode: false
+      retries: 3
+      delay: 5
+      until: trust_gpg_key_recv is succeeded
+      become: false
+
+- name: Verify GPG signing key is present after import — {{ trust_gpg_key.name }}
+  ansible.builtin.command:
+    argv:
+      - gpg
+      - --with-colons
+      - --list-keys
+      - "{{ trust_gpg_key.fingerprint }}"
+  register: trust_gpg_key_verify
+  changed_when: false
+  failed_when: >-
+    trust_gpg_key_verify.rc != 0
+    or trust_gpg_key.fingerprint not in trust_gpg_key_verify.stdout
+  check_mode: false
+  become: false
+
+# export-minimal strips third-party signatures so the binary hash is
+# deterministic across both import paths.
+- name: Export GPG key material for verification — {{ trust_gpg_key.name }}
+  ansible.builtin.command:
+    argv:
+      - gpg
+      - --output
+      - "{{ trust_gpg_key.export_path }}"
+      - --yes
+      - --export-options
+      - export-minimal
+      - --export
+      - "{{ trust_gpg_key.fingerprint }}"
+  changed_when: false
+  check_mode: false
+  become: false
+
+- name: Stat exported GPG key to compute sha256 — {{ trust_gpg_key.name }}
+  ansible.builtin.stat:
+    path: "{{ trust_gpg_key.export_path }}"
+    checksum_algorithm: sha256
+  register: trust_gpg_key_export_stat
+  check_mode: false
+  become: false
+
+- name: Assert exported GPG key material matches pinned sha256 — {{ trust_gpg_key.name }}
+  ansible.builtin.assert:
+    that:
+      - trust_gpg_key_export_stat.stat.checksum == trust_gpg_key.export_sha256
+    fail_msg: >-
+      Exported GPG key sha256 for {{ trust_gpg_key.name }}
+      ({{ trust_gpg_key_export_stat.stat.checksum }})
+      does not match pinned value ({{ trust_gpg_key.export_sha256 }}).
+      Either the key has rotated upstream (update roles/trust/vars/main.yml
+      per the documented rotation procedure) or the imported key has been
+      tampered with — investigate before proceeding.
+  become: false
