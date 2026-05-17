@@ -52,6 +52,8 @@
       tags: [languages]
     - role: tools
       tags: [tools]
+    - role: ai
+      tags: [ai]
     - role: dotfiles
       tags: [dotfiles]
     - role: security

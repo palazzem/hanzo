@@ -1,0 +1,19 @@
+---
+- name: Install AI pacman packages
+  community.general.pacman:
+    name: "{{ ai_pacman }}"
+  become: true
+
+- name: Install AI AUR packages
+  kewlfft.aur.aur:
+    name: "{{ ai_aur }}"
+    use: paru
+  become: false
+
+- name: Add user to AI supplementary groups
+  ansible.builtin.user:
+    name: "{{ ansible_facts['user_id'] }}"
+    groups: "{{ ai_user_groups }}"
+    append: true
+  when: not ansible_check_mode
+  become: true

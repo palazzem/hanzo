@@ -7,9 +7,6 @@ archive_packages:
   - 7zip
   - unrar
 
-ai_packages:
-  - ollama-rocm
-
 audio_packages:
   - sof-firmware
 
@@ -33,7 +30,6 @@ desktop_packages:
   - spotify-launcher
 
 aur_packages:
-  - claude-desktop-appimage
   - fnm-bin
   - google-chrome
   - wifiman-desktop
@@ -59,11 +55,9 @@ virtualization_packages:
 user_groups:
   - kvm
   - libvirt
-  - render
   - video
 
 system_services:
-  - ollama
   - asusd
 
 # User-scoped systemd services (systemctl --user).

@@ -6,11 +6,6 @@
     name: "{{ archive_packages }}"
   become: true
 
-- name: Install AI packages
-  community.general.pacman:
-    name: "{{ ai_packages }}"
-  become: true
-
 - name: Install audio firmware
   community.general.pacman:
     name: "{{ audio_packages }}"
