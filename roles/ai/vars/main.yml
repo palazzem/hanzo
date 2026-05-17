@@ -5,8 +5,9 @@ ai_pacman:
 ai_aur:
   - claude-desktop-appimage
 
+# render is the kernel-managed DRM group; membership is required for
+# direct GPU access (ROCm compute paths consumed by ollama-rocm). udev
+# creates the group when GPU devices appear, so it's absent in
+# containers — gating consumed by the role's user task.
 ai_user_groups:
   - render
-
-ai_services:
-  - ollama
