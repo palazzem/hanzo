@@ -1,0 +1,14 @@
+---
+# Both-required GPG trust chain: seeds the user keyring so makepkg's
+# validpgpkeys check passes when building 1Password (and any future
+# upstream listed below) from the AUR. Each entry is processed by
+# tasks/import_gpg_key.yml under the dual-source verification pattern.
+trust_gpg_keys:
+  - name: 1Password
+    fingerprint: "3FEF9748469ADBE15DA7CA80AC2D62742012EA22"
+    url: "https://downloads.1password.com/linux/keys/1password.asc"
+    asc_sha256: "f39e7dd9dedc581ced85732832f217e0de5860a3b80279b5af4bc7c6d8157bae"
+    export_sha256: "130fd029182686f52eb17304615d8377e7787a0d5b01a90db6b36de4e56fb05c"
+    keyserver: "hkps://keyserver.ubuntu.com"
+    asc_path: "{{ ansible_facts.env.HOME }}/.cache/hanzo/1password.asc"
+    export_path: "{{ ansible_facts.env.HOME }}/.cache/hanzo/1password.gpg"

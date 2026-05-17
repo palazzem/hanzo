@@ -1,0 +1,18 @@
+---
+# Security tooling installation. paru's makepkg validpgpkeys check for
+# 1Password requires the AgileBits GPG key in the user keyring — that
+# key is seeded by roles/trust, which playbook.yml runs before this
+# role.
+
+- name: Install security pacman packages
+  community.general.pacman:
+    name: "{{ security_pacman }}"
+  become: true
+
+# kewlfft.aur.aur batches the list under `name:` into a single paru
+# invocation. paru must run as the unprivileged user — it refuses root.
+- name: Install security AUR packages
+  kewlfft.aur.aur:
+    name: "{{ security_aur }}"
+    use: paru
+  become: false

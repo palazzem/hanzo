@@ -1,0 +1,12 @@
+---
+# Establish GPG trust for each upstream listed in trust_gpg_keys. Each
+# key is processed independently under the dual-source verification
+# pattern defined in import_gpg_key.yml — see roles/trust/vars/main.yml
+# for the per-key inputs and roles/trust/tasks/import_gpg_key.yml for
+# the verification flow.
+- name: Import trusted upstream GPG signing key
+  ansible.builtin.include_tasks: import_gpg_key.yml
+  loop: "{{ trust_gpg_keys }}"
+  loop_control:
+    loop_var: trust_gpg_key
+    label: "{{ trust_gpg_key.name }}"
