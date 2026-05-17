@@ -1,5 +1,5 @@
 ---
-- name: Restart network stack and cycle wifi
+- name: Restart network stack
   ansible.builtin.shell: |
     set -euo pipefail
     systemctl restart NetworkManager
@@ -9,7 +9,7 @@
   changed_when: true
   become: true
 
-- name: Regenerate initramfs and Limine entries
+- name: Regenerate initramfs
   ansible.builtin.command: limine-mkinitcpio
   changed_when: true
   become: true

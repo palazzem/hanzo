@@ -59,10 +59,6 @@
           become: true
           tags: [always]
 
-        # Hardware runs first so the MT7925 wifi-powersave fix is
-        # applied before any other role starts downloading. The wifi
-        # handler is flushed inside the role; the boot-regen handler
-        # fires once at end-of-play.
         - name: Run hardware role
           ansible.builtin.import_role:
             name: hardware

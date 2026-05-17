@@ -10,7 +10,7 @@
     dest: /etc/NetworkManager/conf.d/wifi-powersave.conf
     mode: "0644"
   become: true
-  notify: Restart network stack and cycle wifi
+  notify: Restart network stack
 
 - name: Apply wifi powersave before continuing
   ansible.builtin.meta: flush_handlers
@@ -44,15 +44,19 @@
     dest: /etc/modprobe.d/amdgpu.conf
     mode: "0644"
   become: true
-  notify: Regenerate initramfs and Limine entries
+  notify: Regenerate initramfs
 
+# Regex matches only a dedicated single-param Hanzo line so an existing
+# inline mix like `KERNEL_CMDLINE[default]+=" amdgpu.dcdebugmask=X foo=bar"`
+# is never replaced (which would drop foo=bar). On first run we append a
+# new dedicated line; on re-runs we update its value in place.
 - name: Ensure OLED kernel param in Limine cmdline
   ansible.builtin.lineinfile:
     path: /etc/default/limine
-    regexp: 'amdgpu\.dcdebugmask='
+    regexp: '^KERNEL_CMDLINE\[default\]\+="\s*amdgpu\.dcdebugmask=\S+\s*"\s*$'
     line: 'KERNEL_CMDLINE[default]+=" {{ hardware_gz302_oled_kernel_param }}"'
   become: true
-  notify: Regenerate initramfs and Limine entries
+  notify: Regenerate initramfs
 
 - name: Deploy suspend/resume hook
   ansible.builtin.template:
