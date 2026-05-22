@@ -1,6 +1,7 @@
 ---
 foundation_packages:
   - fzf
+  - github-cli
   - htop
   - neovim
   - tree

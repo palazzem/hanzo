@@ -10,12 +10,14 @@ desktop_pacman:
   - spotify-launcher
   - zed
   - ghostty
+  - wl-clipboard
 
 desktop_aur:
   - google-chrome
   - wifiman-desktop
   - zoom
   - darkly
+  - qrca
 
 desktop_user_groups:
   - video

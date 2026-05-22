@@ -4,11 +4,11 @@
     name: "{{ ai_pacman }}"
   become: true
 
-- name: Install AI AUR packages
-  kewlfft.aur.aur:
-    name: "{{ ai_aur }}"
-    use: paru
-  become: false
+- name: Remove obsolete AI packages
+  community.general.pacman:
+    name: "{{ ai_pacman_remove }}"
+    state: absent
+  become: true
 
 - name: Add user to AI supplementary groups
   ansible.builtin.user:

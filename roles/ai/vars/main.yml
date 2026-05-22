@@ -2,7 +2,7 @@
 ai_pacman:
   - ollama-rocm
 
-ai_aur:
+ai_pacman_remove:
   - claude-desktop-appimage
 
 # ROCm requires membership in both render and video per AMD docs
