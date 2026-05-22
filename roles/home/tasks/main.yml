@@ -62,3 +62,27 @@
     - home_systemd_running.stat.exists
     - "'XDG_RUNTIME_DIR' in ansible_facts['env']"
   become: false
+
+- name: Ensure ~/cowork exists
+  ansible.builtin.file:
+    path: "{{ ansible_facts.env.HOME }}/cowork"
+    state: directory
+    mode: "0755"
+  become: false
+
+# ansible.builtin.template does not create parent directories.
+# On a fresh KDE setup ~/.local/share/applications may not exist
+# yet — pre-create it so the template task is robust on first run.
+- name: Ensure ~/.local/share/applications exists
+  ansible.builtin.file:
+    path: "{{ ansible_facts.env.HOME }}/.local/share/applications"
+    state: directory
+    mode: "0755"
+  become: false
+
+- name: Deploy Claude Code launcher .desktop entry
+  ansible.builtin.template:
+    src: hanzo-claude-code.desktop.j2
+    dest: "{{ ansible_facts.env.HOME }}/.local/share/applications/hanzo-claude-code.desktop"
+    mode: "0644"
+  become: false
