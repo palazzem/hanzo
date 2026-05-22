@@ -26,4 +26,3 @@
     name: keyd
     state: restarted
   become: true
-  when: hardware_systemd_running.stat.exists
