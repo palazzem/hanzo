@@ -2,9 +2,6 @@
 ai_pacman:
   - ollama-rocm
 
-ai_aur:
-  - claude-desktop-appimage
-
 # ROCm requires membership in both render and video per AMD docs
 # (https://rocm.docs.amd.com/projects/install-on-linux/en/latest/install/prerequisites.html):
 # render gates DRM render-node access, video gates the legacy
