@@ -13,3 +13,10 @@
   ansible.builtin.command: limine-mkinitcpio
   changed_when: true
   become: true
+
+# logind reads its config on SIGHUP; a full restart would terminate
+# every active login session. Supported on systemd v243+.
+- name: Reload logind
+  ansible.builtin.command: systemctl kill --signal=HUP systemd-logind
+  changed_when: true
+  become: true
