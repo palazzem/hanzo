@@ -149,3 +149,26 @@
       SleepMode=3
     mode: "0644"
   become: false
+
+- name: Install keyd
+  community.general.pacman:
+    name: keyd
+  become: true
+
+- name: Deploy keyd config
+  ansible.builtin.template:
+    src: keyd-default.conf.j2
+    dest: /etc/keyd/default.conf
+    mode: "0644"
+  become: true
+  notify: Restart keyd
+
+- name: Enable and start keyd
+  ansible.builtin.systemd_service:
+    name: keyd
+    state: started
+    enabled: true
+  when:
+    - not ansible_check_mode
+    - hardware_systemd_running.stat.exists
+  become: true
