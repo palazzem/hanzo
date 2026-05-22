@@ -4,12 +4,6 @@
     name: "{{ ai_pacman }}"
   become: true
 
-- name: Remove obsolete AI packages
-  community.general.pacman:
-    name: "{{ ai_pacman_remove }}"
-    state: absent
-  become: true
-
 - name: Add user to AI supplementary groups
   ansible.builtin.user:
     name: "{{ ansible_facts['user_id'] }}"
