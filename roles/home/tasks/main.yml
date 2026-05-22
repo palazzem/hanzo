@@ -62,7 +62,3 @@
     - home_systemd_running.stat.exists
     - "'XDG_RUNTIME_DIR' in ansible_facts['env']"
   become: false
-
-- name: Configure GZ302 Copilot key launcher
-  ansible.builtin.include_tasks: claude_code_shortcut.yml
-  when: model_is_gz302
