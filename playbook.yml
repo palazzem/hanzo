@@ -27,6 +27,24 @@
     hanzo_aur_sudoers: "/etc/sudoers.d/hanzo-aur"
 
   pre_tasks:
+    # ansible_facts['product_name'] is gathered by ansible.builtin.setup
+    # from /sys/class/dmi/id/product_name. On Linux Docker running ON
+    # the target host, that file is bind-mounted into the container —
+    # so a pure DMI check would mis-trigger inside the container. We
+    # AND in ansible_facts['virtualization_type'] to ensure we never
+    # write to host paths from inside docker/podman.
+    #
+    # `'product_name' in ansible_facts` short-circuits the second
+    # condition so the `'GZ302' in ...` check is safe even when the
+    # DMI fact is missing (e.g., when `gather_subset` doesn't include
+    # `hardware`).
+    - name: Detect GZ302 hardware
+      ansible.builtin.set_fact:
+        model_is_gz302: "{{ 'product_name' in ansible_facts
+                           and 'GZ302' in ansible_facts['product_name']
+                           and ansible_facts['virtualization_type'] | default('') not in ['docker', 'container', 'podman'] }}"
+      tags: [always]
+
     # Identity config is optional: load it only when present so first-run
     # and unattended scenarios work without a pre-existing config file.
     # The home role gates git identity injection on `hanzo_fullname is
