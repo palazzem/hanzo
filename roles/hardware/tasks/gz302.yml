@@ -95,18 +95,11 @@
     state: present
   become: true
 
-- name: Check whether swap is already active
-  ansible.builtin.command: swapon --show=NAME --noheadings
-  register: hardware_gz302_active_swaps
+# swapon --all activates everything in /etc/fstab and silently skips
+# devices already in use, so the task is idempotent without a pre-check.
+- name: Activate swap from fstab
+  ansible.builtin.command: swapon --all
   changed_when: false
-  check_mode: false
-  become: true
-
-- name: Activate swap if not already active
-  ansible.builtin.command:
-    cmd: swapon /swap/swapfile
-  when: "'/swap/swapfile' not in hardware_gz302_active_swaps.stdout"
-  changed_when: true
   become: true
 
 # systemd-suspend-then-hibernate.service consults HibernateDelaySec at
@@ -143,19 +136,16 @@
 
 # KDE Plasma 6: PowerDevil writes lid-action behavior here. SleepMode=3
 # = "Suspend then Hibernate" — set under both AC and Battery so behavior
-# is consistent regardless of power source. Section name is the literal
-# KDE-style nested form `[AC][SuspendAndShutdown]`; ini_file emits this
-# correctly when passed as a single section string with embedded `][`.
-- name: Configure KDE PowerDevil sleep mode (AC and Battery)
-  community.general.ini_file:
-    path: "{{ ansible_facts.env.HOME }}/.config/powerdevilrc"
-    section: "{{ item }}][SuspendAndShutdown"
-    option: SleepMode
-    value: "{{ hardware_gz302_kde_sleep_mode }}"
+# is consistent regardless of power source.
+- name: Configure KDE PowerDevil sleep mode
+  ansible.builtin.copy:
+    dest: "{{ ansible_facts.env.HOME }}/.config/powerdevilrc"
+    content: |
+      # Managed by Hanzo. Do not edit manually.
+      [AC][SuspendAndShutdown]
+      SleepMode=3
+
+      [Battery][SuspendAndShutdown]
+      SleepMode=3
     mode: "0644"
-    no_extra_spaces: true
-    create: true
-  loop:
-    - AC
-    - Battery
   become: false

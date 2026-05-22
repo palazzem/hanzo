@@ -36,20 +36,12 @@ hardware_gz302_asus_lightbar_product: "18c6"
 hardware_gz302_wifi_powersave: 2
 
 # Hibernation backing swap. BTRFS swap files require a NOCOW subvolume
-# with no compression; `btrfs filesystem mkswapfile` enforces both. Size
-# = detected RAM (memtotal_mb) rounded up to GB + 4 GB headroom for the
-# image header. memtotal_mb is the kernel-visible total, which is already
-# net of amdgpu's VRAM carveout on Strix Halo.
-hardware_gz302_swap_size: "{{ ((ansible_facts['memtotal_mb'] / 1024) | round(0, 'ceil') | int + 4) }}g"
+# with no compression; `btrfs filesystem mkswapfile` enforces both. Sized
+# at the GZ302's max RAM SKU (128 GB) — RAM is soldered LPDDR5X, so a
+# fixed cap covers every variant without per-host math.
+hardware_gz302_swap_size: 128g
 
 # HibernateDelaySec for systemd-suspend-then-hibernate.service: time in
-# s2idle before transitioning to hibernate. 1800s = 30 min trades a small
-# battery cost (suspend draws ~1-2 %/h on Strix Halo) for fast resume on
-# short lid-close intervals.
-hardware_gz302_hibernate_delay_sec: 1800
-
-# KDE PowerDevil SleepMode enum (Plasma 6 powerdevilrc, [Profile][SuspendAndShutdown]).
-# Required because PowerDevil holds a block-mode inhibitor on
-# handle-lid-switch, making /etc/systemd/logind.conf.d/ inert under KDE.
-# Values: 1 = Suspend, 2 = Hibernate, 3 = Suspend then Hibernate.
-hardware_gz302_kde_sleep_mode: 3
+# s2idle before transitioning to hibernate. 1h gives a long fast-resume
+# window before paying the disk-write cost.
+hardware_gz302_hibernate_delay_sec: 3600
