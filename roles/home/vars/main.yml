@@ -7,3 +7,7 @@ home_claude_config_dir: ~/.claude
 
 home_user_services:
   - ssh-agent
+
+# Path must match `[include] path = ...` in palazzem/dotfiles gitconfig.
+# Renaming this breaks the cross-repo include and silently drops identity.
+home_gitidentity_file: ~/.gitidentity

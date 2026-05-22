@@ -16,19 +16,21 @@
   when: not ansible_check_mode
   become: false
 
-- name: Set git user.name
+- name: Set git user.name in identity sidecar
   community.general.git_config:
     name: user.name
     value: "{{ hanzo_fullname }}"
-    scope: global
+    scope: file
+    file: "{{ home_gitidentity_file | expanduser }}"
   when: hanzo_fullname is defined
   become: false
 
-- name: Set git user.email
+- name: Set git user.email in identity sidecar
   community.general.git_config:
     name: user.email
     value: "{{ hanzo_email }}"
-    scope: global
+    scope: file
+    file: "{{ home_gitidentity_file | expanduser }}"
   when: hanzo_email is defined
   become: false
 
