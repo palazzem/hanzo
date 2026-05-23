@@ -2,5 +2,7 @@
 *
 
 [main]
-# ASUS Copilot key (Microsoft spec: LeftShift+LeftMeta+F23) -> F13.
-leftshift+leftmeta+f23 = f13
+# ASUS Copilot key (Microsoft spec: LeftShift+LeftMeta+F23) -> bare F23.
+# Without stripping the modifiers, KDE only receives LeftShift+LeftMeta
+# (the F23 keysym never reaches userspace as part of the chord).
+leftshift+leftmeta+f23 = f23

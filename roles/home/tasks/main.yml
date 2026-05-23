@@ -82,7 +82,7 @@
 # refresh bindings written by external tools — the binding
 # activates at the next KDE session start. The loop exists because
 # community.general.ini_file writes one option per invocation.
-- name: Bind Copilot key (F13) to Claude Code launcher in KDE
+- name: Bind Copilot key (F23) to Claude Code launcher in KDE
   community.general.ini_file:
     path: "{{ ansible_facts.env.HOME }}/.config/kglobalshortcutsrc"
     section: hanzo-claude-code.desktop
@@ -93,7 +93,7 @@
     - option: _k_friendly_name
       value: Claude Code
     - option: _launch
-      value: "F13,none,Claude Code"
+      value: "F23"
   loop_control:
     label: "{{ item.option }}"
   become: false
