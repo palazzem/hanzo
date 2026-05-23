@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Hanzo CLI — syncs to origin/main, refreshes Galaxy collections, runs the playbook.
+# Hanzo CLI — force-syncs to origin/main and runs the Ansible provisioner.
 # Usage: hanzo [ansible-playbook-args...]
 # Examples:
 #   hanzo              # full provisioning run
@@ -30,39 +30,12 @@ trap cleanup EXIT INT TERM
 
 cd "$HANZO_DIR"
 
-# __HANZO_INTERNAL_RESYNCED is a process-local sentinel — namespaced
-# with __ to avoid colliding with anything in the caller's environment.
-if [[ -z "${__HANZO_INTERNAL_RESYNCED:-}" ]]; then
-    self_hash_before="$(sha256sum "$HANZO_DIR/bin/hanzo" | cut -d' ' -f1)"
+log_info "Syncing checkout to origin/main..."
+git fetch origin main
+git reset --hard origin/main
 
-    log_info "Syncing checkout to origin/main…"
-    # GIT_HTTP_LOW_SPEED_LIMIT/TIME bound a TCP black hole: if throughput
-    # drops below 1 KB/s for 30s, git aborts instead of hanging silently.
-    GIT_HTTP_LOW_SPEED_LIMIT=1000 GIT_HTTP_LOW_SPEED_TIME=30 \
-        git fetch origin main
-    # `-f -B main origin/main` is the atomic equivalent of:
-    #   branch -f main origin/main + checkout -f main
-    # It force-discards any local tracked-file changes and switches to
-    # `main`, regardless of which branch we were on. `git reset --hard`
-    # alone would reset the *current* branch and leave us on it.
-    git checkout -f -B main origin/main
-    # `-x` also wipes gitignored paths (e.g. a stray .venv). The
-    # checkout is a deployment artifact — develop in a separate clone.
-    git clean -fdx
-
-    self_hash_after="$(sha256sum "$HANZO_DIR/bin/hanzo" | cut -d' ' -f1)"
-    if [[ "$self_hash_before" != "$self_hash_after" ]]; then
-        # The wrapper script we're running was rewritten under us by
-        # `git checkout -f`. Re-exec the new copy so the rest of this
-        # invocation runs the updated logic, not the buffered old one.
-        log_info "hanzo wrapper updated; re-executing…"
-        __HANZO_INTERNAL_RESYNCED=1 exec "$HANZO_DIR/bin/hanzo" "$@"
-    fi
-fi
-unset __HANZO_INTERNAL_RESYNCED
-
-log_info "Refreshing Ansible collections…"
+log_info "Refreshing Ansible collections..."
 ansible-galaxy collection install -r requirements.yml
 
-log_info "Starting provisioner…"
+log_info "Starting provisioner..."
 ansible-playbook playbook.yml --ask-become-pass "$@"

@@ -57,7 +57,7 @@ fi
 # `hanzo` itself resyncs to origin/main on every invocation, so bootstrap
 # never pulls — that would be redundant work and risk a conflicting fetch.
 # ---------------------------------------------------------------------------
-HANZO_REPO="${HANZO_REPO:-https://github.com/palazzem/hanzo.git}"
+HANZO_REPO="https://github.com/palazzem/hanzo.git"
 HANZO_DIR="$HOME/.local/src/hanzo"
 
 mkdir -p "$(dirname "$HANZO_DIR")"
@@ -137,12 +137,8 @@ if [[ ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
 fi
 
 # ---------------------------------------------------------------------------
-# Step 6: Hand off to hanzo
-# `exec` so bootstrap doesn't linger after handoff — hanzo now owns the
-# every-run lifecycle (origin/main sync, Galaxy refresh, playbook run).
-# Positional args are forwarded so callers can pass ansible-playbook
-# flags (e.g. `bootstrap.sh --list-tags` in the test harness).
+# Step 6: Run Hanzo for provisioning
 # ---------------------------------------------------------------------------
 log_info "Running provisioner..."
 echo ""
-exec "$HOME/.local/bin/hanzo" "$@"
+exec "$HOME/.local/bin/hanzo"
