@@ -34,14 +34,3 @@ hardware_gz302_asus_lightbar_product: "18c6"
 # Flip back to 3 if a future kernel/firmware combo fixes the regression.
 # Values: 0 = use default, 1 = ignore, 2 = disable, 3 = enable.
 hardware_gz302_wifi_powersave: 2
-
-# Hibernation backing swap. BTRFS swap files require a NOCOW subvolume
-# with no compression; `btrfs filesystem mkswapfile` enforces both. Sized
-# at the GZ302's max RAM SKU (128 GB) — RAM is soldered LPDDR5X, so a
-# fixed cap covers every variant without per-host math.
-hardware_gz302_swap_size: 128g
-
-# HibernateDelaySec for systemd-suspend-then-hibernate.service: time in
-# s2idle before transitioning to hibernate. 1h gives a long fast-resume
-# window before paying the disk-write cost.
-hardware_gz302_hibernate_delay_sec: 3600

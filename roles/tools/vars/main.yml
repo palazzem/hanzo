@@ -1,4 +1,7 @@
 ---
+tools_dev_packages:
+  - github-cli
+
 tools_uv_tools:
   - ipython
   - pre-commit
