@@ -53,29 +53,24 @@ else
 fi
 
 # ---------------------------------------------------------------------------
-# Step 3: Clone or update the Hanzo repository
+# Step 3: Clone the Hanzo repository (only if missing)
+# `hanzo` itself resyncs to origin/main on every invocation, so bootstrap
+# never pulls — that would be redundant work and risk a conflicting fetch.
 # ---------------------------------------------------------------------------
-HANZO_REPO="https://github.com/palazzem/hanzo.git"
+HANZO_REPO="${HANZO_REPO:-https://github.com/palazzem/hanzo.git}"
 HANZO_DIR="$HOME/.local/src/hanzo"
 
 mkdir -p "$(dirname "$HANZO_DIR")"
 
 if [ -d "$HANZO_DIR/.git" ]; then
-    log_info "Updating Hanzo repository..."
-    git -C "$HANZO_DIR" pull --ff-only
+    log_info "Hanzo repository already present at $HANZO_DIR"
 else
     log_info "Cloning Hanzo repository..."
     git clone "$HANZO_REPO" "$HANZO_DIR"
 fi
 
 # ---------------------------------------------------------------------------
-# Step 4: Install Ansible Galaxy collections
-# ---------------------------------------------------------------------------
-log_info "Installing Ansible Galaxy collections..."
-ansible-galaxy collection install -r "$HANZO_DIR/requirements.yml"
-
-# ---------------------------------------------------------------------------
-# Step 5: User configuration
+# Step 4: User configuration
 # When piped from curl, stdin is the pipe — read from /dev/tty to reach
 # the terminal for interactive prompts.
 # ---------------------------------------------------------------------------
@@ -132,7 +127,7 @@ else
 fi
 
 # ---------------------------------------------------------------------------
-# Step 6: Symlink bin/hanzo into PATH
+# Step 5: Symlink bin/hanzo into PATH
 # ---------------------------------------------------------------------------
 mkdir -p "$HOME/.local/bin"
 ln -sf "$HANZO_DIR/bin/hanzo" "$HOME/.local/bin/hanzo"
@@ -142,11 +137,12 @@ if [[ ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
 fi
 
 # ---------------------------------------------------------------------------
-# Step 7: Run the provisioner
+# Step 6: Hand off to hanzo
+# `exec` so bootstrap doesn't linger after handoff — hanzo now owns the
+# every-run lifecycle (origin/main sync, Galaxy refresh, playbook run).
+# Positional args are forwarded so callers can pass ansible-playbook
+# flags (e.g. `bootstrap.sh --list-tags` in the test harness).
 # ---------------------------------------------------------------------------
 log_info "Running provisioner..."
 echo ""
-"$HANZO_DIR/bin/hanzo"
-
-echo ""
-log_info "Done! Run 'hanzo' to re-provision at any time."
+exec "$HOME/.local/bin/hanzo" "$@"

@@ -1,0 +1,109 @@
+FROM --platform=linux/amd64 cachyos/cachyos:latest
+
+# Exercises the bootstrap → hanzo lifecycle end-to-end with a hermetic
+# origin (local bare repo) standing in for github.com. The existing
+# `tests/Containerfile` already covers the playbook itself, so this
+# stage uses `hanzo --list-tags` to exercise the every-run glue (sync,
+# Galaxy refresh, ansible-playbook invocation) without re-running the
+# roles.
+
+RUN pacman -Syu --noconfirm && \
+    pacman -S --noconfirm python git curl sudo base-devel paru
+
+RUN useradd -m -G wheel testuser && \
+    echo "testuser ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+
+# Stage the source as a hermetic origin. The container has no network
+# path to github.com, so HANZO_REPO is overridden to point at a local
+# bare repo created from the COPY'd source.
+COPY --chown=testuser:testuser . /home/testuser/hanzo-src
+
+USER testuser
+WORKDIR /home/testuser
+
+# Pre-seed user config so the interactive prompt path is skipped.
+RUN mkdir -p /home/testuser/.config/hanzo && \
+    printf 'hanzo_fullname: "Test User"\nhanzo_email: "test@example.com"\n' \
+      > /home/testuser/.config/hanzo/config.yml
+
+# Build the hermetic origin at /tmp/origin.git, with the COPY'd source
+# pushed as `main`. The bare repo lives outside the future worktree,
+# so `git clean -fdx` in hanzo cannot touch it.
+# We strip any inherited `.git` first (the build context may be a
+# worktree, in which case COPY brings in a `.git` *file* pointing at a
+# path that doesn't exist inside the container).
+RUN rm -rf /home/testuser/hanzo-src/.git && \
+    git init --bare /tmp/origin.git && \
+    cd /home/testuser/hanzo-src && \
+    git init -q -b main && \
+    git config user.email test@example.com && \
+    git config user.name Test && \
+    git add . && \
+    git commit -q -m "initial" && \
+    git remote add origin file:///tmp/origin.git && \
+    git push -q -u origin main && \
+    git -C /tmp/origin.git symbolic-ref HEAD refs/heads/main
+
+# ============================================================================
+# Test 1 — Bootstrap idempotency + symlink correctness
+# ============================================================================
+# Bootstrap is run twice. After each run, the same invariants must hold:
+# uv installed, ansible-core installed, clone present, config present,
+# and the PATH symlink resolves to $HANZO_DIR/bin/hanzo. Passing
+# `--list-tags` makes the final ansible-playbook call a no-op listing.
+RUN export HANZO_REPO="file:///tmp/origin.git" && \
+    bash /home/testuser/hanzo-src/bin/bootstrap.sh --list-tags <<< "" && \
+    test -x /home/testuser/.local/bin/uv && \
+    /home/testuser/.local/bin/uv tool list | grep -q '^ansible-core' && \
+    test -d /home/testuser/.local/src/hanzo/.git && \
+    test -f /home/testuser/.config/hanzo/config.yml && \
+    test "$(readlink -f /home/testuser/.local/bin/hanzo)" = \
+         /home/testuser/.local/src/hanzo/bin/hanzo
+
+RUN export HANZO_REPO="file:///tmp/origin.git" && \
+    bash /home/testuser/hanzo-src/bin/bootstrap.sh --list-tags <<< "" && \
+    test -x /home/testuser/.local/bin/uv && \
+    /home/testuser/.local/bin/uv tool list | grep -q '^ansible-core' && \
+    test -d /home/testuser/.local/src/hanzo/.git && \
+    test -f /home/testuser/.config/hanzo/config.yml && \
+    test "$(readlink -f /home/testuser/.local/bin/hanzo)" = \
+         /home/testuser/.local/src/hanzo/bin/hanzo
+
+# ============================================================================
+# Test 2 — Forced sync clears tracked, untracked, and gitignored drift
+# ============================================================================
+# Drift sequence (junk branch first, then dirt on top — keeps the dirt
+# off `main` so the assertion that `main` matches origin holds):
+#   - check out a junk branch
+#   - modify a tracked file
+#   - add an untracked file
+#   - add a gitignored file (verifies `git clean -fdx` removes -x'd paths)
+# Then `hanzo --list-tags` must force back to main, eliminate all drift,
+# and successfully invoke ansible-playbook.
+RUN cd /home/testuser/.local/src/hanzo && \
+    git checkout -q -b junk && \
+    echo "BROKEN" >> playbook.yml && \
+    touch /home/testuser/.local/src/hanzo/scratch.txt && \
+    mkdir -p /home/testuser/.local/src/hanzo/.venv && \
+    touch /home/testuser/.local/src/hanzo/.venv/marker && \
+    export PATH="/home/testuser/.local/bin:$PATH" && \
+    hanzo --list-tags <<< "" && \
+    test "$(git -C /home/testuser/.local/src/hanzo rev-parse --abbrev-ref HEAD)" = main && \
+    ! grep -q BROKEN /home/testuser/.local/src/hanzo/playbook.yml && \
+    test ! -e /home/testuser/.local/src/hanzo/scratch.txt && \
+    test ! -e /home/testuser/.local/src/hanzo/.venv/marker
+
+# ============================================================================
+# Test 3 — Network failure aborts before mutating the checkout
+# ============================================================================
+# Stage visible drift, point origin at an unreachable host, run hanzo
+# and assert non-zero exit. The drift must survive — proving the abort
+# happened in `git fetch` before any `reset --hard` ran. Then restore
+# the origin URL so subsequent stages (if added) are clean.
+RUN cd /home/testuser/.local/src/hanzo && \
+    echo "STILL_BROKEN" >> playbook.yml && \
+    git remote set-url origin https://127.0.0.1:1/nope.git && \
+    export PATH="/home/testuser/.local/bin:$PATH" && \
+    ! hanzo --list-tags <<< "" && \
+    grep -q STILL_BROKEN /home/testuser/.local/src/hanzo/playbook.yml && \
+    git -C /home/testuser/.local/src/hanzo remote set-url origin file:///tmp/origin.git
