@@ -53,9 +53,7 @@ else
 fi
 
 # ---------------------------------------------------------------------------
-# Step 3: Clone the Hanzo repository (only if missing)
-# `hanzo` itself resyncs to origin/main on every invocation, so bootstrap
-# never pulls — that would be redundant work and risk a conflicting fetch.
+# Step 3: Clone or update the Hanzo repository
 # ---------------------------------------------------------------------------
 HANZO_REPO="https://github.com/palazzem/hanzo.git"
 HANZO_DIR="$HOME/.local/src/hanzo"
