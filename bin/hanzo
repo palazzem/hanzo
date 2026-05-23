@@ -1,11 +1,15 @@
 #!/usr/bin/env bash
-# Hanzo CLI wrapper — runs the Ansible provisioner.
+# Hanzo CLI runs the Ansible provisioner.
 # Usage: hanzo [ansible-playbook-args...]
 # Examples:
 #   hanzo              # full provisioning run
 #   hanzo --check      # dry run (shows what would change)
 
 set -euo pipefail
+
+GREEN='\033[0;32m'
+NC='\033[0m'
+log_info() { echo -e "${GREEN}[hanzo]${NC} $1"; }
 
 HANZO_DIR="$(cd "$(dirname "$(readlink -f "$0")")/.." && pwd)"
 HANZO_AUR_SUDOERS="/etc/sudoers.d/hanzo-aur"
@@ -26,4 +30,12 @@ trap cleanup EXIT INT TERM
 
 cd "$HANZO_DIR"
 
+log_info "Syncing checkout to origin/main..."
+git fetch origin main
+git reset --hard origin/main
+
+log_info "Refreshing Ansible collections..."
+ansible-galaxy collection install -r requirements.yml
+
+log_info "Starting provisioner..."
 ansible-playbook playbook.yml --ask-become-pass "$@"
