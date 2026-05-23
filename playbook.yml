@@ -39,7 +39,7 @@
         host_has_systemd: "{{ hanzo_systemd_stat.stat.exists }}"
         model_is_gz302: "{{ 'product_name' in ansible_facts
                            and 'GZ302' in ansible_facts['product_name']
-                           and host_has_systemd }}"
+                           and hanzo_systemd_stat.stat.exists }}"
       become: false
       tags: [always]
 
