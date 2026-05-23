@@ -40,16 +40,10 @@
     git_repo: "{{ home_claude_config_repo }}"
     git_dest: "{{ home_claude_config_dir | expanduser }}"
 
-- name: Detect running systemd
-  ansible.builtin.stat:
-    path: /run/systemd/system
-  register: home_systemd_running
-  check_mode: false
-
 # User-scope systemd also needs an active session bus (XDG_RUNTIME_DIR
-# is set by pam_systemd on login). The systemd-running check above
-# covers most cases; the XDG check covers headless SSH where systemd
-# is running system-wide but no user session is set up.
+# is set by pam_systemd on login). host_has_systemd covers most cases;
+# the XDG check covers headless SSH where systemd is running system-wide
+# but no user session is set up.
 - name: Enable and start user services
   ansible.builtin.systemd_service:
     name: "{{ item }}"
@@ -59,7 +53,7 @@
   loop: "{{ home_user_services }}"
   when:
     - not ansible_check_mode
-    - home_systemd_running.stat.exists
+    - host_has_systemd
     - "'XDG_RUNTIME_DIR' in ansible_facts['env']"
   become: false
 

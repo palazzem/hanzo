@@ -35,25 +35,16 @@
   when: not ansible_check_mode
   become: true
 
-- name: Detect running systemd
-  ansible.builtin.stat:
-    path: /run/systemd/system
-  register: virtualization_systemd_running
-  check_mode: false
-  become: false
-
 # --check simulates the pacman install, so virsh wouldn't exist on
 # first run. Without PID-1 systemd (container builds, chroots, BuildKit
-# RUN steps), libvirtd cannot start — gate on /run/systemd/system rather
-# than ansible_facts['virtualization_type'], because the latter is
-# unreliable under BuildKit (the docker fact is not always populated at
-# play start, so the previous guard leaked the systemd_service call
-# into container builds). Same gating primitive as roles/home and
-# roles/hardware/gz302.yml.
+# RUN steps), libvirtd cannot start either — gate on `host_has_systemd`
+# (computed in playbook.yml pre_tasks via a stat on /run/systemd/system
+# — the canonical sd_booted(3) marker) rather than ansible's
+# virtualization_type fact, which is unreliable under BuildKit.
 - name: Configure libvirt default network autostart
   when:
     - not ansible_check_mode
-    - virtualization_systemd_running.stat.exists
+    - host_has_systemd
   block:
     # virsh needs libvirtd reachable for the probe and the flag flip
     # below. state: started only — persisting the socket would

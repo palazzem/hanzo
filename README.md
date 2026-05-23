@@ -67,7 +67,7 @@ Hanzo uses Ansible to provision the local machine via `ansible-playbook playbook
 - `requirements.yml` — Galaxy collection dependencies (pinned versions)
 - `roles/` — one directory per configured domain; each role declares a tag for selective `--tags <role>` runs
 
-The `hardware` role is dispatched by `ansible_product_name` and skipped automatically inside containers (via `ansible_virtualization_type`).
+The `hardware` role is dispatched by `ansible_facts['product_name']` and skipped automatically inside containers and other non-systemd contexts (via a stat of `/run/systemd/system` — see `CLAUDE.md` rule 3).
 
 ## Development
 
