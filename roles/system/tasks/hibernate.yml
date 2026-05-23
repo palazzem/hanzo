@@ -30,6 +30,20 @@
   changed_when: false
   become: true
 
+# systemd ships sleep.conf and logind.conf, but not their .conf.d/
+# drop-in directories — ansible.builtin.copy does not create parent
+# directories, so the drop-in writes below fail on a fresh system
+# unless these are precreated.
+- name: Ensure systemd drop-in directories exist
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: "0755"
+  loop:
+    - /etc/systemd/sleep.conf.d
+    - /etc/systemd/logind.conf.d
+  become: true
+
 # systemd-suspend-then-hibernate.service consults HibernateDelaySec at
 # invocation time, so no service restart is needed for this drop-in to
 # take effect on the next sleep operation.
