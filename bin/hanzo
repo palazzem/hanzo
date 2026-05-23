@@ -30,9 +30,9 @@ trap cleanup EXIT INT TERM
 
 cd "$HANZO_DIR"
 
-# Forced sync to origin/main. The HANZO_RESYNCED sentinel prevents a
-# second sync after the self-reexec branch below.
-if [[ -z "${HANZO_RESYNCED:-}" ]]; then
+# __HANZO_INTERNAL_RESYNCED is a process-local sentinel — namespaced
+# with __ to avoid colliding with anything in the caller's environment.
+if [[ -z "${__HANZO_INTERNAL_RESYNCED:-}" ]]; then
     self_hash_before="$(sha256sum "$HANZO_DIR/bin/hanzo" | cut -d' ' -f1)"
 
     log_info "Syncing checkout to origin/main…"
@@ -46,18 +46,20 @@ if [[ -z "${HANZO_RESYNCED:-}" ]]; then
     # `main`, regardless of which branch we were on. `git reset --hard`
     # alone would reset the *current* branch and leave us on it.
     git checkout -f -B main origin/main
+    # `-x` also wipes gitignored paths (e.g. a stray .venv). The
+    # checkout is a deployment artifact — develop in a separate clone.
     git clean -fdx
 
     self_hash_after="$(sha256sum "$HANZO_DIR/bin/hanzo" | cut -d' ' -f1)"
     if [[ "$self_hash_before" != "$self_hash_after" ]]; then
         # The wrapper script we're running was rewritten under us by
-        # `git reset --hard`. Re-exec the new copy so the rest of this
+        # `git checkout -f`. Re-exec the new copy so the rest of this
         # invocation runs the updated logic, not the buffered old one.
         log_info "hanzo wrapper updated; re-executing…"
-        HANZO_RESYNCED=1 exec "$HANZO_DIR/bin/hanzo" "$@"
+        __HANZO_INTERNAL_RESYNCED=1 exec "$HANZO_DIR/bin/hanzo" "$@"
     fi
 fi
-unset HANZO_RESYNCED
+unset __HANZO_INTERNAL_RESYNCED
 
 log_info "Refreshing Ansible collections…"
 ansible-galaxy collection install -r requirements.yml
