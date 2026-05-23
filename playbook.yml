@@ -4,12 +4,6 @@
   connection: local
   become: false
   gather_facts: true
-  # Restrict fact gathering to the subsets actually consumed by the
-  # roles:
-  #   - min:      ansible_facts['user_id'], ansible_facts['env']
-  #   - hardware: ansible_facts['product_name'] (from /sys/class/dmi/id)
-  # Skipping unused subsets (network, virtual, ohai, facter) cuts
-  # startup time on every run, especially noticeable in the CI build.
   gather_subset:
     - "!all"
     - min
@@ -25,12 +19,11 @@
     hanzo_aur_sudoers: "/etc/sudoers.d/hanzo-aur"
 
   pre_tasks:
-    # /run/systemd/system is the canonical sd_booted(3) marker. Absent
-    # during `docker build` RUN, on non-systemd inits, and in chroots —
-    # exactly the contexts where the systemd-touching tasks in this
-    # repo must skip. ansible's virtualization_type fact is unreliable
-    # here (returns 'NA' under BuildKit despite being inside a docker
-    # container), so we don't rely on it.
+    # Stat-gate systemd-touching tasks on the sd_booted(3) marker
+    # /run/systemd/system — absent under `docker build` RUN, chroots,
+    # and non-systemd inits. ansible's virtualization_type fact is
+    # unreliable here (returns 'NA' under BuildKit despite being inside
+    # a docker container), so we don't rely on it.
     - name: Detect running systemd
       ansible.builtin.stat:
         path: /run/systemd/system

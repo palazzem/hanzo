@@ -40,10 +40,6 @@
     git_repo: "{{ home_claude_config_repo }}"
     git_dest: "{{ home_claude_config_dir | expanduser }}"
 
-# User-scope systemd also needs an active session bus (XDG_RUNTIME_DIR
-# is set by pam_systemd on login). host_has_systemd covers most cases;
-# the XDG check covers headless SSH where systemd is running system-wide
-# but no user session is set up.
 - name: Enable and start user services
   ansible.builtin.systemd_service:
     name: "{{ item }}"
