@@ -11,11 +11,15 @@
   ansible.builtin.lineinfile:
     path: /etc/locale.conf
     regexp: "^LANG="
-    line: "LANG={{ foundation_locale }}"
+    line: "LANG={{ system_locale }}"
   become: true
 
 - name: Install baseline development packages
   community.general.pacman:
-    name: "{{ foundation_packages }}"
+    name: "{{ system_packages }}"
     update_cache: true
   become: true
+
+- name: Configure hibernation
+  ansible.builtin.include_tasks: hibernate.yml
+  when: host_has_systemd

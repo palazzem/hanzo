@@ -1,4 +1,7 @@
 ---
+- name: Include DevTools tasks
+  ansible.builtin.include_tasks: devtools.yml
+
 - name: Include Python user tools tasks
   ansible.builtin.include_tasks: python_tools.yml
 

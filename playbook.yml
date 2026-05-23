@@ -80,10 +80,10 @@
             name: hardware
           tags: [hardware]
 
-        - name: Run foundation role
+        - name: Run system role
           ansible.builtin.import_role:
-            name: foundation
-          tags: [foundation, always]
+            name: system
+          tags: [system, always]
 
         - name: Run desktop role
           ansible.builtin.import_role:
