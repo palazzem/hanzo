@@ -13,13 +13,10 @@ system_packages:
 
 system_locale: en_US.UTF-8
 
-# Hibernation backing swap. BTRFS swap files require a NOCOW subvolume
-# with no compression; `btrfs filesystem mkswapfile` enforces both. Sized
-# at the GZ302's max RAM SKU (128 GB) — RAM is soldered LPDDR5X, so a
-# fixed cap covers every variant without per-host math.
+# Hibernation swap for a 128 GB system.
 system_swap_size: 128g
 
 # HibernateDelaySec for systemd-suspend-then-hibernate.service: time in
-# s2idle before transitioning to hibernate. 1h gives a long fast-resume
+# s2idle before transitioning to hibernate. 3h gives a long fast-resume
 # window before paying the disk-write cost.
-system_hibernate_delay_sec: 3600
+system_hibernate_delay_sec: 10800
