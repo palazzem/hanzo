@@ -4,18 +4,10 @@
   connection: local
   become: false
   gather_facts: true
-  # Restrict fact gathering to the subsets actually consumed by the
-  # roles:
-  #   - min:      ansible_facts['user_id'], ansible_facts['env']
-  #   - hardware: ansible_facts['product_name'] (from /sys/class/dmi/id)
-  #   - virtual:  ansible_facts['virtualization_type'] (container guard)
-  # Skipping unused subsets (network, ohai, facter) cuts startup time
-  # on every run, especially noticeable in the CI container build.
   gather_subset:
     - "!all"
     - min
     - hardware
-    - virtual
 
   vars:
     # Transient sudoers drop-in granting NOPASSWD: /usr/bin/pacman
@@ -27,22 +19,28 @@
     hanzo_aur_sudoers: "/etc/sudoers.d/hanzo-aur"
 
   pre_tasks:
-    # ansible_facts['product_name'] is gathered by ansible.builtin.setup
-    # from /sys/class/dmi/id/product_name. On Linux Docker running ON
-    # the target host, that file is bind-mounted into the container —
-    # so a pure DMI check would mis-trigger inside the container. We
-    # AND in ansible_facts['virtualization_type'] to ensure we never
-    # write to host paths from inside docker/podman.
-    #
-    # `'product_name' in ansible_facts` short-circuits the second
-    # condition so the `'GZ302' in ...` check is safe even when the
-    # DMI fact is missing (e.g., when `gather_subset` doesn't include
-    # `hardware`).
-    - name: Detect GZ302 hardware
+    # Stat-gate systemd-touching tasks on the sd_booted(3) marker
+    # /run/systemd/system — absent under `docker build` RUN, chroots,
+    # and non-systemd inits. ansible's virtualization_type fact is
+    # unreliable here (returns 'NA' under BuildKit despite being inside
+    # a docker container), so we don't rely on it.
+    - name: Detect running systemd
+      ansible.builtin.stat:
+        path: /run/systemd/system
+      register: hanzo_systemd_stat
+      become: false
+      tags: [always]
+
+    # `'product_name' in ansible_facts` short-circuits the GZ302 check
+    # so it's safe even when the DMI fact is missing (gather_subset
+    # without `hardware`, or non-Linux DMI paths).
+    - name: Compute provisioning facts
       ansible.builtin.set_fact:
+        host_has_systemd: "{{ hanzo_systemd_stat.stat.exists }}"
         model_is_gz302: "{{ 'product_name' in ansible_facts
                            and 'GZ302' in ansible_facts['product_name']
-                           and ansible_facts['virtualization_type'] | default('') not in ['docker', 'container', 'podman'] }}"
+                           and host_has_systemd }}"
+      become: false
       tags: [always]
 
     # Identity config is optional: load it only when present so first-run
