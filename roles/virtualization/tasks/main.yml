@@ -35,12 +35,10 @@
   when: not ansible_check_mode
   become: true
 
-# --check simulates the pacman install, so virsh wouldn't exist on
-# first run. Without PID-1 systemd (container builds, chroots, BuildKit
-# RUN steps), libvirtd cannot start either — gate on `host_has_systemd`
-# (computed in playbook.yml pre_tasks via a stat on /run/systemd/system
-# — the canonical sd_booted(3) marker) rather than ansible's
-# virtualization_type fact, which is unreliable under BuildKit.
+# Two conditions skip this block: --check simulates the pacman install,
+# so virsh wouldn't exist on first run; and libvirtd cannot start without
+# PID-1 systemd. See playbook.yml pre_tasks for the host_has_systemd
+# detection rationale.
 - name: Configure libvirt default network autostart
   when:
     - not ansible_check_mode
