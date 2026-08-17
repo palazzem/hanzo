@@ -1,15 +1,32 @@
 ---
+# llama.cpp from the CachyOS-provided repos (Arch `extra`, mirrored by
+# CachyOS). Upstream splits the runtime into the frontend binaries
+# (llama-cpp) and one package per ggml backend, loaded dynamically at
+# runtime — so the backend set is chosen here, by which ggml-* packages
+# get installed.
 ai_pacman:
-  - ollama-rocm
+  # CLI tooling and the HTTP server: /usr/bin/llama-cli,
+  # /usr/bin/llama-server, plus llama-bench/llama-quantize et al.
+  - llama-cpp
+  # ROCm/HIP backend, the GPU path on this machine's AMD GPU; pulls
+  # rocm-hip-runtime, hipblas and rocblas as hard dependencies. Declared
+  # an optional dep by `ggml`, so it is not implied by llama-cpp and has
+  # to be requested explicitly.
+  - ggml-hip
+  # CPU backend, also an optional dep of `ggml`. Required for everything
+  # that stays on the host — tokenization and any layer not offloaded —
+  # so llama.cpp stays usable when a model exceeds VRAM or the GPU
+  # backend is unavailable.
+  - ggml-cpu
 
 # ROCm requires membership in both render and video per AMD docs
 # (https://rocm.docs.amd.com/projects/install-on-linux/en/latest/install/prerequisites.html):
 # render gates DRM render-node access, video gates the legacy
-# video-device path. Both are kernel-managed (udev creates them when
-# GPU devices appear), so they're absent in containers — gating
-# consumed by the role's user task. video is also declared in the
-# desktop role's desktop_user_groups for general graphics access;
-# the duplicate append is idempotent.
+# video-device path. Both are static system groups declared in systemd's
+# sysusers.d/basic.conf, so they exist on any systemd host and in the
+# test container — the role's user task therefore runs unconditionally.
+# video is also declared in the desktop role's desktop_user_groups for
+# general graphics access; the duplicate append is idempotent.
 ai_user_groups:
   - render
   - video

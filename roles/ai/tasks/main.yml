@@ -1,13 +1,23 @@
 ---
+# Local inference is start-on-demand: the llama-cpp package ships
+# llama-server.service (system and user units), and this role
+# deliberately never enables or starts either. Nothing listens until
+# the owner launches llama-server (or a llama-cli run) by hand.
+#
+# Model files are out of scope — this role installs tooling only.
 - name: Install AI pacman packages
   community.general.pacman:
     name: "{{ ai_pacman }}"
   become: true
 
+# No check-mode gate: render and video are static system groups (systemd
+# sysusers.d/basic.conf), so they exist in the test container too, and the
+# user module resolves every name in `groups` even under --check. Running
+# the task in the container build is what makes a missing or renamed group
+# fail the run instead of passing green on a skip.
 - name: Add user to AI supplementary groups
   ansible.builtin.user:
     name: "{{ ansible_facts['user_id'] }}"
     groups: "{{ ai_user_groups }}"
     append: true
-  when: not ansible_check_mode
   become: true
