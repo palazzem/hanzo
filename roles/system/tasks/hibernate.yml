@@ -1,4 +1,46 @@
 ---
+# CachyOS defaults to ZRam: zram-generator declares a RAM-sized zram0 swap
+# at priority 100 and cachyos-settings ships a udev rule that force-disables
+# Zswap on every zram0 change event. RAM-backed swap cannot hold a
+# hibernation image, so the machine never resumes. The tasks below follow
+# the CachyOS wiki "Switching from ZRam to Zswap" procedure:
+# https://wiki.cachyos.org/configuration/general_system_tweaks/#swap-configuration
+
+# Kernel params live in /etc/default/limine; limine-mkinitcpio regenerates
+# the boot entries and the initramfs from it, so both param tasks and the
+# mkinitcpio drop-in below share the same handler.
+- name: Ensure ZRam is disabled in Limine cmdline
+  ansible.builtin.lineinfile:
+    path: /etc/default/limine
+    regexp: '^KERNEL_CMDLINE\[default\]\+=" systemd\.zram='
+    line: 'KERNEL_CMDLINE[default]+=" {{ system_zram_kernel_param }}"'
+  become: true
+  notify: Rebuild initramfs
+
+- name: Ensure Zswap kernel params in Limine cmdline
+  ansible.builtin.lineinfile:
+    path: /etc/default/limine
+    regexp: '^KERNEL_CMDLINE\[default\]\+=" zswap\.'
+    line: 'KERNEL_CMDLINE[default]+=" {{ system_zswap_kernel_params }}"'
+  become: true
+  notify: Rebuild initramfs
+
+# /usr/lib/udev/rules.d/30-zram.rules (cachyos-settings) writes `N` to
+# /sys/module/zswap/parameters/enabled whenever zram0 changes state. A
+# rule-free file of the same name in /etc/udev/rules.d shadows it — udev
+# resolves rule files by name, /etc winning over /usr/lib.
+- name: Override CachyOS udev rule that disables Zswap
+  ansible.builtin.copy:
+    dest: /etc/udev/rules.d/30-zram.rules
+    content: |
+      # Managed by Hanzo. Do not edit manually.
+      # Intentionally rule-free: shadows /usr/lib/udev/rules.d/30-zram.rules,
+      # which disables Zswap and raises vm.swappiness for ZRam.
+    owner: root
+    group: root
+    mode: "0644"
+  become: true
+
 # Hibernation backing store. Single contiguous swap file on a dedicated
 # NOCOW subvolume (CachyOS recommended layout). The kernel reads the
 # image back via a direct device offset systemd records in the
@@ -29,6 +71,30 @@
   ansible.builtin.command: swapon --all
   changed_when: false
   become: true
+
+# zswap.compressor=lz4 is applied at boot, before the root filesystem is
+# mounted, so lz4 must ship inside the initramfs. mkinitcpio (>= 38)
+# concatenates /etc/mkinitcpio.conf.d/*.conf after the main config and
+# sources the result, so `MODULES+=(lz4)` appends to the MODULES array
+# without rewriting /etc/mkinitcpio.conf in place.
+- name: Ensure mkinitcpio drop-in directory exists
+  ansible.builtin.file:
+    path: /etc/mkinitcpio.conf.d
+    state: directory
+    mode: "0755"
+  become: true
+
+- name: Add lz4 to initramfs MODULES
+  ansible.builtin.copy:
+    dest: /etc/mkinitcpio.conf.d/10-zswap.conf
+    content: |
+      # Managed by Hanzo. Do not edit manually.
+      MODULES+=(lz4)
+    owner: root
+    group: root
+    mode: "0644"
+  become: true
+  notify: Rebuild initramfs
 
 # systemd ships sleep.conf and logind.conf, but not their .conf.d/
 # drop-in directories — ansible.builtin.copy does not create parent
