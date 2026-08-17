@@ -11,6 +11,7 @@ desktop_pacman:
   - zed
   - ghostty
   - wl-clipboard
+  - plasma-keyboard
 
 desktop_aur:
   - google-chrome
