@@ -1,4 +1,10 @@
 ---
+# Local inference is start-on-demand: the llama-cpp package ships
+# llama-server.service (system and user units), and this role
+# deliberately never enables or starts either. Nothing listens until
+# the owner launches llama-server (or a llama-cli run) by hand.
+#
+# Model files are out of scope — this role installs tooling only.
 - name: Install AI pacman packages
   community.general.pacman:
     name: "{{ ai_pacman }}"
