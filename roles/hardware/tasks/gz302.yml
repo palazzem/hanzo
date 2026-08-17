@@ -47,7 +47,6 @@
     dest: /etc/modprobe.d/amdgpu.conf
     mode: "0644"
   become: true
-  notify: Regenerate initramfs
 
 - name: Ensure OLED kernel param in Limine cmdline
   ansible.builtin.lineinfile:
@@ -55,7 +54,6 @@
     regexp: '^KERNEL_CMDLINE\[default\]\+=" amdgpu\.dcdebugmask='
     line: 'KERNEL_CMDLINE[default]+=" {{ hardware_gz302_oled_kernel_param }}"'
   become: true
-  notify: Regenerate initramfs
 
 - name: Deploy suspend/resume hook
   ansible.builtin.template:

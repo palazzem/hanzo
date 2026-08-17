@@ -8,6 +8,9 @@
     - "!all"
     - min
     - hardware
+  # Handlers flush at the end of the play, so a failure in a later role would
+  # otherwise drop pending notifications that idempotent tasks never re-send.
+  force_handlers: true
 
   vars:
     # Transient sudoers drop-in granting NOPASSWD: /usr/bin/pacman
@@ -151,11 +154,3 @@
             state: absent
           become: true
           tags: [always]
-
-  # Regenerates the initramfs for every installed kernel and rewrites the
-  # Limine boot entries from /etc/default/limine.
-  handlers:
-    - name: Regenerate initramfs
-      ansible.builtin.command: limine-mkinitcpio
-      changed_when: true
-      become: true

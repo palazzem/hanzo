@@ -23,3 +23,17 @@
 - name: Configure hibernation
   ansible.builtin.include_tasks: hibernate.yml
   when: host_has_systemd
+
+# Runs on every invocation, last in the role, because a handler notification
+# is consumed once: lost or failed, it is never re-sent (issue #293).
+- name: Regenerate initramfs and Limine boot entries
+  ansible.builtin.command: limine-mkinitcpio
+  register: system_limine_rebuild
+  changed_when: true
+  # limine-mkinitcpio swallows per-kernel failures and still exits 0, printing
+  # `ERROR:` to stderr — rc alone would report a stale initramfs as success.
+  failed_when: >-
+    system_limine_rebuild.rc != 0
+    or 'ERROR:' in system_limine_rebuild.stderr
+  when: host_has_systemd
+  become: true
