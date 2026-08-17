@@ -23,3 +23,13 @@
 - name: Configure hibernation
   ansible.builtin.include_tasks: hibernate.yml
   when: host_has_systemd
+
+# Rebuilt unconditionally, last in the role (tagged `always`, imported
+# after `hardware`), because a handler notification is consumed by a single
+# run: lost or failed once, it is never re-sent and the boot artifacts stay
+# stale forever while every run reports clean (issue #293).
+- name: Regenerate initramfs and Limine boot entries
+  ansible.builtin.command: limine-mkinitcpio
+  changed_when: true
+  when: host_has_systemd
+  become: true

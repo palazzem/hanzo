@@ -7,15 +7,14 @@
 # https://wiki.cachyos.org/configuration/general_system_tweaks/#swap-configuration
 
 # Kernel params live in /etc/default/limine; limine-mkinitcpio regenerates
-# the boot entries and the initramfs from it, so both param tasks and the
-# mkinitcpio drop-in below share the same handler.
+# the boot entries and the initramfs from it — that rebuild runs
+# unconditionally at the end of the role (tasks/main.yml), not via handler.
 - name: Ensure ZRam is disabled in Limine cmdline
   ansible.builtin.lineinfile:
     path: /etc/default/limine
     regexp: '^KERNEL_CMDLINE\[default\]\+=" systemd\.zram='
     line: 'KERNEL_CMDLINE[default]+=" {{ system_zram_kernel_param }}"'
   become: true
-  notify: Regenerate initramfs
 
 - name: Ensure Zswap kernel params in Limine cmdline
   ansible.builtin.lineinfile:
@@ -23,7 +22,6 @@
     regexp: '^KERNEL_CMDLINE\[default\]\+=" zswap\.'
     line: 'KERNEL_CMDLINE[default]+=" {{ system_zswap_kernel_params }}"'
   become: true
-  notify: Regenerate initramfs
 
 # /usr/lib/udev/rules.d/30-zram.rules (cachyos-settings) writes `N` to
 # /sys/module/zswap/parameters/enabled whenever zram0 changes state. A
@@ -89,7 +87,6 @@
     group: root
     mode: "0644"
   become: true
-  notify: Regenerate initramfs
 
 # systemd ships sleep.conf and logind.conf, but not their .conf.d/
 # drop-in directories — ansible.builtin.copy does not create parent
