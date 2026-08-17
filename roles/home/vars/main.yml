@@ -11,3 +11,11 @@ home_user_services:
 # Path must match `[include] path = ...` in palazzem/dotfiles gitconfig.
 # Renaming this breaks the cross-repo include and silently drops identity.
 home_gitidentity_file: ~/.gitidentity
+
+# Basename of the Claude Code launcher entry. kglobalacceld resolves the
+# global shortcut to the launcher *by this filename*: the deployed file in
+# ~/.local/share/applications and the `[services][<file>]` group in
+# kglobalshortcutsrc must stay byte-identical, so both use this var.
+# Renaming it in only one place leaves the shortcut pointing at a
+# nonexistent service and the Copilot key silently goes dead.
+home_claude_launcher_file: hanzo-claude-code.desktop

@@ -73,7 +73,7 @@
 - name: Deploy Claude Code launcher .desktop entry
   ansible.builtin.template:
     src: hanzo-claude-code.desktop.j2
-    dest: "{{ ansible_facts.env.HOME }}/.local/share/applications/hanzo-claude-code.desktop"
+    dest: "{{ ansible_facts.env.HOME }}/.local/share/applications/{{ home_claude_launcher_file }}"
     mode: "0644"
   become: false
 
@@ -85,12 +85,14 @@
 # loadSettings() and deleted by migrateConfig() on every daemon start,
 # which is why that earlier write never took effect. ini_file has no
 # nested-group syntax, hence the `]`+`[` embedded in `section`.
+# The launcher basename comes from home_claude_launcher_file — the same
+# var the template task deploys under, since the two must match exactly.
 # Writing this from an SSH/TTY run is fine: kglobalacceld reads the file
 # at session start, so the binding activates at the next login.
 - name: Bind Copilot key (F23) to Claude Code launcher in KDE
   community.general.ini_file:
     path: "{{ ansible_facts.env.HOME }}/.config/kglobalshortcutsrc"
-    section: "services][hanzo-claude-code.desktop"
+    section: "services][{{ home_claude_launcher_file }}"
     option: _launch
     value: "F23"
     no_extra_spaces: true
