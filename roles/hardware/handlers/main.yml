@@ -9,10 +9,9 @@
   changed_when: true
   become: true
 
-- name: Regenerate initramfs
-  ansible.builtin.command: limine-mkinitcpio
-  changed_when: true
-  become: true
+# `Regenerate initramfs`, notified by the GZ302 tasks in this role, is
+# defined at play level in playbook.yml: the system role notifies it too,
+# and one play-level definition keeps ansible's per-name dedupe intact.
 
 - name: Restart keyd
   ansible.builtin.systemd_service:

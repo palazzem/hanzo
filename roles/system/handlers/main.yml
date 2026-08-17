@@ -1,16 +1,10 @@
 ---
+# `Regenerate initramfs`, notified by the hibernation tasks in this role,
+# is defined at play level in playbook.yml: the hardware role notifies it
+# too, and one play-level definition keeps ansible's per-name dedupe intact.
+
 # logind reads its config on SIGHUP; a full restart would terminate
 # every active login session. Supported on systemd v243+.
-# Deliberately role-local rather than reusing the hardware role's
-# equivalent handler: handler names resolve globally, and sharing one
-# would tie the system role's hibernation tasks to a role that only runs
-# on matching hardware. limine-mkinitcpio regenerates the initramfs and
-# rewrites the Limine boot entries from /etc/default/limine.
-- name: Rebuild initramfs
-  ansible.builtin.command: limine-mkinitcpio
-  changed_when: true
-  become: true
-
 - name: Reload logind
   ansible.builtin.command: systemctl kill --signal=HUP systemd-logind
   changed_when: true
