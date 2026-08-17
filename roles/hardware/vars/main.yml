@@ -6,10 +6,12 @@ hardware_asus_packages:
 hardware_asus_services:
   - asusd
 
-# Disable Panel Replay (DC_DISABLE_REPLAY=0x400) and PSR-SU
-# (DC_DISABLE_PSR_SU=0x200) on the Strix Halo OLED panel to prevent
-# scrolling artifacts and flicker on DCN 3.5.
-hardware_gz302_oled_kernel_param: "amdgpu.dcdebugmask=0x600"
+# Disable Panel Replay (DC_DISABLE_REPLAY=0x400) on the Strix Halo OLED panel
+# to prevent scrolling artifacts and flicker on DCN 3.5. Do NOT re-add the
+# PSR-SU bit (0x200 -> 0x600): PSR-SU is already disabled at the driver level
+# by kernel commit 6deeefb820d0, so the extra bit is dead weight (see #251,
+# tracked in #254).
+hardware_gz302_oled_kernel_param: "amdgpu.dcdebugmask=0x400"
 
 # Force ABM off: kernel auto-skip on OLED was reverted in 2024; PPD engages
 # ABM on battery and causes visible gamma/red-shift on AMD OLED panels.
