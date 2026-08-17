@@ -1,8 +1,4 @@
 ---
-# `Regenerate initramfs`, notified by the hibernation tasks in this role,
-# is defined at play level in playbook.yml: the hardware role notifies it
-# too, and one play-level definition keeps ansible's per-name dedupe intact.
-
 # logind reads its config on SIGHUP; a full restart would terminate
 # every active login session. Supported on systemd v243+.
 - name: Reload logind

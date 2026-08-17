@@ -138,17 +138,8 @@
           become: true
           tags: [always]
 
-  # Cross-role handlers live in the play. Handler scope is play-wide
-  # regardless of where a handler is defined, and ansible dedupes handler
-  # runs by name — so two roles notifying one play-level handler produce a
-  # single run, while two identically-bodied role-local handlers under
-  # different names would run twice. limine-mkinitcpio regenerates the
-  # initramfs for every installed kernel and rewrites the Limine boot
-  # entries from /etc/default/limine; both the hardware role (GZ302 GPU
-  # modprobe config, OLED kernel param) and the system role (Zswap kernel
-  # params, lz4 initramfs module) change inputs to that same command.
-  # Notified handlers run regardless of --tags filtering, so no tag is
-  # needed here for selective runs (`--tags hardware`, `--tags system`).
+  # Regenerates the initramfs for every installed kernel and rewrites the
+  # Limine boot entries from /etc/default/limine.
   handlers:
     - name: Regenerate initramfs
       ansible.builtin.command: limine-mkinitcpio
