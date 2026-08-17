@@ -76,3 +76,24 @@
     dest: "{{ ansible_facts.env.HOME }}/.local/share/applications/hanzo-claude-code.desktop"
     mode: "0644"
   become: false
+
+# kglobalacceld (Plasma 6) reads launcher shortcuts from the *nested*
+# `[services][<file>.desktop]` group of kglobalshortcutsrc, with the bare
+# key sequence as value — see kglobalacceld's GlobalShortcutsRegistry::
+# loadSettings() and KServiceActionComponent::loadSettings(). Top-level
+# `[<file>.desktop]` groups — the shape used before #289 — are skipped by
+# loadSettings() and deleted by migrateConfig() on every daemon start,
+# which is why that earlier write never took effect. ini_file has no
+# nested-group syntax, hence the `]`+`[` embedded in `section`.
+# Writing this from an SSH/TTY run is fine: kglobalacceld reads the file
+# at session start, so the binding activates at the next login.
+- name: Bind Copilot key (F23) to Claude Code launcher in KDE
+  community.general.ini_file:
+    path: "{{ ansible_facts.env.HOME }}/.config/kglobalshortcutsrc"
+    section: "services][hanzo-claude-code.desktop"
+    option: _launch
+    value: "F23"
+    no_extra_spaces: true
+    mode: "0644"
+  when: host_has_kde
+  become: false

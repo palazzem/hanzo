@@ -31,12 +31,26 @@
       become: false
       tags: [always]
 
+    # "KDE host" means Plasma is *installed*, not that a session is
+    # running: provisioning over SSH/TTY must still write the KDE config
+    # that activates at the next login. /usr/bin/plasmashell is the
+    # install marker; session-scoped signals (KDE_FULL_SESSION,
+    # XDG_CURRENT_DESKTOP) are absent on a headless run and would wrongly
+    # skip the binding.
+    - name: Detect installed KDE Plasma
+      ansible.builtin.stat:
+        path: /usr/bin/plasmashell
+      register: hanzo_plasma_stat
+      become: false
+      tags: [always]
+
     # `'product_name' in ansible_facts` short-circuits the GZ302 check
     # so it's safe even when the DMI fact is missing (gather_subset
     # without `hardware`, or non-Linux DMI paths).
     - name: Compute provisioning facts
       ansible.builtin.set_fact:
         host_has_systemd: "{{ hanzo_systemd_stat.stat.exists }}"
+        host_has_kde: "{{ hanzo_plasma_stat.stat.exists }}"
         model_is_gz302: "{{ 'product_name' in ansible_facts
                            and 'GZ302' in ansible_facts['product_name']
                            and hanzo_systemd_stat.stat.exists }}"
