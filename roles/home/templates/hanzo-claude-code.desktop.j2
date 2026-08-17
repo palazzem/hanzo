@@ -1,14 +1,3 @@
-{#
-  Exec notes:
-  - The home path is templated in because %h is not a Desktop Entry field
-    code (only %f %F %u %U %i %c %k are) and would be passed through
-    literally by the launcher.
-  - `claude` is an npm global under the fnm-managed Node version, so it is
-    only on PATH once the shell environment is loaded (dotfiles
-    conf.d/environment.fish, which fish sources for every session kind).
-    A desktop activation starts from the session environment, which has no
-    fnm PATH entry — hence `fish -c claude` instead of a bare `claude`.
--#}
 [Desktop Entry]
 Type=Application
 Name=Claude Code
