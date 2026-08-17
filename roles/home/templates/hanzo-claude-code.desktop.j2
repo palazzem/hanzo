@@ -2,7 +2,7 @@
 Type=Application
 Name=Claude Code
 Comment=Open Claude Code in ~/cowork
-Exec=ghostty --working-directory=%h/cowork -e claude agents
+Exec=ghostty --working-directory={{ ansible_facts.env.HOME }}/cowork -e fish -c claude
 Icon=utilities-terminal
 Terminal=false
 Categories=Utility;Development;
