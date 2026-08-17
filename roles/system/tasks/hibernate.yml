@@ -76,14 +76,9 @@
 # mounted, so lz4 must ship inside the initramfs. mkinitcpio (>= 38)
 # concatenates /etc/mkinitcpio.conf.d/*.conf after the main config and
 # sources the result, so `MODULES+=(lz4)` appends to the MODULES array
-# without rewriting /etc/mkinitcpio.conf in place.
-- name: Ensure mkinitcpio drop-in directory exists
-  ansible.builtin.file:
-    path: /etc/mkinitcpio.conf.d
-    state: directory
-    mode: "0755"
-  become: true
-
+# without rewriting /etc/mkinitcpio.conf in place. The mkinitcpio package
+# owns /etc/mkinitcpio.conf.d/, so — unlike the systemd drop-in
+# directories below — it needs no pre-create task.
 - name: Add lz4 to initramfs MODULES
   ansible.builtin.copy:
     dest: /etc/mkinitcpio.conf.d/10-zswap.conf
