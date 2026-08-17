@@ -6,9 +6,8 @@
 # the CachyOS wiki "Switching from ZRam to Zswap" procedure:
 # https://wiki.cachyos.org/configuration/general_system_tweaks/#swap-configuration
 
-# Kernel params live in /etc/default/limine; limine-mkinitcpio regenerates
-# the boot entries and the initramfs from it — that rebuild runs
-# unconditionally at the end of the role (tasks/main.yml), not via handler.
+# Kernel params live in /etc/default/limine; the rebuild that applies them
+# runs at the end of the role (tasks/main.yml), not via handler.
 - name: Ensure ZRam is disabled in Limine cmdline
   ansible.builtin.lineinfile:
     path: /etc/default/limine

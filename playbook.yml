@@ -8,9 +8,8 @@
     - "!all"
     - min
     - hardware
-  # Handlers flush at the end of the play, so without this a failure in any
-  # later role silently drops pending notifications that idempotent tasks
-  # will never re-send (issue #293).
+  # Handlers flush at the end of the play, so a failure in a later role would
+  # otherwise drop pending notifications that idempotent tasks never re-send.
   force_handlers: true
 
   vars:
