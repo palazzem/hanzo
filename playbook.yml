@@ -137,3 +137,11 @@
             state: absent
           become: true
           tags: [always]
+
+  # Regenerates the initramfs for every installed kernel and rewrites the
+  # Limine boot entries from /etc/default/limine.
+  handlers:
+    - name: Regenerate initramfs
+      ansible.builtin.command: limine-mkinitcpio
+      changed_when: true
+      become: true

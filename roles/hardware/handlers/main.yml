@@ -9,11 +9,6 @@
   changed_when: true
   become: true
 
-- name: Regenerate initramfs
-  ansible.builtin.command: limine-mkinitcpio
-  changed_when: true
-  become: true
-
 - name: Restart keyd
   ansible.builtin.systemd_service:
     name: keyd
