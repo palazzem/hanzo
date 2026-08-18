@@ -9,11 +9,13 @@ ANSIBLE_CORE_VERSION="2.21.3"
 GREEN='\033[0;32m'
 BLUE='\033[0;34m'
 CYAN='\033[0;36m'
+YELLOW='\033[0;33m'
 RED='\033[0;31m'
 BOLD='\033[1m'
 DIM='\033[2m'
 NC='\033[0m'
 log()  { echo -e "${GREEN}[hanzo]${NC} $1"; }
+warn() { echo -e "${YELLOW}[hanzo]${NC} $1" >&2; }
 fail() { echo -e "${RED}[hanzo]${NC} $1" >&2; exit 1; }
 
 # Where automation stops: these steps need account secrets or firmware
@@ -88,6 +90,8 @@ ansible-playbook playbook.yml "${ARGS[@]}"
 # Shelly equivalent, so --check skips it.
 if [ "$MODE" != "--check" ]; then
     "$HANZO_DIR/bin/hanzo-aur" ${MODE:+"$MODE"}
+else
+    warn "Skipped AUR installation: --check is a dry run."
 fi
 
 # The handoff closes every run: a dry run and CI must show the same
