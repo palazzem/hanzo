@@ -19,3 +19,6 @@ venv.bak/
 
 # Worktrees
 .worktrees/
+
+# Claude spec drafts
+.claude/specs/
