@@ -61,10 +61,11 @@
   become: false
 
 # Deployed verbatim: the workspace rules are read by Claude Code as-is,
-# so the file carries no managed-by header.
+# so the file carries no managed-by header. The source keeps a .template
+# suffix so agents working in this repository do not read it as rules.
 - name: Deploy cowork workspace rules
   ansible.builtin.copy:
-    src: cowork/CLAUDE.md
+    src: cowork/CLAUDE.md.template
     dest: "{{ home_cowork_dir }}/CLAUDE.md"
     mode: "0644"
   become: false
