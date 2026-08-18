@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Hanzo CLI runs the Ansible provisioner.
-# Usage: hanzo [--check|--ci] [ansible-playbook-args...]
+# Usage: hanzo [--check|--ci]
 # Examples:
 #   hanzo              # full provisioning run
 #   hanzo --check      # dry run (shows what would change)
@@ -13,11 +13,7 @@ HANZO_DIR="$(cd "$(dirname "$(readlink -f "$0")")/.." && pwd)"
 # shellcheck source=bin/lib.sh
 source "$HANZO_DIR/bin/lib.sh"
 
-# A mode flag must come first; every remaining argument forwards to ansible-playbook.
-HANZO_MODE="full"
-case "${1:-}" in
-    --check|--ci) parse_mode "$1"; shift ;;
-esac
+parse_mode "$@"
 mode_banner
 
 HANZO_AUR_SUDOERS="/etc/sudoers.d/hanzo-aur"
@@ -49,14 +45,15 @@ fi
 log_info "Refreshing Ansible collections..."
 ansible-galaxy collection install -r requirements.yml
 
-HANZO_ANSIBLE_ARGS=()
-if [ "$HANZO_MODE" = "check" ]; then
-    HANZO_ANSIBLE_ARGS+=(--check)
-fi
-# CI runs unattended; elsewhere the sudo prompt needs a terminal to read from.
+# CI runs unattended; elsewhere the sudo prompt needs a terminal.
+HANZO_ASK_PASS=()
 if [ "$HANZO_MODE" != "ci" ] && has_tty; then
-    HANZO_ANSIBLE_ARGS+=(--ask-become-pass)
+    HANZO_ASK_PASS=(--ask-become-pass)
 fi
 
 log_info "Starting provisioner..."
-ansible-playbook playbook.yml ${HANZO_ANSIBLE_ARGS[@]+"${HANZO_ANSIBLE_ARGS[@]}"} "$@"
+if [ "$HANZO_MODE" = "check" ]; then
+    ansible-playbook playbook.yml --check "${HANZO_ASK_PASS[@]}"
+else
+    ansible-playbook playbook.yml "${HANZO_ASK_PASS[@]}"
+fi

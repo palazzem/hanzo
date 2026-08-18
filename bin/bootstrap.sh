@@ -19,19 +19,6 @@ log_warn()    { echo -e "${YELLOW}[hanzo]${NC} $1"; }
 log_error()   { echo -e "${RED}[hanzo]${NC} $1" >&2; }
 
 # ---------------------------------------------------------------------------
-# Banner
-# ---------------------------------------------------------------------------
-echo -e "${BLUE}"
-echo "  _   _                       "
-echo " | | | | __ _ _ __  _______   "
-echo " | |_| |/ _\` | '_ \\|_  / _ \\  "
-echo " |  _  | (_| | | | |/ / (_) | "
-echo " |_| |_|\\__,_|_| |_/___\\___/  "
-echo -e "${NC}"
-echo -e "${GREEN}CachyOS System Provisioner${NC}"
-echo ""
-
-# ---------------------------------------------------------------------------
 # Step 1: Clone or update the Hanzo repository
 # ---------------------------------------------------------------------------
 HANZO_REPO="https://github.com/palazzem/hanzo.git"
@@ -46,16 +33,12 @@ else
     git clone "$HANZO_REPO" "$HANZO_DIR"
 fi
 
-# ---------------------------------------------------------------------------
-# Step 2: Parse the provisioning mode with the cloned lib.sh helpers
-# ---------------------------------------------------------------------------
-# shellcheck source=/dev/null  # lib.sh is linted standalone; following it here clashes with the pre-clone helpers
+# shellcheck source=/dev/null
 source "$HANZO_DIR/bin/lib.sh"
 
-HANZO_MODE="full"
 parse_mode "$@"
 
-# CI mode later bypasses human AUR verification — never allow it on a real host.
+# CI bypasses human AUR verification — never allow it on a real host.
 if [ "$HANZO_MODE" = "ci" ] && ! in_container; then
     log_error "--ci runs unattended and bypasses human AUR verification — allowed only inside a container"
     exit 1
@@ -64,7 +47,20 @@ fi
 mode_banner
 
 # ---------------------------------------------------------------------------
-# Step 3: Install uv (Astral's Python package manager)
+# Banner
+# ---------------------------------------------------------------------------
+echo -e "${BLUE}"
+echo "  _   _                       "
+echo " | | | | __ _ _ __  _______   "
+echo " | |_| |/ _\` | '_ \\|_  / _ \\  "
+echo " |  _  | (_| | | | |/ / (_) | "
+echo " |_| |_|\\__,_|_| |_/___\\___/  "
+echo -e "${NC}"
+echo -e "${GREEN}CachyOS System Provisioner${NC}"
+echo ""
+
+# ---------------------------------------------------------------------------
+# Step 2: Install uv (Astral's Python package manager)
 # ---------------------------------------------------------------------------
 export PATH="$HOME/.local/bin:$PATH"
 
@@ -76,7 +72,7 @@ else
 fi
 
 # ---------------------------------------------------------------------------
-# Step 4: Install Ansible via uv tool
+# Step 3: Install Ansible via uv tool
 # ---------------------------------------------------------------------------
 if uv tool list 2>/dev/null | grep -q "^ansible-core"; then
     log_info "ansible-core is already installed"
@@ -86,7 +82,7 @@ else
 fi
 
 # ---------------------------------------------------------------------------
-# Step 5: User configuration
+# Step 4: User configuration
 # When piped from curl, stdin is the pipe — read from /dev/tty to reach
 # the terminal for interactive prompts.
 # ---------------------------------------------------------------------------
@@ -143,7 +139,7 @@ else
 fi
 
 # ---------------------------------------------------------------------------
-# Step 6: Symlink bin/hanzo into PATH
+# Step 5: Symlink bin/hanzo into PATH
 # ---------------------------------------------------------------------------
 mkdir -p "$HOME/.local/bin"
 ln -sf "$HANZO_DIR/bin/hanzo" "$HOME/.local/bin/hanzo"
@@ -153,12 +149,8 @@ if [[ ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
 fi
 
 # ---------------------------------------------------------------------------
-# Step 7: Run Hanzo for provisioning
+# Step 6: Run Hanzo for provisioning
 # ---------------------------------------------------------------------------
 log_info "Running provisioner..."
 echo ""
-if [ "$HANZO_MODE" = "full" ]; then
-    exec "$HOME/.local/bin/hanzo"
-else
-    exec "$HOME/.local/bin/hanzo" "--$HANZO_MODE"
-fi
+exec "$HOME/.local/bin/hanzo" "$@"
