@@ -33,6 +33,9 @@
   ansible.builtin.include_tasks: hibernate.yml
   when: host_has_systemd
 
+- name: Configure firewall
+  ansible.builtin.include_tasks: firewall.yml
+
 # Runs on every invocation, last in the role, because a handler notification
 # is consumed once: lost or failed, it is never re-sent (issue #293).
 - name: Regenerate initramfs and Limine boot entries
