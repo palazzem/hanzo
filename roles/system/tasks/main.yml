@@ -1,4 +1,6 @@
 ---
+# always: the languages (pyenv) and tools (gcloud) installers download into
+# this directory, so a selective run of either role still needs it created.
 - name: Ensure Hanzo cache directory exists
   ansible.builtin.file:
     path: "{{ ansible_facts.env.HOME }}/.cache/hanzo"
@@ -6,6 +8,7 @@
     mode: "0700"
   check_mode: false
   become: false
+  tags: [always]
 
 - name: Set system locale
   ansible.builtin.lineinfile:
@@ -14,10 +17,16 @@
     line: "LANG={{ system_locale }}"
   become: true
 
+# always: every other role's pacman installs rely on this sync db refresh.
+- name: Refresh pacman package databases
+  community.general.pacman:
+    update_cache: true
+  become: true
+  tags: [always]
+
 - name: Install baseline development packages
   community.general.pacman:
     name: "{{ system_packages }}"
-    update_cache: true
   become: true
 
 - name: Configure hibernation
