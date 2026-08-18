@@ -8,19 +8,34 @@
 set -euo pipefail
 
 GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
 NC='\033[0m'
 log_info() { echo -e "${GREEN}[hanzo]${NC} $1"; }
+log_warn() { echo -e "${YELLOW}[hanzo]${NC} $1"; }
 
 HANZO_DIR="$(cd "$(dirname "$(readlink -f "$0")")/.." && pwd)"
 
 cd "$HANZO_DIR"
 
-# HANZO_SKIP_SYNC=1 provisions the working tree as-is. Container tests
-# set it: they must exercise the code under review, not origin/main.
-if [[ "${HANZO_SKIP_SYNC:-0}" != "1" ]]; then
-    log_info "Syncing checkout to origin/main..."
+# Sync the checkout to origin/main so machines provision the published
+# configuration. The sync must never destroy local work: uncommitted
+# changes (e.g. manifest edits kaji asked for), local commits, or a
+# checkout without an origin remote (container tests) skip it with a
+# warning and provision the working tree as-is.
+log_info "Syncing checkout to origin/main..."
+if ! git remote get-url origin >/dev/null 2>&1; then
+    log_warn "No 'origin' remote — provisioning the working tree as-is."
+elif [[ -n "$(git status --porcelain)" ]]; then
+    log_warn "Working tree has local changes — skipping sync to keep them."
+elif [[ "$(git symbolic-ref --short -q HEAD)" != "main" ]]; then
+    log_warn "Checkout is not on the main branch — skipping sync."
+else
     git fetch origin main
-    git reset --hard origin/main
+    if git merge-base --is-ancestor HEAD origin/main; then
+        git merge --ff-only origin/main
+    else
+        log_warn "Local commits not on origin/main — skipping sync to keep them."
+    fi
 fi
 
 log_info "Refreshing Ansible collections..."

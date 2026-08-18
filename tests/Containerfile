@@ -20,9 +20,10 @@ RUN useradd -m -G wheel testuser && \
 
 # The container provisions through bin/bootstrap.sh exactly as a
 # production machine would. The repo is pre-copied to bootstrap's clone
-# path so the code under review is tested; HANZO_SKIP_SYNC keeps
-# bin/hanzo from resetting it to origin/main, and the HANZO_* identity
-# env vars exercise bootstrap's unattended configuration path.
+# path so the code under review is tested; bin/hanzo's sync guard sees
+# a checkout that is dirty or off-main and leaves it alone, and the
+# HANZO_* identity env vars exercise bootstrap's unattended
+# configuration path.
 COPY --chown=testuser:testuser . /home/testuser/.local/src/hanzo
 
 USER testuser
@@ -33,7 +34,6 @@ ENV PATH="/home/testuser/.local/bin:${PATH}"
 # a path outside the container — replace it with a real repository so
 # bootstrap detects the existing checkout instead of cloning over it.
 RUN [ -d .git ] || { rm -f .git; git init -q; }
-ENV HANZO_SKIP_SYNC=1
 ENV HANZO_FULLNAME="Test User"
 ENV HANZO_EMAIL="test@example.com"
 
