@@ -1,15 +1,20 @@
 #!/usr/bin/env bash
-# Hanzo CLI runs the Ansible provisioner.
-# Usage: hanzo [ansible-playbook-args...]
-# Examples:
-#   hanzo              # full provisioning run
-#   hanzo --check      # dry run (shows what would change)
+# Hanzo CLI — runs the Ansible provisioner.
+# Usage: hanzo [--check|--ci]
 
 set -euo pipefail
 
 GREEN='\033[0;32m'
+RED='\033[0;31m'
 NC='\033[0m'
-log_info() { echo -e "${GREEN}[hanzo]${NC} $1"; }
+log()  { echo -e "${GREEN}[hanzo]${NC} $1"; }
+fail() { echo -e "${RED}[hanzo]${NC} $1" >&2; exit 1; }
+
+MODE="${1:-}"
+case "$MODE" in
+    ""|--check|--ci) ;;
+    *) fail "usage: hanzo [--check|--ci]" ;;
+esac
 
 HANZO_DIR="$(cd "$(dirname "$(readlink -f "$0")")/.." && pwd)"
 HANZO_AUR_SUDOERS="/etc/sudoers.d/hanzo-aur"
@@ -30,25 +35,26 @@ trap cleanup EXIT INT TERM
 
 cd "$HANZO_DIR"
 
-# Container tests set HANZO_SKIP_SYNC=1 so the code under review runs
-# instead of origin/main; real machines always get the destructive sync.
-if [[ "${HANZO_SKIP_SYNC:-}" == "1" ]]; then
-    log_info "Skipping checkout sync (HANZO_SKIP_SYNC=1)..."
+if [ "$MODE" = "--ci" ]; then
+    log "CI mode: keeping the checkout under test"
 else
-    log_info "Syncing checkout to origin/main..."
+    log "Syncing checkout to origin/main..."
     git fetch origin main
     git reset --hard origin/main
 fi
 
-log_info "Refreshing Ansible collections..."
+log "Refreshing Ansible collections..."
 ansible-galaxy collection install -r requirements.yml
 
-# Ask for the become password only when a terminal exists — container
-# builds have no tty and sudo is passwordless there.
-HANZO_BECOME_ARGS=()
-if { : </dev/tty; } 2>/dev/null; then
-    HANZO_BECOME_ARGS+=(--ask-become-pass)
+ARGS=()
+if [ "$MODE" = "--check" ]; then
+    ARGS+=(--check)
+fi
+# Prompt for sudo only when a terminal is reachable (curl | bash keeps
+# stdin on the pipe, so probe /dev/tty instead of stdin) and never in CI.
+if [ "$MODE" != "--ci" ] && { : </dev/tty; } 2>/dev/null; then
+    ARGS+=(--ask-become-pass)
 fi
 
-log_info "Starting provisioner..."
-ansible-playbook playbook.yml "${HANZO_BECOME_ARGS[@]}" "$@"
+log "Starting provisioner..."
+ansible-playbook playbook.yml "${ARGS[@]}"
