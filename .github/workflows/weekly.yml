@@ -1,0 +1,25 @@
+name: Weekly Full Provision
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Friday 02:17 UTC — off the top of the hour, when GitHub's scheduler
+    # is most congested and cron runs get delayed or dropped.
+    - cron: '17 2 * * 5'
+
+permissions:
+  contents: read
+
+jobs:
+  provision:
+    runs-on: ubuntu-latest
+    # Real provisioning compiles AUR packages from source; the generous
+    # cap absorbs slow builds while still catching hangs well before the
+    # 6-hour runner default.
+    timeout-minutes: 120
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Full unattended provisioning
+        run: docker build --build-arg HANZO_ARGS="--ci" -f tests/Containerfile -t hanzo:test .

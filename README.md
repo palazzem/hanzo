@@ -1,6 +1,6 @@
 # Hanzo
 
-[![Testing](https://github.com/palazzem/hanzo/actions/workflows/test.yaml/badge.svg)](https://github.com/palazzem/hanzo/actions/workflows/test.yaml)
+[![CI](https://github.com/palazzem/hanzo/actions/workflows/ci.yml/badge.svg)](https://github.com/palazzem/hanzo/actions/workflows/ci.yml)
 
 > Hattori Hanzō: You must have big rats if you need Hattori Hanzo's steel.
 > The Bride: ...Huge.
