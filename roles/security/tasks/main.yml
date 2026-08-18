@@ -1,11 +1,7 @@
 ---
-# Security tooling installation. The 1Password AUR packages listed in
-# security_aur are installed by bin/shelly-update, not by this role:
-# it pins the AgileBits signing key (trust/keys.conf), verifies the
-# sources against it, and requires the PKGBUILD to keep that key in
-# validpgpkeys (trust/signed-packages.conf).
-
-- name: Install security pacman packages
-  community.general.pacman:
-    name: "{{ security_pacman }}"
-  become: true
+# Security tooling. The 1Password AUR packages listed in security_aur
+# are installed by bin/kaji, not by this role: it pins the AgileBits
+# signing key (trust/keys.conf), verifies the sources against it, and
+# requires the PKGBUILD to keep that key in validpgpkeys
+# (trust/signed-packages.conf). This role currently manages no
+# pacman-side tooling.

@@ -68,10 +68,6 @@
       when: hanzo_config_stat.stat.exists
       tags: [always]
 
-  # AUR packages are deliberately not installed here: bin/shelly-update
-  # reviews and installs the `<role>_aur` manifests via Shelly after
-  # this play converges, so the playbook itself needs no NOPASSWD
-  # sudoers grant of any kind.
   tasks:
     - name: Run hardware role
       ansible.builtin.import_role:

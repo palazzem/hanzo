@@ -27,11 +27,20 @@ jobs:
       - name: Run pre-commit hooks
         run: pre-commit run --all-files
 
-  test:
+  check:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
-      - name: Build test container
-        run: docker build -f tests/Containerfile -t hanzo:test .
+      - name: Provisioning check (ansible-playbook --check)
+        run: docker build --build-arg HANZO_TEST_ARGS="--check --diff" -f tests/Containerfile -t hanzo:check .
+
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Full end-to-end provisioning (including AUR via kaji)
+        run: docker build --build-arg HANZO_TEST_ARGS="--unattended" -f tests/Containerfile -t hanzo:e2e .

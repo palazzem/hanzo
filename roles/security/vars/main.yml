@@ -1,13 +1,12 @@
 ---
-# Security tooling. Proton VPN ships via pacman; 1Password (GUI + CLI)
-# is AUR-only. Its source signatures are verified by bin/shelly-update
-# against the pinned AgileBits key (trust/keys.conf and
-# trust/signed-packages.conf).
-security_pacman:
-  - proton-vpn-gtk-app
+# Security tooling. VPN uses WireGuard directly (a post-install action
+# in bin/bootstrap.sh links the Proton VPN WireGuard setup guide).
+# 1Password (GUI + CLI) is AUR-only; its source signatures are
+# verified by bin/kaji against the pinned AgileBits key
+# (trust/keys.conf and trust/signed-packages.conf).
 
-# AUR manifest — consumed by bin/shelly-update, not by this role. Keep
-# entries as literal `- name` lines (parsed without a YAML library).
+# AUR manifest — consumed by bin/kaji, not by this role. Keep entries
+# as literal `- name` lines (parsed without a YAML library).
 security_aur:
   - 1password
   - 1password-cli

@@ -1,8 +1,22 @@
 #!/usr/bin/env bash
 # Hanzo bootstrap — one-command CachyOS provisioner setup.
 # Usage: curl -L https://raw.githubusercontent.com/palazzem/hanzo/main/bin/bootstrap.sh | bash
+#
+# Modes (first argument, e.g. `bash -s -- --check`):
+#   (default)     attended provisioning: hanzo, then kaji (AUR)
+#   --check       dry run: `hanzo --check` only — used by the CI check job
+#   --unattended  full provisioning with kaji's Claude/human gates
+#                 skipped (HANZO_AUR_UNATTENDED=1); every cryptographic
+#                 check still runs. CI and container tests only.
+# Remaining arguments are forwarded to ansible-playbook via hanzo.
 
 set -euo pipefail
+
+MODE="provision"
+case "${1:-}" in
+    --check) MODE="check"; shift ;;
+    --unattended) MODE="unattended"; shift ;;
+esac
 
 # ---------------------------------------------------------------------------
 # Colors
@@ -129,15 +143,38 @@ fi
 # ---------------------------------------------------------------------------
 mkdir -p "$HOME/.local/bin"
 ln -sf "$HANZO_DIR/bin/hanzo" "$HOME/.local/bin/hanzo"
-ln -sf "$HANZO_DIR/bin/shelly-update" "$HOME/.local/bin/shelly-update"
+ln -sf "$HANZO_DIR/bin/kaji" "$HOME/.local/bin/kaji"
 
 if [[ ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
     log_warn "\$HOME/.local/bin is not in your PATH — add it to your shell config"
 fi
 
 # ---------------------------------------------------------------------------
-# Step 6: Run Hanzo for provisioning
+# Step 6: Run the provisioner (hanzo), then AUR provisioning (kaji)
 # ---------------------------------------------------------------------------
 log_info "Running provisioner..."
 echo ""
-exec "$HOME/.local/bin/hanzo"
+case "$MODE" in
+    check)
+        "$HOME/.local/bin/hanzo" --check "$@"
+        ;;
+    unattended)
+        "$HOME/.local/bin/hanzo" "$@"
+        HANZO_AUR_UNATTENDED=1 "$HOME/.local/bin/kaji"
+        ;;
+    *)
+        "$HOME/.local/bin/hanzo" "$@"
+        "$HOME/.local/bin/kaji"
+        ;;
+esac
+
+# ---------------------------------------------------------------------------
+# Step 7: Post-install actions — manual steps that cannot be
+# provisioned automatically.
+# ---------------------------------------------------------------------------
+if [ "$MODE" != "check" ]; then
+    echo ""
+    log_info "Post-install actions:"
+    echo "  - Download and configure the WireGuard config (Proton VPN):"
+    echo "    https://protonvpn.com/support/wireguard-linux#cli"
+fi

@@ -10,17 +10,19 @@ CachyOS system provisioner powered by Ansible.
 4. One role per domain. Every role must declare a tag.
 5. Don't install packages already in the CachyOS base image. Verify against `cachyos/cachyos:latest` (`pacman -Qe`) before adding to a role's `vars/main.yml`.
 6. Registered variables inside a role must use the role name as prefix (ansible-lint `var-naming[no-role-prefix]` rule). E.g., inside `roles/tools` use `tools_uv_tool_list`, not `uv_tool_list`.
-7. AUR packages are never installed by the playbook. Declare them in `<role>_aur` vars lists as literal `- name` block sequences — `bin/shelly-update` parses these without a YAML library. `shelly-update` (run automatically after full `hanzo` runs) gates every install: mandatory Claude review plus mandatory human approval, pinned trust keys (`trust/keys.conf`, dual-source verified), `makepkg --verifysource` (restoring the PGP check that Shelly's builds skip via `--skippgpcheck`), and a commit-pinned install via `shelly install aur <pkg> --version <sha>`. Hard failures that stop the whole run: a `SKIP` checksum on a non-signature source, a `validpgpkeys` entry outside the pinned set, a signed package (`trust/signed-packages.conf`) whose PKGBUILD drops its pinned key, a foreign package installed on the system but missing from the manifests, or any failed/missing Claude verdict.
+7. AUR packages are never installed by the playbook. Declare them in `<role>_aur` vars lists as literal `- name` block sequences — `bin/kaji` parses these without a YAML library. `kaji` (run by `bootstrap.sh` after `hanzo`) gates every install: mandatory Claude review plus mandatory human approval, pinned trust keys (`trust/keys.conf`, dual-source verified), `makepkg --verifysource` (restoring the PGP check that Shelly's builds skip via `--skippgpcheck`), and a commit-pinned install via `shelly install aur <pkg> --version <sha>`. Hard failures that stop the whole run: a `SKIP` checksum on a non-signature source, a `validpgpkeys` entry outside the pinned set, a signed package (`trust/signed-packages.conf`) whose PKGBUILD drops its pinned key, a foreign package installed on the system but missing from the manifests, or any failed/missing Claude verdict.
 
 ## Commands
 
 All provisioning operations run inside the CachyOS test container — running on the host modifies system state (see Security: Prohibited Commands below).
 
+The container provisions through `bin/bootstrap.sh`, exactly as a production machine would.
+
 - `pre-commit run --all-files`: Lint all files (ansible-lint, shellcheck, generic hooks).
-- `docker build -f tests/Containerfile -t hanzo:test .`: Run `ansible-playbook --check --diff` (full provisioning check).
-- `docker build --build-arg ANSIBLE_ARGS="--list-tags" -f tests/Containerfile -t hanzo:test .`: List all available tags.
-- `docker build --build-arg ANSIBLE_ARGS="--tags <role> --check --diff" -f tests/Containerfile -t hanzo:test .`: Check a single tagged role.
-- `docker build --build-arg ANSIBLE_ARGS="" -f tests/Containerfile -t hanzo:test .`: Real provisioning run inside the container (no `--check`).
+- `docker build -f tests/Containerfile -t hanzo:test .`: Provisioning check (`bootstrap.sh --check --diff`).
+- `docker build --build-arg HANZO_TEST_ARGS="--check --list-tags" -f tests/Containerfile -t hanzo:test .`: List all available tags.
+- `docker build --build-arg HANZO_TEST_ARGS="--check --tags <role>" -f tests/Containerfile -t hanzo:test .`: Check a single tagged role.
+- `docker build --build-arg HANZO_TEST_ARGS="--unattended" -f tests/Containerfile -t hanzo:test .`: Full end-to-end provisioning inside the container, including kaji's AUR installs.
 
 ## Role Tags
 

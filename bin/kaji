@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# shelly-update — attended AUR reconciliation for Hanzo.
+# kaji — attended AUR package provisioning for Hanzo.
 #
 # Installs and updates ONLY the AUR packages declared in the Hanzo
 # `<role>_aur` manifests, each one gated by every layer below. Any
@@ -13,8 +13,9 @@
 #      fetched sha256-pinned from the vendor, imported into the user
 #      keyring, fingerprint-asserted, and cross-checked against an
 #      independent keyserver.
-#   3. Convergence: every foreign (non-repo) package installed on the
-#      system must be in the manifests; unknown AUR packages abort.
+#   3. Foreign-package check: every foreign (non-repo) package
+#      installed on the system must be declared in the manifests;
+#      unknown AUR packages abort.
 #   4. Per package: the PKGBUILD (or its diff since the last approved
 #      commit) is reviewed by Claude AND by a human — both are
 #      mandatory; a Claude FAIL verdict or an unreadable verdict
@@ -30,7 +31,7 @@
 # Shelly's build) bind the verified bytes to what gets installed.
 #
 # HANZO_AUR_UNATTENDED=1 skips only the Claude and human gates — it is
-# reserved for the disposable test container; never set it on a real
+# reserved for CI and local container tests; never set it on a real
 # host. Every cryptographic check still runs.
 
 set -euo pipefail
@@ -39,9 +40,9 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 RED='\033[0;31m'
 NC='\033[0m'
-log_info()  { echo -e "${GREEN}[shelly-update]${NC} $1"; }
-log_warn()  { echo -e "${YELLOW}[shelly-update]${NC} $1"; }
-log_error() { echo -e "${RED}[shelly-update]${NC} $1" >&2; }
+log_info()  { echo -e "${GREEN}[kaji]${NC} $1"; }
+log_warn()  { echo -e "${YELLOW}[kaji]${NC} $1"; }
+log_error() { echo -e "${RED}[kaji]${NC} $1" >&2; }
 
 HANZO_DIR="$(cd "$(dirname "$(readlink -f "$0")")/.." && pwd)"
 KEYS_CONF="$HANZO_DIR/trust/keys.conf"
@@ -56,7 +57,7 @@ UNATTENDED="${HANZO_AUR_UNATTENDED:-0}"
 # Preconditions
 # ---------------------------------------------------------------------------
 if [[ "$(id -u)" -eq 0 ]]; then
-    log_error "shelly-update must run as an unprivileged user (root masks Shelly build failures)."
+    log_error "kaji must run as an unprivileged user (root masks Shelly build failures)."
     exit 1
 fi
 if ! command -v shelly >/dev/null 2>&1; then
@@ -64,7 +65,7 @@ if ! command -v shelly >/dev/null 2>&1; then
     exit 1
 fi
 if [[ "$UNATTENDED" != "1" ]] && ! { : </dev/tty; } 2>/dev/null; then
-    log_error "shelly-update requires a terminal: every AUR install is human-gated."
+    log_error "kaji requires a terminal: every AUR install is human-gated."
     exit 1
 fi
 
@@ -150,8 +151,9 @@ signed_package_fingerprint() { # <pkg> — prints required fingerprint, if any
 }
 
 # ---------------------------------------------------------------------------
-# Gate 3: convergence — every foreign package on the system must be in
-# the Hanzo manifests (debug split packages ride with their parent).
+# Gate 3: foreign-package check — every foreign package on the system
+# must be declared in the Hanzo manifests (debug split packages ride
+# with their parent).
 # ---------------------------------------------------------------------------
 collect_aur_packages() {
     # `<role>_aur` lists are literal `- name` block sequences by
@@ -161,7 +163,7 @@ collect_aur_packages() {
          { in_list = 0 }' "$HANZO_DIR"/roles/*/vars/main.yml
 }
 
-convergence_check() { # <manifest newline-list>
+foreign_package_check() { # <manifest newline-list>
     local manifest="$1" pkg base extras=()
     while IFS= read -r pkg; do
         [[ -z "$pkg" ]] && continue
@@ -174,7 +176,7 @@ convergence_check() { # <manifest newline-list>
     done < <(pacman -Qmq 2>/dev/null || true)
     if [[ "${#extras[@]}" -gt 0 ]]; then
         log_error "Foreign packages installed but not in the Hanzo AUR manifests: ${extras[*]}"
-        log_error "The system must converge: remove them or add them to a role's <role>_aur list."
+        log_error "Remove them or add them to a role's <role>_aur list."
         exit 1
     fi
 }
@@ -374,10 +376,10 @@ if [[ -z "$manifest" ]]; then
     log_info "No AUR packages declared."
     exit 0
 fi
-convergence_check "$manifest"
+foreign_package_check "$manifest"
 
 mapfile -t packages <<< "$manifest"
-log_info "Reconciling ${#packages[@]} AUR package(s): ${packages[*]}"
+log_info "Provisioning ${#packages[@]} AUR package(s): ${packages[*]}"
 
 installed=()
 current=()
@@ -394,5 +396,5 @@ done
 echo ""
 log_info "Done: ${#installed[@]} installed, ${#current[@]} current, ${#skipped[@]} skipped"
 if [[ "${#skipped[@]}" -gt 0 ]]; then
-    log_warn "Skipped (re-run shelly-update to review again): ${skipped[*]}"
+    log_warn "Skipped (re-run kaji to review again): ${skipped[*]}"
 fi
