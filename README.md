@@ -56,7 +56,7 @@ hanzo_fullname: "Your Name"
 hanzo_email: "your@email.com"
 ```
 
-Edit this file directly to update your settings. You can also set `HANZO_FULLNAME` and `HANZO_EMAIL` as environment variables for unattended provisioning (e.g., in containers) — the bootstrap script will write them to the config file in YAML form, escaping any embedded quotes or backslashes.
+Edit this file directly to update your settings. You can also set `HANZO_FULLNAME` and `HANZO_EMAIL` as environment variables for unattended provisioning (e.g., in containers) — the bootstrap script will write them to the config file in YAML form, escaping any embedded quotes or backslashes. Both variables are required: if either one is set but the other is empty, bootstrap stops instead of persisting a half-filled identity. When neither is set, bootstrap prompts and re-asks until both answers are non-empty.
 
 ## Architecture
 
