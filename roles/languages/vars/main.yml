@@ -1,5 +1,6 @@
 ---
 languages_python_packages:
+  - pyenv
   - uv
 
 languages_rust_packages:
