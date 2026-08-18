@@ -20,11 +20,13 @@ curl -L https://raw.githubusercontent.com/palazzem/hanzo/main/bin/bootstrap.sh |
 
 This will:
 
-1. Install [uv](https://docs.astral.sh/uv/) and [ansible-core](https://docs.ansible.com/ansible-core/)
+1. Install [uv](https://docs.astral.sh/uv/)
 2. Clone this repository to `~/.local/src/hanzo`
 3. Prompt for your name and email (first run only)
 4. Link `hanzo` and `hanzo-aur` into `~/.local/bin`
-5. Run the full provisioning: Galaxy collections (`community.general`), the playbook (prompts once for your sudo password), then the AUR package set through Shelly (one PKGBUILD review per package)
+5. Install [ansible-core](https://docs.ansible.com/ansible-core/)
+6. Install required Galaxy collections (`community.general`)
+7. Run the full provisioning: the playbook (prompts once for your sudo password), then the AUR package set through Shelly (one PKGBUILD review per package)
 
 ## Usage
 

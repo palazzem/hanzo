@@ -5,8 +5,6 @@
 
 set -euo pipefail
 
-ANSIBLE_CORE_VERSION="2.21.3"
-
 GREEN='\033[0;32m'
 BLUE='\033[0;34m'
 RED='\033[0;31m'
@@ -45,11 +43,6 @@ echo ""
 if ! command -v uv >/dev/null 2>&1; then
     log "Installing uv..."
     sudo pacman -S --needed --noconfirm uv
-fi
-
-if ! uv tool list 2>/dev/null | grep -q '^ansible-core'; then
-    log "Installing ansible-core..."
-    uv tool install "ansible-core~=${ANSIBLE_CORE_VERSION}"
 fi
 
 if [ ! -d "$HANZO_DIR/.git" ]; then
