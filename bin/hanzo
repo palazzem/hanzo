@@ -7,11 +7,11 @@
 
 set -euo pipefail
 
-GREEN='\033[0;32m'
-NC='\033[0m'
-log_info() { echo -e "${GREEN}[hanzo]${NC} $1"; }
-
 HANZO_DIR="$(cd "$(dirname "$(readlink -f "$0")")/.." && pwd)"
+
+# shellcheck source=bin/lib.sh
+source "$HANZO_DIR/bin/lib.sh"
+
 HANZO_AUR_SUDOERS="/etc/sudoers.d/hanzo-aur"
 
 # Belt-and-suspenders cleanup. Ansible's block/always inside
