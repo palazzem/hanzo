@@ -1,0 +1,35 @@
+---
+# No allow rules on purpose: a laptop opens connections and accepts none, so
+# provisioning this host remotely needs an SSH rule added before the enable task.
+# Docker bypasses UFW — bind published ports to loopback if docker.service is enabled.
+- name: Provision UFW firewall
+  # community.general.ufw runs `ufw status verbose` before every operation, which
+  # fails in the unprivileged container and has no binary to call in check mode.
+  when:
+    - host_has_systemd
+    - not ansible_check_mode
+  block:
+    - name: Set default policy to deny incoming traffic
+      community.general.ufw:
+        direction: incoming
+        default: deny
+      become: true
+
+    - name: Set default policy to allow outgoing traffic
+      community.general.ufw:
+        direction: outgoing
+        default: allow
+      become: true
+
+    - name: Enable UFW
+      community.general.ufw:
+        state: enabled
+      become: true
+
+    # ufw.conf alone does not survive a reboot: ufw.service re-applies it at boot.
+    - name: Enable and start ufw service
+      ansible.builtin.systemd_service:
+        name: ufw.service
+        state: started
+        enabled: true
+      become: true
