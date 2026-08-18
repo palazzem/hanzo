@@ -17,9 +17,11 @@ All provisioning operations run inside the CachyOS test container — running on
 
 The container provisions through `bin/bootstrap.sh`, exactly as a production machine would.
 
+`HANZO_ARGS` has no default — every build passes it explicitly.
+
 - `pre-commit run --all-files`: Lint all files (ansible-lint, shellcheck, generic hooks).
-- `docker build -f tests/Containerfile -t hanzo:test .`: Provisioning check (`bootstrap.sh --check`, the default and what CI runs).
-- `docker build --build-arg HANZO_TEST_ARGS="--ci" -f tests/Containerfile -t hanzo:test .`: Full unattended provisioning inside the container.
+- `docker build --build-arg HANZO_ARGS="--check" -f tests/Containerfile -t hanzo:test .`: Provisioning check (dry run, what CI runs).
+- `docker build --build-arg HANZO_ARGS="--ci" -f tests/Containerfile -t hanzo:test .`: Full unattended provisioning.
 
 ## Role Tags
 

@@ -1,31 +1,30 @@
 FROM --platform=linux/amd64 cachyos/cachyos:latest
 
-# Bootstrap mode. Default `--check` validates the playbook without modifying
-# the system; `--ci` runs a full unattended provisioning:
-#     docker build --build-arg HANZO_TEST_ARGS="--ci" -f tests/Containerfile -t hanzo:test .
-ARG HANZO_TEST_ARGS="--check"
-
 RUN pacman -Syu --noconfirm && \
-    pacman -S --noconfirm python git curl sudo base-devel
+    pacman -S --noconfirm python git curl sudo base-devel paru
 
 # Non-root user with passwordless sudo for realistic testing
 RUN useradd -m -G wheel testuser && \
     echo "testuser ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 
+USER testuser
+WORKDIR /home/testuser/.local/src/hanzo
+ENV PATH="/home/testuser/.local/bin:${PATH}"
+ENV HANZO_FULLNAME="Test User"
+ENV HANZO_EMAIL="test@example.com"
+
+# Provisioning mode: --check (dry run) or --ci (full unattended
+# provisioning). No default — the build fails unless one is passed:
+#     docker build --build-arg HANZO_ARGS="--check" -f tests/Containerfile -t hanzo:test .
+ARG HANZO_ARGS
+
 # Pre-copy the repo to bootstrap's clone path so it provisions the code
 # under review instead of cloning origin/main.
 COPY --chown=testuser:testuser . /home/testuser/.local/src/hanzo
 
-USER testuser
-WORKDIR /home/testuser/.local/src/hanzo
-ENV PATH="/home/testuser/.local/bin:${PATH}"
-
 # A worktree checkout ships a `.git` pointer file; make `.git` a real
-# directory so bootstrap detects an existing checkout.
+# directory so bootstrap skips the clone.
 RUN if [ ! -d .git ]; then rm -f .git && git init -q; fi
 
-ENV HANZO_SKIP_SYNC=1
-ENV HANZO_FULLNAME="Test User"
-ENV HANZO_EMAIL="test@example.com"
-
-RUN bash bin/bootstrap.sh $HANZO_TEST_ARGS
+RUN test -n "$HANZO_ARGS" || { echo "HANZO_ARGS is required: --check or --ci" >&2; exit 1; }
+RUN bash bin/bootstrap.sh $HANZO_ARGS

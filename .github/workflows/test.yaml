@@ -34,4 +34,4 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Build test container
-        run: docker build -f tests/Containerfile -t hanzo:test .
+        run: docker build --build-arg HANZO_ARGS="--check" -f tests/Containerfile -t hanzo:test .

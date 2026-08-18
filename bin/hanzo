@@ -35,9 +35,9 @@ trap cleanup EXIT INT TERM
 
 cd "$HANZO_DIR"
 
-if [ "$MODE" = "--ci" ]; then
-    log "CI mode: keeping the checkout under test"
-else
+# A dry run must not mutate the checkout and CI must test the code
+# under review — sync only on a real attended run.
+if [ -z "$MODE" ]; then
     log "Syncing checkout to origin/main..."
     git fetch origin main
     git reset --hard origin/main
