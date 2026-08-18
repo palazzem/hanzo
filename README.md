@@ -22,9 +22,9 @@ This will:
 
 1. Install [uv](https://docs.astral.sh/uv/) and [ansible-core](https://docs.ansible.com/ansible-core/)
 2. Clone this repository to `~/.local/src/hanzo`
-3. Install required Galaxy collections (`community.general`)
-4. Prompt for your name and email (first run only)
-5. Run the full provisioning (prompts once for your sudo password)
+3. Prompt for your name and email (first run only)
+4. Link `hanzo` and `hanzo-aur` into `~/.local/bin`
+5. Run the full provisioning: Galaxy collections (`community.general`), the playbook (prompts once for your sudo password), then the AUR package set through Shelly (one PKGBUILD review per package)
 
 ## Usage
 
@@ -33,19 +33,8 @@ After bootstrap, re-run provisioning at any time:
 ```bash
 hanzo              # full provisioning run
 hanzo --check      # dry run (shows what would change)
+hanzo --ci         # unattended run, container only
 ```
-
-For selective provisioning, pass `--tags <role>` to run a subset of the playbook:
-
-```bash
-hanzo --tags hardware                  # only the hardware role
-hanzo --tags "languages,tools"         # languages + tools
-hanzo --list-tags                      # list all available tags
-```
-
-See [CLAUDE.md's Role Tags section](CLAUDE.md#role-tags) for the full tag list and dependency notes.
-
-`hanzo` accepts any flag that `ansible-playbook` understands.
 
 ## Configuration
 
@@ -56,18 +45,19 @@ hanzo_fullname: "Your Name"
 hanzo_email: "your@email.com"
 ```
 
-Edit this file directly to update your settings. You can also set `HANZO_FULLNAME` and `HANZO_EMAIL` as environment variables for unattended provisioning (e.g., in containers) — the bootstrap script will write them to the config file in YAML form, escaping any embedded quotes or backslashes.
+Edit this file directly to update your settings. You can also set `HANZO_FULLNAME` and `HANZO_EMAIL` as environment variables for unattended provisioning (e.g., in containers) — when the config file does not exist yet, the bootstrap script writes them out instead of prompting. An existing config file is never rewritten, so later changes go in the file itself.
 
 The file is loaded into its own namespace and read through an allowlist: exactly `hanzo_fullname` and `hanzo_email` are used, and **any other key is ignored**. It is not a place to override playbook or role variables — since the file is user-writable, an unfiltered load would let anything with write access to your home directory inject variables into tasks that run as root. Both keys are optional; when one is missing, the matching git identity setting is simply skipped.
 
 ## Architecture
 
-Hanzo uses Ansible to provision the local machine via `ansible-playbook playbook.yml`. All operations are idempotent — running `hanzo` multiple times is safe and will only apply changes that are needed.
+Hanzo provisions the local machine with `ansible-playbook playbook.yml`, then hands the AUR package set to Shelly — Ansible never manages AUR. All operations are idempotent — running `hanzo` multiple times is safe and will only apply changes that are needed.
 
 - `playbook.yml` — main entry point, lists roles in dependency order
 - `ansible.cfg` — local connection, become defaults, roles path
 - `requirements.yml` — Galaxy collection dependencies (pinned versions)
-- `roles/` — one directory per configured domain; each role declares a tag for selective `--tags <role>` runs
+- `roles/` — one directory per configured domain; each role declares a tag
+- `bin/` — `bootstrap.sh` (one-command setup), `hanzo` (provisioning CLI), `hanzo-aur` (AUR package set via Shelly)
 
 The `hardware` role is dispatched by `ansible_facts['product_name']` and skipped automatically inside containers and other non-systemd contexts (see `CLAUDE.md` rule 3).
 
@@ -87,13 +77,15 @@ Run linters locally:
 pre-commit run --all-files
 ```
 
-Run the full test suite inside a CachyOS container:
+Run provisioning inside a CachyOS container:
 
 ```bash
-docker build -f tests/Containerfile -t hanzo:test .
-```
+# Provisioning check
+docker build --build-arg HANZO_ARGS="--check" -f tests/Containerfile -t hanzo:test .
 
-The container test runs `ansible-playbook --check` in two stages — once without `~/.config/hanzo/config.yml` (exercises the graceful missing-config path) and once with it (exercises the identity-injection path).
+# Full unattended provisioning
+docker build --build-arg HANZO_ARGS="--ci" -f tests/Containerfile -t hanzo:test .
+```
 
 ## Contribute
 
