@@ -1,21 +1,22 @@
 #!/usr/bin/env bash
-# Hanzo CLI runs the Ansible provisioner.
+# Hanzo CLI — runs the Ansible provisioner.
 # Usage: hanzo [--check|--ci]
-# Examples:
-#   hanzo              # full provisioning run
-#   hanzo --check      # dry run (shows what would change)
-#   hanzo --ci         # unattended run for container CI
 
 set -euo pipefail
 
+GREEN='\033[0;32m'
+RED='\033[0;31m'
+NC='\033[0m'
+log()  { echo -e "${GREEN}[hanzo]${NC} $1"; }
+fail() { echo -e "${RED}[hanzo]${NC} $1" >&2; exit 1; }
+
+MODE="${1:-}"
+case "$MODE" in
+    ""|--check|--ci) ;;
+    *) fail "usage: hanzo [--check|--ci]" ;;
+esac
+
 HANZO_DIR="$(cd "$(dirname "$(readlink -f "$0")")/.." && pwd)"
-
-# shellcheck source=bin/lib.sh
-source "$HANZO_DIR/bin/lib.sh"
-
-parse_mode "$@"
-mode_banner
-
 HANZO_AUR_SUDOERS="/etc/sudoers.d/hanzo-aur"
 
 # Belt-and-suspenders cleanup. Ansible's block/always inside
@@ -34,26 +35,26 @@ trap cleanup EXIT INT TERM
 
 cd "$HANZO_DIR"
 
-if [ "$HANZO_MODE" = "ci" ]; then
-    log_warn "CI mode: skipping checkout sync to origin/main — CI must test the code under review"
+if [ "$MODE" = "--ci" ]; then
+    log "CI mode: keeping the checkout under test"
 else
-    log_info "Syncing checkout to origin/main..."
+    log "Syncing checkout to origin/main..."
     git fetch origin main
     git reset --hard origin/main
 fi
 
-log_info "Refreshing Ansible collections..."
+log "Refreshing Ansible collections..."
 ansible-galaxy collection install -r requirements.yml
 
-# CI runs unattended; elsewhere the sudo prompt needs a terminal.
-HANZO_ASK_PASS=()
-if [ "$HANZO_MODE" != "ci" ] && has_tty; then
-    HANZO_ASK_PASS=(--ask-become-pass)
+ARGS=()
+if [ "$MODE" = "--check" ]; then
+    ARGS+=(--check)
+fi
+# Prompt for sudo only when a terminal is reachable (curl | bash keeps
+# stdin on the pipe, so probe /dev/tty instead of stdin) and never in CI.
+if [ "$MODE" != "--ci" ] && { : </dev/tty; } 2>/dev/null; then
+    ARGS+=(--ask-become-pass)
 fi
 
-log_info "Starting provisioner..."
-if [ "$HANZO_MODE" = "check" ]; then
-    ansible-playbook playbook.yml --check "${HANZO_ASK_PASS[@]}"
-else
-    ansible-playbook playbook.yml "${HANZO_ASK_PASS[@]}"
-fi
+log "Starting provisioner..."
+ansible-playbook playbook.yml "${ARGS[@]}"
