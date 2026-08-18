@@ -19,35 +19,6 @@ log_warn()    { echo -e "${YELLOW}[hanzo]${NC} $1"; }
 log_error()   { echo -e "${RED}[hanzo]${NC} $1" >&2; }
 
 # ---------------------------------------------------------------------------
-# Mode parsing — inline because this script runs curl-piped, before the
-# repo (and bin/lib.sh) exists on disk. Same contract as lib.sh parse_mode.
-# ---------------------------------------------------------------------------
-in_container() {
-    [ -f /run/.containerenv ] || [ -f /.dockerenv ] || \
-        grep -qa 'container=' /proc/1/environ 2>/dev/null
-}
-
-HANZO_MODE="full"
-if [ "$#" -gt 1 ] || { [ "$#" -eq 1 ] && [ "$1" != "--check" ] && [ "$1" != "--ci" ]; }; then
-    log_error "invalid arguments: $*"
-    log_error "usage: bootstrap.sh [--check|--ci]"
-    exit 1
-elif [ "$#" -eq 1 ]; then
-    HANZO_MODE="${1#--}"
-fi
-
-# CI mode later bypasses human AUR verification — never allow it on a real host.
-if [ "$HANZO_MODE" = "ci" ] && ! in_container; then
-    log_error "--ci runs unattended and bypasses human AUR verification — allowed only inside a container"
-    exit 1
-fi
-
-case "$HANZO_MODE" in
-    check) echo -e "${YELLOW}>>> CHECK MODE — dry run — reports changes without applying them${NC}" ;;
-    ci)    echo -e "${YELLOW}>>> CI MODE — unattended provisioning — human AUR verification is bypassed${NC}" ;;
-esac
-
-# ---------------------------------------------------------------------------
 # Banner
 # ---------------------------------------------------------------------------
 echo -e "${BLUE}"
@@ -61,29 +32,7 @@ echo -e "${GREEN}CachyOS System Provisioner${NC}"
 echo ""
 
 # ---------------------------------------------------------------------------
-# Step 1: Install uv (Astral's Python package manager)
-# ---------------------------------------------------------------------------
-export PATH="$HOME/.local/bin:$PATH"
-
-if command -v uv >/dev/null 2>&1; then
-    log_info "uv is already installed: $(uv --version)"
-else
-    log_info "Installing uv..."
-    curl -LsSf https://astral.sh/uv/install.sh | sh
-fi
-
-# ---------------------------------------------------------------------------
-# Step 2: Install Ansible via uv tool
-# ---------------------------------------------------------------------------
-if uv tool list 2>/dev/null | grep -q "^ansible-core"; then
-    log_info "ansible-core is already installed"
-else
-    log_info "Installing ansible-core..."
-    uv tool install 'ansible-core~=2.20.5'
-fi
-
-# ---------------------------------------------------------------------------
-# Step 3: Clone or update the Hanzo repository
+# Step 1: Clone or update the Hanzo repository
 # ---------------------------------------------------------------------------
 HANZO_REPO="https://github.com/palazzem/hanzo.git"
 HANZO_DIR="$HOME/.local/src/hanzo"
@@ -98,7 +47,46 @@ else
 fi
 
 # ---------------------------------------------------------------------------
-# Step 4: User configuration
+# Step 2: Parse the provisioning mode with the cloned lib.sh helpers
+# ---------------------------------------------------------------------------
+# shellcheck source=/dev/null  # lib.sh is linted standalone; following it here clashes with the pre-clone helpers
+source "$HANZO_DIR/bin/lib.sh"
+
+HANZO_MODE="full"
+parse_mode "$@"
+
+# CI mode later bypasses human AUR verification — never allow it on a real host.
+if [ "$HANZO_MODE" = "ci" ] && ! in_container; then
+    log_error "--ci runs unattended and bypasses human AUR verification — allowed only inside a container"
+    exit 1
+fi
+
+mode_banner
+
+# ---------------------------------------------------------------------------
+# Step 3: Install uv (Astral's Python package manager)
+# ---------------------------------------------------------------------------
+export PATH="$HOME/.local/bin:$PATH"
+
+if command -v uv >/dev/null 2>&1; then
+    log_info "uv is already installed: $(uv --version)"
+else
+    log_info "Installing uv..."
+    curl -LsSf https://astral.sh/uv/install.sh | sh
+fi
+
+# ---------------------------------------------------------------------------
+# Step 4: Install Ansible via uv tool
+# ---------------------------------------------------------------------------
+if uv tool list 2>/dev/null | grep -q "^ansible-core"; then
+    log_info "ansible-core is already installed"
+else
+    log_info "Installing ansible-core..."
+    uv tool install 'ansible-core~=2.20.5'
+fi
+
+# ---------------------------------------------------------------------------
+# Step 5: User configuration
 # When piped from curl, stdin is the pipe — read from /dev/tty to reach
 # the terminal for interactive prompts.
 # ---------------------------------------------------------------------------
@@ -155,7 +143,7 @@ else
 fi
 
 # ---------------------------------------------------------------------------
-# Step 5: Symlink bin/hanzo into PATH
+# Step 6: Symlink bin/hanzo into PATH
 # ---------------------------------------------------------------------------
 mkdir -p "$HOME/.local/bin"
 ln -sf "$HANZO_DIR/bin/hanzo" "$HOME/.local/bin/hanzo"
@@ -165,7 +153,7 @@ if [[ ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
 fi
 
 # ---------------------------------------------------------------------------
-# Step 6: Run Hanzo for provisioning
+# Step 7: Run Hanzo for provisioning
 # ---------------------------------------------------------------------------
 log_info "Running provisioner..."
 echo ""
