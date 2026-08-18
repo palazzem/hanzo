@@ -105,7 +105,7 @@
     - name: Run system role
       ansible.builtin.import_role:
         name: system
-      tags: [system, always]
+      tags: [system]
 
     - name: Run desktop role
       ansible.builtin.import_role:
@@ -122,10 +122,12 @@
         name: containers
       tags: [containers]
 
+    # Also tagged `tools`: the tools role's npm tasks `eval "$(fnm env)"`, so
+    # `--tags tools` on a fresh host must install fnm and Node first.
     - name: Run languages role
       ansible.builtin.import_role:
         name: languages
-      tags: [languages]
+      tags: [languages, tools]
 
     - name: Run tools role
       ansible.builtin.import_role:
