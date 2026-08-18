@@ -58,6 +58,8 @@ hanzo_email: "your@email.com"
 
 Edit this file directly to update your settings. You can also set `HANZO_FULLNAME` and `HANZO_EMAIL` as environment variables for unattended provisioning (e.g., in containers) — the bootstrap script will write them to the config file in YAML form, escaping any embedded quotes or backslashes.
 
+The file is loaded into its own namespace and read through an allowlist: exactly `hanzo_fullname` and `hanzo_email` are used, and **any other key is ignored**. It is not a place to override playbook or role variables — since the file is user-writable, an unfiltered load would let anything with write access to your home directory inject variables into tasks that run as root. Both keys are optional; when one is missing, the matching git identity setting is simply skipped.
+
 ## Architecture
 
 Hanzo uses Ansible to provision the local machine via `ansible-playbook playbook.yml`. All operations are idempotent — running `hanzo` multiple times is safe and will only apply changes that are needed.

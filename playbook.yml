@@ -62,10 +62,38 @@
       register: hanzo_config_stat
       tags: [always]
 
+    # Namespaced under `hanzo_user_config` so the file's keys never land
+    # in play scope directly: `~/.config/hanzo/config.yml` is
+    # user-writable, and an unfiltered load outranks role vars — a
+    # compromised account could plant `system_packages` and have a
+    # `become: true` task install it as root.
     - name: Load Hanzo user configuration if present
       ansible.builtin.include_vars:
         file: "{{ ansible_facts.env.HOME }}/.config/hanzo/config.yml"
+        name: hanzo_user_config
       when: hanzo_config_stat.stat.exists
+      tags: [always]
+
+    # Allowlist: exactly these two keys cross into play scope, every
+    # other key in the file is ignored. Each is copied only when present,
+    # keeping `hanzo_fullname`/`hanzo_email` undefined otherwise so the
+    # home role's `is defined` gates still skip injection silently.
+    - name: Apply allowed user configuration key hanzo_fullname
+      ansible.builtin.set_fact:
+        hanzo_fullname: "{{ hanzo_user_config.hanzo_fullname }}"
+      when:
+        - hanzo_user_config is defined
+        - hanzo_user_config.hanzo_fullname is defined
+      become: false
+      tags: [always]
+
+    - name: Apply allowed user configuration key hanzo_email
+      ansible.builtin.set_fact:
+        hanzo_email: "{{ hanzo_user_config.hanzo_email }}"
+      when:
+        - hanzo_user_config is defined
+        - hanzo_user_config.hanzo_email is defined
+      become: false
       tags: [always]
 
   tasks:
