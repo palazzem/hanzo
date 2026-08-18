@@ -7,10 +7,42 @@ set -euo pipefail
 ANSIBLE_CORE_VERSION="2.21.3"
 
 GREEN='\033[0;32m'
+BLUE='\033[0;34m'
+CYAN='\033[0;36m'
 RED='\033[0;31m'
+BOLD='\033[1m'
+DIM='\033[2m'
 NC='\033[0m'
 log()  { echo -e "${GREEN}[hanzo]${NC} $1"; }
 fail() { echo -e "${RED}[hanzo]${NC} $1" >&2; exit 1; }
+
+# Where automation stops: these steps need account secrets or firmware
+# access no playbook can reach, so the run ends by handing them back.
+manual_steps() {
+    local rule="━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo ""
+    echo -e "${BLUE}${rule}${NC}"
+    echo -e "  ${BOLD}Provisioning complete.${NC} Three steps are still yours to run."
+    echo -e "${BLUE}${rule}${NC}"
+    echo ""
+    echo -e "  ${GREEN}${BOLD}1${NC}  ${BOLD}ProtonVPN over WireGuard${NC}"
+    echo -e "     Generate a WireGuard configuration in your ProtonVPN account,"
+    echo -e "     then import it with NetworkManager."
+    echo -e "     ${CYAN}https://protonvpn.com/support/wireguard-linux#cli${NC}"
+    echo ""
+    echo -e "  ${GREEN}${BOLD}2${NC}  ${BOLD}Secure Boot${NC}"
+    echo -e "     Put the firmware in setup mode, enroll your own keys with"
+    echo -e "     sbctl, then sign the bootloader and the kernel."
+    echo -e "     ${CYAN}https://wiki.cachyos.org/configuration/secure_boot_setup/${NC}"
+    echo ""
+    echo -e "  ${GREEN}${BOLD}3${NC}  ${BOLD}Reboot${NC}"
+    echo -e "     Kernel, firmware, and service changes only take effect on the"
+    echo -e "     next boot — finish with a full restart."
+    echo -e "     ${CYAN}sudo systemctl reboot${NC}"
+    echo ""
+    echo -e "  ${DIM}Run hanzo again whenever you like: it only applies what changed.${NC}"
+    echo ""
+}
 
 MODE="${1:-}"
 case "$MODE" in
@@ -56,4 +88,5 @@ ansible-playbook playbook.yml "${ARGS[@]}"
 # Shelly equivalent, so --check skips it.
 if [ "$MODE" != "--check" ]; then
     "$HANZO_DIR/bin/hanzo-aur" ${MODE:+"$MODE"}
+    manual_steps
 fi

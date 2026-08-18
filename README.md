@@ -28,6 +28,7 @@ This will:
 5. Install [ansible-core](https://docs.ansible.com/ansible-core/)
 6. Install required Galaxy collections (`community.general`)
 7. Run the full provisioning: the playbook (prompts once for your sudo password), then the AUR package set through Shelly (one PKGBUILD review per package)
+8. Print the manual steps automation cannot cover (see below)
 
 ## Usage
 
@@ -38,6 +39,14 @@ hanzo              # full provisioning run
 hanzo --check      # dry run (shows what would change)
 hanzo --ci         # unattended run, container only
 ```
+
+## Manual Steps
+
+Every provisioning run ends by printing the three steps that stay in your hands — they need account secrets or firmware access no playbook can reach:
+
+1. [ProtonVPN over WireGuard](https://protonvpn.com/support/wireguard-linux#cli) — generate a WireGuard configuration in your ProtonVPN account, then import it with NetworkManager
+2. [Secure Boot](https://wiki.cachyos.org/configuration/secure_boot_setup/) — put the firmware in setup mode, enroll your own keys with `sbctl`, then sign the bootloader and the kernel
+3. Reboot with `sudo systemctl reboot` — kernel, firmware, and service changes only take effect on the next boot
 
 ## Configuration
 
