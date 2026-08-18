@@ -53,11 +53,20 @@
     - "'XDG_RUNTIME_DIR' in ansible_facts['env']"
   become: false
 
-- name: Ensure ~/cowork exists
+- name: Ensure cowork workspace exists
   ansible.builtin.file:
-    path: "{{ ansible_facts.env.HOME }}/cowork"
+    path: "{{ home_cowork_dir }}"
     state: directory
     mode: "0755"
+  become: false
+
+# Deployed verbatim: the workspace rules are read by Claude Code as-is,
+# so the file carries no managed-by header.
+- name: Deploy cowork workspace rules
+  ansible.builtin.copy:
+    src: cowork/CLAUDE.md
+    dest: "{{ home_cowork_dir }}/CLAUDE.md"
+    mode: "0644"
   become: false
 
 - name: Configure KDE Plasma user settings
