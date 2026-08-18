@@ -44,7 +44,7 @@ echo ""
 
 if ! command -v uv >/dev/null 2>&1; then
     log "Installing uv..."
-    curl -LsSf https://astral.sh/uv/install.sh | sh
+    sudo pacman -S --needed --noconfirm uv
 fi
 
 if ! uv tool list 2>/dev/null | grep -q '^ansible-core'; then
