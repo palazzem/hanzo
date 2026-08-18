@@ -6,7 +6,6 @@ hardware_asus_pacman:
 hardware_asus_services:
   - asusd
 
-# Key remapper for the Copilot key chord; see tasks/gz302.yml.
 hardware_gz302_pacman:
   - keyd
 

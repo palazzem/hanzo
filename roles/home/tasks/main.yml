@@ -1,6 +1,4 @@
 ---
-# include_tasks (not import_tasks): git_adopt.yml is parameterized and
-# reused, and only a dynamic include re-evaluates its vars per call.
 - name: Setup dotfiles repository
   ansible.builtin.include_tasks: git_adopt.yml
   vars:
@@ -36,8 +34,6 @@
   when: hanzo_email is defined
   become: false
 
-# include_tasks (not import_tasks): second parameterized reuse of
-# git_adopt.yml, same reason as the dotfiles call above.
 - name: Setup claude-config repository
   ansible.builtin.include_tasks: git_adopt.yml
   vars:

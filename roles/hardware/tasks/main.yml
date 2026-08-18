@@ -1,6 +1,4 @@
 ---
-# include_tasks (not import_tasks): the `when` gates the whole file on a
-# runtime model fact instead of copying it onto every imported task.
 - name: Include GZ302 hardware fixes
   ansible.builtin.include_tasks: gz302.yml
   when: model_is_gz302
