@@ -23,6 +23,23 @@
 # variable resolution and task structure even when the side-effecting
 # tasks are bypassed.
 
+# Contract check: every task below interpolates git_dest into a shell
+# command or a stat path, so an undefined or `~`-prefixed value would
+# either fail deep inside the adopt branch or silently create a literal
+# `~` directory in the cwd.
+- name: Assert git_adopt contract is satisfied
+  ansible.builtin.assert:
+    that:
+      - git_repo is defined
+      - git_dest is defined
+      - git_dest is match('^/')
+    fail_msg: >-
+      git_adopt.yml requires git_repo and an absolute git_dest. Callers must
+      expand ~ themselves — build the path from the HOME fact in the calling
+      variable rather than passing a ~-prefixed string.
+    quiet: true
+  become: false
+
 - name: Check git repository presence at {{ git_dest }}
   ansible.builtin.stat:
     path: "{{ git_dest }}/.git"

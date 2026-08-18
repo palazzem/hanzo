@@ -132,19 +132,3 @@
     mode: "0644"
   become: true
   notify: Reload logind
-
-# KDE Plasma 6: PowerDevil writes lid-action behavior here. SleepMode=3
-# = "Suspend then Hibernate" — set under both AC and Battery so behavior
-# is consistent regardless of power source.
-- name: Configure KDE PowerDevil sleep mode
-  ansible.builtin.copy:
-    dest: "{{ ansible_facts.env.HOME }}/.config/powerdevilrc"
-    content: |
-      # Managed by Hanzo. Do not edit manually.
-      [AC][SuspendAndShutdown]
-      SleepMode=3
-
-      [Battery][SuspendAndShutdown]
-      SleepMode=3
-    mode: "0644"
-  become: false

@@ -1,15 +1,6 @@
 ---
-virtualization_pacman:
-  - dnsmasq
-  - edk2-ovmf
-  - libvirt
-  - qemu-desktop
-  - spice-vdagent
-  - swtpm
-  - virt-manager
-  - virt-viewer
-  - virtiofsd
-
+# libvirt's own group contract, not a preference: `kvm` gates /dev/kvm and
+# `libvirt` gates the system libvirtd socket.
 virtualization_user_groups:
   - kvm
   - libvirt

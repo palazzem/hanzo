@@ -1,0 +1,20 @@
+---
+desktop_pacman:
+  - 7zip
+  - unrar
+  - sof-firmware
+  - cachyos-gaming-applications
+  - ffmpeg
+  - signal-desktop
+  - moonlight-qt
+  - spotify-launcher
+  - zed
+  - ghostty
+  - wl-clipboard
+  - plasma-keyboard
+  - qrca
+
+desktop_pacman_remove:
+  - alacritty
+  - firefox
+  - konsole

@@ -1,23 +1,5 @@
 ---
-desktop_pacman:
-  - 7zip
-  - unrar
-  - sof-firmware
-  - cachyos-gaming-applications
-  - ffmpeg
-  - signal-desktop
-  - moonlight-qt
-  - spotify-launcher
-  - zed
-  - ghostty
-  - wl-clipboard
-  - plasma-keyboard
-  - qrca
-
+# Group membership is a contract with the system, not a preference:
+# `video` gates the graphics devices the desktop applications need.
 desktop_user_groups:
   - video
-
-desktop_pacman_remove:
-  - alacritty
-  - firefox
-  - konsole

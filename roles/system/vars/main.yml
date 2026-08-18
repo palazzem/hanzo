@@ -1,32 +1,11 @@
 ---
-system_pacman:
-  - fzf
-  - htop
-  - neovim
-  - tree
-  - wget
-  - jq
-  - yq
-  - httpie
-  - whois
-  - tmux
-  - shelly
-
-system_locale: en_US.UTF-8
-
-# Hibernation swap for a 128 GB system.
-system_swap_size: 128g
-
 # Kernel params for the CachyOS "Switching from ZRam to Zswap" procedure.
 # ZRam is RAM-backed and cannot hold a hibernation image, so it is turned
 # off and Zswap takes over as the compressed cache in front of the swap
 # file. Pool percentage and compressor are the values the wiki recommends.
+# Not a tunable: hibernation only resumes with this exact pairing, so
+# these live in vars/ where a user config cannot override them.
 system_zram_kernel_param: systemd.zram=0
 system_zswap_kernel_params: >-
   zswap.enabled=1 zswap.shrinker_enabled=1
   zswap.compressor=lz4 zswap.max_pool_percent=30
-
-# HibernateDelaySec for systemd-suspend-then-hibernate.service: time in
-# s2idle before transitioning to hibernate. 3h gives a long fast-resume
-# window before paying the disk-write cost.
-system_hibernate_delay_sec: 10800
