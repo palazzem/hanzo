@@ -21,7 +21,7 @@ The container provisions through `bin/bootstrap.sh`, exactly as a production mac
 
 - `pre-commit run --all-files`: Lint all files (ansible-lint, shellcheck, generic hooks).
 - `docker build --build-arg HANZO_ARGS="--check" -f tests/Containerfile -t hanzo:test .`: Provisioning check (dry run, what CI runs).
-- `docker build --build-arg HANZO_ARGS="--ci" -f tests/Containerfile -t hanzo:test .`: Full unattended provisioning.
+- `docker build --build-arg HANZO_ARGS="--ci" -f tests/Containerfile -t hanzo:test .`: Full unattended provisioning (what the weekly cron runs).
 
 ## Role Tags
 
@@ -49,5 +49,5 @@ All testing goes through the CachyOS container — see the Commands section abov
 Before submitting changes:
 
 - [ ] Lint passes: `pre-commit run --all-files`
-- [ ] Container test passes: `docker build -f tests/Containerfile -t hanzo:test .`
+- [ ] Container test passes: `docker build --build-arg HANZO_ARGS="--check" -f tests/Containerfile -t hanzo:test .`
 - [ ] Commits follow [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/)
