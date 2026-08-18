@@ -1,7 +1,7 @@
 FROM --platform=linux/amd64 cachyos/cachyos:latest
 
 RUN pacman -Syu --noconfirm && \
-    pacman -S --noconfirm python git curl sudo base-devel paru
+    pacman -S --noconfirm python git curl sudo base-devel
 
 # Non-root user with passwordless sudo for realistic testing
 RUN useradd -m -G wheel testuser && \
@@ -12,6 +12,9 @@ WORKDIR /home/testuser/.local/src/hanzo
 ENV PATH="/home/testuser/.local/bin:${PATH}"
 ENV HANZO_FULLNAME="Test User"
 ENV HANZO_EMAIL="test@example.com"
+# docker build RUN steps mount neither /.dockerenv nor
+# /run/.containerenv — declare the container for bootstrap's --ci guard.
+ENV container=docker
 
 # Provisioning mode: --check (dry run) or --ci (full unattended
 # provisioning). No default — the build fails unless one is passed:

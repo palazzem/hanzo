@@ -1,0 +1,109 @@
+#!/usr/bin/env bash
+# hanzo-aur — one-shot AUR provisioning via Shelly for a fresh machine.
+# Usage: hanzo-aur [--ci]
+
+set -euo pipefail
+
+GREEN='\033[0;32m'
+RED='\033[0;31m'
+NC='\033[0m'
+log()  { echo -e "${GREEN}[hanzo-aur]${NC} $1"; }
+fail() { echo -e "${RED}[hanzo-aur]${NC} $1" >&2; exit 1; }
+
+MODE="${1:-}"
+case "$MODE" in
+    ""|--ci) ;;
+    *) fail "usage: hanzo-aur [--ci]" ;;
+esac
+
+# Everything else installs via pacman in the Ansible roles.
+PACKAGES=(
+    google-chrome
+    wifiman-desktop
+    darkly
+)
+SIGNED_PACKAGES=(
+    1password
+    1password-cli
+)
+
+# 1Password (AgileBits) signing key, dual-source pinned.
+KEY_NAME="1Password"
+KEY_FPR="3FEF9748469ADBE15DA7CA80AC2D62742012EA22" # gitleaks:allow
+KEY_URL="https://downloads.1password.com/linux/keys/1password.asc"
+KEY_ASC_SHA256="f39e7dd9dedc581ced85732832f217e0de5860a3b80279b5af4bc7c6d8157bae" # gitleaks:allow
+KEY_EXPORT_SHA256="130fd029182686f52eb17304615d8377e7787a0d5b01a90db6b36de4e56fb05c" # gitleaks:allow
+KEY_KEYSERVER="hkps://keyserver.ubuntu.com"
+
+shelly_install() { # <shelly args...>
+    if [ "$MODE" = "--ci" ]; then
+        # < <(yes): a pipe would poison the exit status under pipefail
+        # when yes dies of SIGPIPE after shelly exits.
+        shelly install aur "$@" < <(yes)
+    else
+        # Shelly reads its review prompts from stdin — reach the
+        # terminal even under curl | bash.
+        shelly install aur "$@" </dev/tty
+    fi
+}
+
+# Both sources must agree and the export-minimal material must match
+# the pinned hash — no single point of trust.
+import_signing_key() {
+    if gpg --with-colons --list-keys "$KEY_FPR" >/dev/null 2>&1; then
+        log "$KEY_NAME signing key already in the keyring."
+        return 0
+    fi
+    log "Importing $KEY_NAME signing key (vendor URL + keyserver)..."
+    local asc actual exported
+    asc="$WORK/key.asc"
+    curl -fsSL --proto '=https' --tlsv1.2 -o "$asc" "$KEY_URL"
+    actual="$(sha256sum "$asc" | awk '{print $1}')"
+    if [[ "$actual" != "$KEY_ASC_SHA256" ]]; then
+        fail "$KEY_NAME key sha256 mismatch (expected $KEY_ASC_SHA256, got $actual)."
+    fi
+    gpg --batch --no-tty --import "$asc"
+    gpg --batch --no-tty --keyserver "$KEY_KEYSERVER" --recv-keys "$KEY_FPR"
+    exported="$WORK/key.gpg"
+    gpg --output "$exported" --yes --export-options export-minimal --export "$KEY_FPR"
+    actual="$(sha256sum "$exported" | awk '{print $1}')"
+    if [[ "$actual" != "$KEY_EXPORT_SHA256" ]]; then
+        fail "$KEY_NAME exported key material sha256 mismatch (expected $KEY_EXPORT_SHA256, got $actual) — key rotated upstream or tampered with."
+    fi
+    log "$KEY_NAME signing key verified and imported."
+}
+
+# Verify signatures at a pinned commit, then install that exact commit:
+# the PKGBUILD checksums bind Shelly's download to the verified bytes,
+# so a republished artifact fails the install (no verify/install race).
+install_signed_package() { # <pkg>
+    local pkg="$1" clone sha srcinfo
+    clone="$WORK/$pkg"
+    git clone -q "https://aur.archlinux.org/${pkg}.git" "$clone"
+    sha="$(git -C "$clone" rev-parse HEAD)"
+    # No pipe into grep -q: its early exit would SIGPIPE makepkg and
+    # pipefail would misread a successful match as a failure.
+    srcinfo="$(cd "$clone" && makepkg --printsrcinfo)"
+    if ! grep -q "$KEY_FPR" <<<"$srcinfo"; then
+        fail "$pkg PKGBUILD at $sha no longer lists the pinned $KEY_NAME key in validpgpkeys."
+    fi
+    log "$pkg: verifying source signatures at ${sha:0:12}..."
+    (cd "$clone" && makepkg --verifysource)
+    log "$pkg: installing at ${sha:0:12} via Shelly..."
+    shelly_install "$pkg" --version "$sha"
+}
+
+WORK="$(mktemp -d)"
+trap 'rm -rf "$WORK"' EXIT
+
+# Pre-create or Shelly's sudo half root-owns them on first run.
+mkdir -p "$HOME/.cache/Shelly" "$HOME/.local/share/Shelly"
+
+import_signing_key
+for pkg in "${SIGNED_PACKAGES[@]}"; do
+    install_signed_package "$pkg"
+done
+
+log "Installing via Shelly: ${PACKAGES[*]}"
+shelly_install "${PACKAGES[@]}"
+log "Done."

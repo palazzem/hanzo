@@ -17,7 +17,13 @@ fail() { echo -e "${RED}[hanzo]${NC} $1" >&2; exit 1; }
 case "${1:-}" in
     ""|--check) ;;
     # CI bypasses human verification — never allow it on a real host.
-    --ci) [ -f /run/.containerenv ] || [ -f /.dockerenv ] || fail "--ci runs unattended — allowed only inside a container" ;;
+    # podman creates /run/.containerenv and sets container=; docker run
+    # creates /.dockerenv; docker build provides none of them, so
+    # tests/Containerfile sets container=docker explicitly.
+    --ci)
+        [ -f /run/.containerenv ] || [ -f /.dockerenv ] || [ -n "${container:-}" ] || \
+            fail "--ci runs unattended — allowed only inside a container"
+        ;;
     *) fail "usage: bootstrap.sh [--check|--ci]" ;;
 esac
 
@@ -65,6 +71,7 @@ fi
 
 mkdir -p "$HOME/.local/bin"
 ln -sf "$HANZO_DIR/bin/hanzo" "$HOME/.local/bin/hanzo"
+ln -sf "$HANZO_DIR/bin/hanzo-aur" "$HOME/.local/bin/hanzo-aur"
 
 log "Running provisioner..."
 echo ""

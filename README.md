@@ -22,7 +22,7 @@ This will:
 
 1. Install [uv](https://docs.astral.sh/uv/) and [ansible-core](https://docs.ansible.com/ansible-core/)
 2. Clone this repository to `~/.local/src/hanzo`
-3. Install required Galaxy collections (`community.general`, `kewlfft.aur`)
+3. Install required Galaxy collections (`community.general`)
 4. Prompt for your name and email (first run only)
 5. Run the full provisioning (prompts once for your sudo password)
 

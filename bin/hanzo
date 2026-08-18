@@ -17,21 +17,6 @@ case "$MODE" in
 esac
 
 HANZO_DIR="$(cd "$(dirname "$(readlink -f "$0")")/.." && pwd)"
-HANZO_AUR_SUDOERS="/etc/sudoers.d/hanzo-aur"
-
-# Belt-and-suspenders cleanup. Ansible's block/always inside
-# playbook.yml handles success and task-failure paths; this trap
-# covers SIGINT/SIGTERM (Ctrl+C, kill) which ansible cannot. The
-# sudoers drop-in installed by the playbook whitelists exactly this
-# rm command for the connection user, so cleanup never re-prompts
-# for a password — even after ansible's --ask-become-pass cache is
-# gone. SIGKILL and power loss remain uncovered (unavoidable).
-cleanup() {
-    if [[ -f "$HANZO_AUR_SUDOERS" ]]; then
-        sudo -n /usr/bin/rm "$HANZO_AUR_SUDOERS" 2>/dev/null || true
-    fi
-}
-trap cleanup EXIT INT TERM
 
 cd "$HANZO_DIR"
 
@@ -58,3 +43,9 @@ fi
 
 log "Starting provisioner..."
 ansible-playbook playbook.yml "${ARGS[@]}"
+
+# AUR provisioning is Shelly's job, not Ansible's — a dry run has no
+# Shelly equivalent, so --check skips it.
+if [ "$MODE" != "--check" ]; then
+    "$HANZO_DIR/bin/hanzo-aur" ${MODE:+"$MODE"}
+fi
