@@ -4,6 +4,8 @@
 
 set -euo pipefail
 
+ANSIBLE_CORE_VERSION="2.21.3"
+
 GREEN='\033[0;32m'
 RED='\033[0;31m'
 NC='\033[0m'
@@ -27,6 +29,12 @@ if [ -z "$MODE" ]; then
     git fetch origin main
     git reset --hard origin/main
 fi
+
+# hanzo owns the pin: bootstrap only guarantees uv, so install here
+# before the first Ansible call. `uv tool install` is idempotent and
+# replaces a stale constraint, so drift converges on every run.
+log "Installing ansible-core ~=${ANSIBLE_CORE_VERSION}..."
+uv tool install "ansible-core~=${ANSIBLE_CORE_VERSION}"
 
 log "Refreshing Ansible collections..."
 ansible-galaxy collection install -r requirements.yml
