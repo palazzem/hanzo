@@ -8,8 +8,10 @@
 set -euo pipefail
 
 GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
 NC='\033[0m'
 log_info() { echo -e "${GREEN}[hanzo]${NC} $1"; }
+log_warn() { echo -e "${YELLOW}[hanzo]${NC} $1"; }
 
 HANZO_DIR="$(cd "$(dirname "$(readlink -f "$0")")/.." && pwd)"
 HANZO_AUR_SUDOERS="/etc/sudoers.d/hanzo-aur"
@@ -30,9 +32,24 @@ trap cleanup EXIT INT TERM
 
 cd "$HANZO_DIR"
 
+# The sync exists so machines provision the published configuration,
+# and it must never destroy local work: any local changes, a non-main
+# branch, or local commits make it skip and provision the tree as-is.
 log_info "Syncing checkout to origin/main..."
-git fetch origin main
-git reset --hard origin/main
+if ! git remote get-url origin >/dev/null 2>&1; then
+    log_warn "No 'origin' remote — provisioning the working tree as-is."
+elif [[ -n "$(git status --porcelain)" ]]; then
+    log_warn "Working tree has local changes — skipping sync to keep them."
+elif [[ "$(git symbolic-ref --short -q HEAD)" != "main" ]]; then
+    log_warn "Checkout is not on the main branch — skipping sync."
+else
+    git fetch origin main
+    if git merge-base --is-ancestor HEAD origin/main; then
+        git merge --ff-only origin/main
+    else
+        log_warn "Local commits not on origin/main — skipping sync to keep them."
+    fi
+fi
 
 log_info "Refreshing Ansible collections..."
 ansible-galaxy collection install -r requirements.yml
