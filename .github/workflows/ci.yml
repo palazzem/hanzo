@@ -21,6 +21,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # Nothing after checkout talks to GitHub; don't leave a token in .git/config.
+          persist-credentials: false
 
       - name: Set up Python
         uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
@@ -28,7 +31,8 @@ jobs:
           python-version: "3.14"
 
       - name: Install pre-commit
-        run: pip install pre-commit
+        # Pinned so a pre-commit release can't change lint results mid-PR.
+        run: pip install pre-commit==4.6.2
 
       - name: Run pre-commit hooks
         run: pre-commit run --all-files
@@ -39,6 +43,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # The container build only reads the copied tree; no token needed.
+          persist-credentials: false
 
       - name: Provisioning check (dry run)
         run: docker build --build-arg HANZO_ARGS="--check" -f tests/Containerfile -t hanzo:test .
