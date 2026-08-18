@@ -1,4 +1,47 @@
 ---
+# Hibernation writes the entire contents of RAM — session keys, keyrings,
+# decrypted secrets — to /swap/swapfile, which lives on the root
+# filesystem. Refuse to configure it unless that filesystem is encrypted.
+# Both probes keep running under --check, so a dry run on an unencrypted
+# host fails here instead of reporting a clean plan.
+- name: Probe the device backing the root filesystem
+  ansible.builtin.command:
+    cmd: findmnt -no SOURCE /
+  register: system_root_source
+  changed_when: false
+  check_mode: false
+  become: true
+
+# findmnt reports a btrfs subvolume mount as `<device>[/subvol]`, so the
+# suffix is stripped before lsblk sees it. `-s` inverts the tree, listing
+# the mounted device and every layer underneath it — a LUKS install
+# always has a `crypt` layer among them, plain or stacked under LVM.
+- name: Probe the device stack under the root filesystem
+  ansible.builtin.command:
+    argv:
+      - lsblk
+      - -rsno
+      - TYPE
+      - >-
+        {{ system_root_source.stdout | regex_replace('\[.*\]$', '') }}
+  register: system_root_stack
+  changed_when: false
+  check_mode: false
+  become: true
+
+- name: Assert the root filesystem is on an encrypted device
+  ansible.builtin.assert:
+    that:
+      - "'crypt' in system_root_stack.stdout_lines"
+    fail_msg: >-
+      Hibernation writes the full contents of RAM to the swap file on the
+      root filesystem, so the root filesystem must sit on LUKS full-disk
+      encryption. No crypt layer was found under
+      {{ system_root_source.stdout | regex_replace('\[.*\]$', '') }}.
+      Reinstall CachyOS with full-disk encryption before provisioning
+      this machine.
+  become: true
+
 # CachyOS defaults to ZRam: zram-generator declares a RAM-sized zram0 swap
 # at priority 100 and cachyos-settings ships a udev rule that force-disables
 # Zswap on every zram0 change event. RAM-backed swap cannot hold a
