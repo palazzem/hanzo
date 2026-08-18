@@ -30,12 +30,25 @@ trap cleanup EXIT INT TERM
 
 cd "$HANZO_DIR"
 
-log_info "Syncing checkout to origin/main..."
-git fetch origin main
-git reset --hard origin/main
+# Container tests set HANZO_SKIP_SYNC=1 so the code under review runs
+# instead of origin/main; real machines always get the destructive sync.
+if [[ "${HANZO_SKIP_SYNC:-}" == "1" ]]; then
+    log_info "Skipping checkout sync (HANZO_SKIP_SYNC=1)..."
+else
+    log_info "Syncing checkout to origin/main..."
+    git fetch origin main
+    git reset --hard origin/main
+fi
 
 log_info "Refreshing Ansible collections..."
 ansible-galaxy collection install -r requirements.yml
 
+# Ask for the become password only when a terminal exists — container
+# builds have no tty and sudo is passwordless there.
+HANZO_BECOME_ARGS=()
+if { : </dev/tty; } 2>/dev/null; then
+    HANZO_BECOME_ARGS+=(--ask-become-pass)
+fi
+
 log_info "Starting provisioner..."
-ansible-playbook playbook.yml --ask-become-pass "$@"
+ansible-playbook playbook.yml "${HANZO_BECOME_ARGS[@]}" "$@"

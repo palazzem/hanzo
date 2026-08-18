@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Hanzo bootstrap — one-command CachyOS provisioner setup.
 # Usage: curl -L https://raw.githubusercontent.com/palazzem/hanzo/main/bin/bootstrap.sh | bash
+# Modes: --check (dry run), --ci (unattended full provisioning, CI only).
 
 set -euo pipefail
 
@@ -16,6 +17,25 @@ NC='\033[0m'
 log_info()    { echo -e "${GREEN}[hanzo]${NC} $1"; }
 log_warn()    { echo -e "${YELLOW}[hanzo]${NC} $1"; }
 log_error()   { echo -e "${RED}[hanzo]${NC} $1" >&2; }
+
+# ---------------------------------------------------------------------------
+# Mode
+# ---------------------------------------------------------------------------
+HANZO_MODE="${1:-}"
+
+if [ "$#" -gt 1 ]; then
+    log_error "Usage: bootstrap.sh [--check|--ci]"
+    exit 1
+fi
+
+case "$HANZO_MODE" in
+    ""|--check|--ci) ;;
+    *)
+        log_error "Unknown argument: $HANZO_MODE"
+        log_error "Usage: bootstrap.sh [--check|--ci]"
+        exit 1
+        ;;
+esac
 
 # ---------------------------------------------------------------------------
 # Banner
@@ -113,6 +133,10 @@ elif [ -n "${HANZO_FULLNAME:-}" ] && [ -n "${HANZO_EMAIL:-}" ]; then
 
     write_config
     log_info "Configuration saved to $CONFIG_FILE (from environment)"
+elif [ "$HANZO_MODE" = "--ci" ]; then
+    # Unattended mode must never prompt.
+    log_error "--ci requires HANZO_FULLNAME and HANZO_EMAIL (or an existing config)"
+    exit 1
 else
     log_info "First-time setup — configuring Hanzo"
     echo ""
@@ -137,6 +161,12 @@ fi
 # ---------------------------------------------------------------------------
 # Step 6: Run Hanzo for provisioning
 # ---------------------------------------------------------------------------
+if [ "$HANZO_MODE" = "--check" ]; then
+    log_info "Running provisioner (dry run)..."
+    echo ""
+    exec "$HOME/.local/bin/hanzo" --check
+fi
+
 log_info "Running provisioner..."
 echo ""
 exec "$HOME/.local/bin/hanzo"

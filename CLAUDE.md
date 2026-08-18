@@ -15,11 +15,11 @@ CachyOS system provisioner powered by Ansible.
 
 All provisioning operations run inside the CachyOS test container — running on the host modifies system state (see Security: Prohibited Commands below).
 
+The container provisions through `bin/bootstrap.sh`, exactly as a production machine would.
+
 - `pre-commit run --all-files`: Lint all files (ansible-lint, shellcheck, generic hooks).
-- `docker build -f tests/Containerfile -t hanzo:test .`: Run `ansible-playbook --check --diff` (full provisioning check).
-- `docker build --build-arg ANSIBLE_ARGS="--list-tags" -f tests/Containerfile -t hanzo:test .`: List all available tags.
-- `docker build --build-arg ANSIBLE_ARGS="--tags <role> --check --diff" -f tests/Containerfile -t hanzo:test .`: Check a single tagged role.
-- `docker build --build-arg ANSIBLE_ARGS="" -f tests/Containerfile -t hanzo:test .`: Real provisioning run inside the container (no `--check`).
+- `docker build -f tests/Containerfile -t hanzo:test .`: Provisioning check (`bootstrap.sh --check`, the default and what CI runs).
+- `docker build --build-arg HANZO_TEST_ARGS="--ci" -f tests/Containerfile -t hanzo:test .`: Full unattended provisioning inside the container.
 
 ## Role Tags
 

@@ -1,33 +1,31 @@
 FROM --platform=linux/amd64 cachyos/cachyos:latest
 
-# ansible-playbook flag set. Default `--check --diff` validates the playbook
-# without modifying the system; override to `""` (or another flag set) to
-# run a real provisioning inside the container:
-#     docker build --build-arg ANSIBLE_ARGS="" -f tests/Containerfile -t hanzo:test .
-ARG ANSIBLE_ARGS="--check --diff"
+# Bootstrap mode. Default `--check` validates the playbook without modifying
+# the system; `--ci` runs a full unattended provisioning:
+#     docker build --build-arg HANZO_TEST_ARGS="--ci" -f tests/Containerfile -t hanzo:test .
+ARG HANZO_TEST_ARGS="--check"
 
 RUN pacman -Syu --noconfirm && \
-    pacman -S --noconfirm python git curl sudo base-devel paru
+    pacman -S --noconfirm python git curl sudo base-devel
 
 # Non-root user with passwordless sudo for realistic testing
 RUN useradd -m -G wheel testuser && \
     echo "testuser ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 
-COPY --chown=testuser:testuser . /home/testuser/hanzo
+# Pre-copy the repo to bootstrap's clone path so it provisions the code
+# under review instead of cloning origin/main.
+COPY --chown=testuser:testuser . /home/testuser/.local/src/hanzo
 
 USER testuser
-WORKDIR /home/testuser/hanzo
-
-RUN curl -LsSf https://astral.sh/uv/install.sh | sh
+WORKDIR /home/testuser/.local/src/hanzo
 ENV PATH="/home/testuser/.local/bin:${PATH}"
-RUN uv tool install ansible-core
-RUN ansible-galaxy collection install -r requirements.yml
 
-# Pre-seed a user config so the identity-injection path is exercised on
-# every build (the `hanzo_fullname is defined` guards in roles/home
-# only fire when the config is present).
-RUN mkdir -p /home/testuser/.config/hanzo && \
-    printf 'hanzo_fullname: "Test User"\nhanzo_email: "test@example.com"\n' \
-      > /home/testuser/.config/hanzo/config.yml
+# A worktree checkout ships a `.git` pointer file; make `.git` a real
+# directory so bootstrap detects an existing checkout.
+RUN if [ ! -d .git ]; then rm -f .git && git init -q; fi
 
-RUN ansible-playbook playbook.yml $ANSIBLE_ARGS
+ENV HANZO_SKIP_SYNC=1
+ENV HANZO_FULLNAME="Test User"
+ENV HANZO_EMAIL="test@example.com"
+
+RUN bash bin/bootstrap.sh $HANZO_TEST_ARGS
