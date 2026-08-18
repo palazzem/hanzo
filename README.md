@@ -10,6 +10,7 @@ CachyOS system provisioner powered by [Ansible](https://docs.ansible.com/). A si
 ## Requirements
 
 - [CachyOS](https://cachyos.org/) (Arch-based)
+- Full-disk encryption (LUKS) on the root filesystem to prevent unencrypted swap file
 - Internet connection for initial setup
 
 ## Quickstart
