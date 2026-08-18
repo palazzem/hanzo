@@ -4,11 +4,6 @@
 # key is seeded by roles/trust, which playbook.yml runs before this
 # role.
 
-- name: Install security pacman packages
-  community.general.pacman:
-    name: "{{ security_pacman }}"
-  become: true
-
 # kewlfft.aur.aur batches the list under `name:` into a single paru
 # invocation. paru must run as the unprivileged user — it refuses root.
 - name: Install security AUR packages
