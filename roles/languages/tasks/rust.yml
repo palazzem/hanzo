@@ -1,7 +1,7 @@
 ---
 - name: Install Rust toolchain packages
   community.general.pacman:
-    name: "{{ languages_rust_packages }}"
+    name: "{{ languages_rust_pacman }}"
   become: true
 
 # rustup default stable is idempotent. We can't reliably introspect its

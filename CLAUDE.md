@@ -38,6 +38,13 @@ All testing goes through the CachyOS container — see the Commands section abov
 
 ## Coding Guidelines
 
+### Ansible Conventions
+
+- Package lists are named by their install channel, not by the word "packages": `<prefix>_pacman` for pacman package sets (`system_pacman`, `tools_iac_pacman`), `tools_uv_tools` / `tools_npm_global_packages` for the tool-manager channels. The suffix says which installer consumes the list.
+- Home-relative paths use the `{{ ansible_facts.env.HOME }}/...` fact directly in the variable value. Never store a `~` path and expand it at the point of use with `| expanduser`.
+- Every config file Hanzo writes — template or inline `content:` — opens with a `# Managed by Hanzo. Do not edit manually.` comment, in the target format's comment syntax.
+- Unconditional task-file splits use `ansible.builtin.import_tasks` (static, so tags and `--list-tasks` see the tasks). `include_tasks` is reserved for genuinely dynamic cases — a file gated by a runtime fact, or a parameterized file included more than once — and each use carries a one-line comment saying why.
+
 ### Shell Scripts
 
 - `set -euo pipefail` at the top of every script.

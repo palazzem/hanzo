@@ -1,16 +1,16 @@
 ---
 home_dotfiles_repo: https://github.com/palazzem/dotfiles.git
-home_dotfiles_dir: ~/.dotfiles
+home_dotfiles_dir: "{{ ansible_facts.env.HOME }}/.dotfiles"
 
 home_claude_config_repo: https://github.com/palazzem/claude-config.git
-home_claude_config_dir: ~/.claude
+home_claude_config_dir: "{{ ansible_facts.env.HOME }}/.claude"
 
 home_user_services:
   - ssh-agent
 
 # Path must match `[include] path = ...` in palazzem/dotfiles gitconfig.
 # Renaming this breaks the cross-repo include and silently drops identity.
-home_gitidentity_file: ~/.gitidentity
+home_gitidentity_file: "{{ ansible_facts.env.HOME }}/.gitidentity"
 
 # KDE resolves the global shortcut to the launcher by this filename, so the
 # deployed .desktop file and the kglobalshortcutsrc group must match exactly.

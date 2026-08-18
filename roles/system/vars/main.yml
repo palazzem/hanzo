@@ -1,5 +1,5 @@
 ---
-system_packages:
+system_pacman:
   - fzf
   - htop
   - neovim

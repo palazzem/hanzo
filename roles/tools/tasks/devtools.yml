@@ -1,5 +1,5 @@
 ---
 - name: Install DevTools
   community.general.pacman:
-    name: "{{ tools_dev_packages }}"
+    name: "{{ tools_dev_pacman }}"
   become: true

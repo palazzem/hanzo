@@ -1,9 +1,11 @@
 ---
+# include_tasks (not import_tasks): git_adopt.yml is parameterized and
+# reused, and only a dynamic include re-evaluates its vars per call.
 - name: Setup dotfiles repository
   ansible.builtin.include_tasks: git_adopt.yml
   vars:
     git_repo: "{{ home_dotfiles_repo }}"
-    git_dest: "{{ home_dotfiles_dir | expanduser }}"
+    git_dest: "{{ home_dotfiles_dir }}"
 
 # install.sh is the dotfiles repo's own installer. Re-runnable by design;
 # there is no clean change signal, so we mark it unchanged unconditionally.
@@ -11,7 +13,7 @@
 # isn't on disk to execute.
 - name: Run dotfiles installer
   ansible.builtin.command:
-    cmd: "{{ home_dotfiles_dir | expanduser }}/install.sh"
+    cmd: "{{ home_dotfiles_dir }}/install.sh"
   changed_when: false
   when: not ansible_check_mode
   become: false
@@ -21,7 +23,7 @@
     name: user.name
     value: "{{ hanzo_fullname }}"
     scope: file
-    file: "{{ home_gitidentity_file | expanduser }}"
+    file: "{{ home_gitidentity_file }}"
   when: hanzo_fullname is defined
   become: false
 
@@ -30,15 +32,17 @@
     name: user.email
     value: "{{ hanzo_email }}"
     scope: file
-    file: "{{ home_gitidentity_file | expanduser }}"
+    file: "{{ home_gitidentity_file }}"
   when: hanzo_email is defined
   become: false
 
+# include_tasks (not import_tasks): second parameterized reuse of
+# git_adopt.yml, same reason as the dotfiles call above.
 - name: Setup claude-config repository
   ansible.builtin.include_tasks: git_adopt.yml
   vars:
     git_repo: "{{ home_claude_config_repo }}"
-    git_dest: "{{ home_claude_config_dir | expanduser }}"
+    git_dest: "{{ home_claude_config_dir }}"
 
 - name: Enable and start user services
   ansible.builtin.systemd_service:
@@ -61,4 +65,4 @@
   become: false
 
 - name: Configure KDE Plasma user settings
-  ansible.builtin.include_tasks: kde.yml
+  ansible.builtin.import_tasks: kde.yml

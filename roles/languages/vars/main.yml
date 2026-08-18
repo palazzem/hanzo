@@ -1,15 +1,15 @@
 ---
-languages_python_packages:
+languages_python_pacman:
   - pyenv
   - uv
 
-languages_rust_packages:
+languages_rust_pacman:
   - rustup
 
-languages_go_packages:
+languages_go_pacman:
   - go
 
-languages_node_packages:
+languages_node_pacman:
   - fnm
 
-languages_gopath: ~/.golang
+languages_gopath: "{{ ansible_facts.env.HOME }}/.golang"

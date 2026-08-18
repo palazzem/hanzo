@@ -16,7 +16,7 @@
 
 - name: Install virtualization packages
   community.general.pacman:
-    name: "{{ virtualization_packages }}"
+    name: "{{ virtualization_pacman }}"
   become: true
 
 - name: Ensure virtualization groups exist

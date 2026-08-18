@@ -1,5 +1,5 @@
 ---
-containers_packages:
+containers_pacman:
   - docker
   - docker-buildx
   - docker-compose
