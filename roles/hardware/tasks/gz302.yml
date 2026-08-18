@@ -3,7 +3,7 @@
 
 # Wifi-powersave fix runs first and is flushed immediately so the
 # MT7925 stops dropping long-running TCP transfers before any role
-# downloads anything (paru/curl in later roles, pacman in this one).
+# downloads anything (curl in later roles, pacman in this one).
 - name: Deploy NetworkManager wifi powersave drop-in
   ansible.builtin.template:
     src: wifi-powersave.conf.j2

@@ -1,9 +1,8 @@
 ---
-- name: Install Node.js AUR packages
-  kewlfft.aur.aur:
+- name: Install Node.js pacman packages
+  community.general.pacman:
     name: "{{ languages_node_packages }}"
-    use: paru
-  become: false
+  become: true
 
 # Each shell task runs in a fresh process, so we must eval fnm env to
 # activate it. fnm install is idempotent (skips installed versions) —

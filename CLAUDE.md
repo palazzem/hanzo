@@ -4,12 +4,13 @@ CachyOS system provisioner powered by Ansible.
 
 ## Rules
 
-1. `ansible.builtin.shell` / `ansible.builtin.command` are the escape hatch. Use only when no module exists (e.g., paru via `kewlfft.aur.aur`, fnm version manager). Always include `name:` and either an explicit `changed_when:` clause or a `creates:` argument so ansible-lint's `no-changed-when` rule is satisfied without disabling it.
-2. Explicit `become:` on every task. The playbook default is `become: false`. Every task declares `become: true` (system operations: package installs, service management, config writes) or `become: false` (user-space: paru, dotfiles, language version managers).
+1. `ansible.builtin.shell` / `ansible.builtin.command` are the escape hatch. Use only when no module exists (e.g., fnm version manager). Always include `name:` and either an explicit `changed_when:` clause or a `creates:` argument so ansible-lint's `no-changed-when` rule is satisfied without disabling it.
+2. Explicit `become:` on every task. The playbook default is `become: false`. Every task declares `become: true` (system operations: package installs, service management, config writes) or `become: false` (user-space: dotfiles, language version managers).
 3. Detection facts that gate task execution are defined in `playbook.yml` `pre_tasks`; roles consume them via `when:` and never redefine them.
 4. One role per domain. Every role must declare a tag.
 5. Don't install packages already in the CachyOS base image. Verify against `cachyos/cachyos:latest` (`pacman -Qe`) before adding to a role's `vars/main.yml`.
 6. Registered variables inside a role must use the role name as prefix (ansible-lint `var-naming[no-role-prefix]` rule). E.g., inside `roles/tools` use `tools_uv_tool_list`, not `uv_tool_list`.
+7. AUR packages are never installed by the playbook. Declare them in `<role>_aur` vars lists as literal `- name` block sequences — `bin/shelly-update` parses these without a YAML library. `shelly-update` (run automatically after full `hanzo` runs) gates every install: mandatory Claude review plus mandatory human approval, pinned trust keys (`trust/keys.conf`, dual-source verified), `makepkg --verifysource` (restoring the PGP check that Shelly's builds skip via `--skippgpcheck`), and a commit-pinned install via `shelly install aur <pkg> --version <sha>`. Hard failures that stop the whole run: a `SKIP` checksum on a non-signature source, a `validpgpkeys` entry outside the pinned set, a signed package (`trust/signed-packages.conf`) whose PKGBUILD drops its pinned key, a foreign package installed on the system but missing from the manifests, or any failed/missing Claude verdict.
 
 ## Commands
 

@@ -12,13 +12,18 @@ desktop_pacman:
   - ghostty
   - wl-clipboard
   - plasma-keyboard
+  - qrca
 
+# AUR manifest — not installed by this role. bin/shelly-update reads
+# every `<role>_aur` list, reviews each PKGBUILD (Claude + human),
+# verifies sources, and installs via Shelly at the approved commit.
+# Keep entries as literal `- name` lines: the list is parsed without a
+# YAML library.
 desktop_aur:
   - google-chrome
   - wifiman-desktop
   - zoom
   - darkly
-  - qrca
 
 desktop_user_groups:
   - video

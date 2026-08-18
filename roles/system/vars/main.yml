@@ -10,6 +10,10 @@ system_packages:
   - httpie
   - whois
   - tmux
+  # Shelly (cachyos repo) is the AUR helper used by bin/shelly-update.
+  # Not `shelly-cli`, which is a conflicting beta channel of the same
+  # tool.
+  - shelly
 
 system_locale: en_US.UTF-8
 

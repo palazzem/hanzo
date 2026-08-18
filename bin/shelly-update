@@ -1,0 +1,398 @@
+#!/usr/bin/env bash
+# shelly-update — attended AUR reconciliation for Hanzo.
+#
+# Installs and updates ONLY the AUR packages declared in the Hanzo
+# `<role>_aur` manifests, each one gated by every layer below. Any
+# verification failure aborts the whole run immediately — there is no
+# partial trust and no fallback path.
+#
+#   1. Claude gate: the claude CLI must be present (abort otherwise)
+#      and logged in — `claude auth login` is started automatically
+#      when it is not.
+#   2. Trust keys: pinned upstream signing keys (trust/keys.conf) are
+#      fetched sha256-pinned from the vendor, imported into the user
+#      keyring, fingerprint-asserted, and cross-checked against an
+#      independent keyserver.
+#   3. Convergence: every foreign (non-repo) package installed on the
+#      system must be in the manifests; unknown AUR packages abort.
+#   4. Per package: the PKGBUILD (or its diff since the last approved
+#      commit) is reviewed by Claude AND by a human — both are
+#      mandatory; a Claude FAIL verdict or an unreadable verdict
+#      aborts. Then the sources are verified (`makepkg
+#      --verifysource`: checksums + PGP) with guards: no SKIP checksum
+#      on non-signature sources, no validpgpkeys outside the pinned
+#      set, and signed packages (trust/signed-packages.conf) must keep
+#      their pinned fingerprint in validpgpkeys. Only then does Shelly
+#      build and install, pinned at the exact approved commit.
+#
+# Shelly builds with `makepkg --skippgpcheck`; the verification above
+# restores the PGP guarantee, and the PKGBUILD checksums (enforced by
+# Shelly's build) bind the verified bytes to what gets installed.
+#
+# HANZO_AUR_UNATTENDED=1 skips only the Claude and human gates — it is
+# reserved for the disposable test container; never set it on a real
+# host. Every cryptographic check still runs.
+
+set -euo pipefail
+
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+RED='\033[0;31m'
+NC='\033[0m'
+log_info()  { echo -e "${GREEN}[shelly-update]${NC} $1"; }
+log_warn()  { echo -e "${YELLOW}[shelly-update]${NC} $1"; }
+log_error() { echo -e "${RED}[shelly-update]${NC} $1" >&2; }
+
+HANZO_DIR="$(cd "$(dirname "$(readlink -f "$0")")/.." && pwd)"
+KEYS_CONF="$HANZO_DIR/trust/keys.conf"
+SIGNED_CONF="$HANZO_DIR/trust/signed-packages.conf"
+
+STATE_DIR="$HOME/.local/state/hanzo"
+STATE_FILE="$STATE_DIR/aur-reviewed"
+CLONE_ROOT="$HOME/.cache/hanzo/aur"
+UNATTENDED="${HANZO_AUR_UNATTENDED:-0}"
+
+# ---------------------------------------------------------------------------
+# Preconditions
+# ---------------------------------------------------------------------------
+if [[ "$(id -u)" -eq 0 ]]; then
+    log_error "shelly-update must run as an unprivileged user (root masks Shelly build failures)."
+    exit 1
+fi
+if ! command -v shelly >/dev/null 2>&1; then
+    log_error "shelly is not installed — run 'hanzo' first (the system role installs it)."
+    exit 1
+fi
+if [[ "$UNATTENDED" != "1" ]] && ! { : </dev/tty; } 2>/dev/null; then
+    log_error "shelly-update requires a terminal: every AUR install is human-gated."
+    exit 1
+fi
+
+# ---------------------------------------------------------------------------
+# Gate 1: Claude. The automated review is mandatory, so the CLI must
+# exist and be authenticated before anything else happens.
+# ---------------------------------------------------------------------------
+claude_logged_in() {
+    # `claude auth status` reads local credentials (no network call).
+    claude auth status --json 2>/dev/null | grep -q '"loggedIn": *true'
+}
+
+claude_gate() {
+    [[ "$UNATTENDED" == "1" ]] && return 0
+    if ! command -v claude >/dev/null 2>&1; then
+        log_error "claude CLI not found — it is required for PKGBUILD review. Aborting."
+        exit 1
+    fi
+    if ! claude_logged_in; then
+        log_info "Claude login required for PKGBUILD review — starting 'claude auth login'..."
+        claude auth login </dev/tty
+        if ! claude_logged_in; then
+            log_error "Claude login did not complete — aborting."
+            exit 1
+        fi
+    fi
+}
+
+# ---------------------------------------------------------------------------
+# Gate 2: pinned trust keys (ported from the former roles/trust
+# dual-source pattern). Keys land in the user keyring: makepkg
+# --verifysource reads it, and PKGBUILDs that verify in build() (e.g.
+# 1password-cli's `gpg --verify op.sig op`) need it there too.
+# ---------------------------------------------------------------------------
+import_trust_keys() {
+    local name fingerprint url asc_sha256 keyserver asc actual tmpring
+    while read -r name fingerprint url asc_sha256 keyserver; do
+        [[ -z "$name" || "$name" == \#* ]] && continue
+
+        asc="$(mktemp)"
+        if ! curl -fsSL --retry 3 --retry-delay 5 --proto '=https' --tlsv1.2 -o "$asc" "$url"; then
+            log_error "trust: failed to download key '$name' from $url"
+            exit 1
+        fi
+        actual="$(sha256sum "$asc" | awk '{print $1}')"
+        if [[ "$actual" != "$asc_sha256" ]]; then
+            log_error "trust: key '$name' sha256 mismatch (expected $asc_sha256, got $actual)"
+            exit 1
+        fi
+
+        # Independent second source: the keyserver copy must carry the
+        # same full fingerprint.
+        tmpring="$(mktemp -d)"
+        chmod 0700 "$tmpring"
+        if ! gpg --homedir "$tmpring" --keyserver "$keyserver" --recv-keys "$fingerprint" >/dev/null 2>&1; then
+            log_error "trust: keyserver $keyserver does not serve key '$name' ($fingerprint)"
+            rm -rf "$tmpring"
+            exit 1
+        fi
+        if ! gpg --homedir "$tmpring" --fingerprint --with-colons "$fingerprint" | grep -q "^fpr:::::::::${fingerprint}:$"; then
+            log_error "trust: keyserver copy of '$name' does not match pinned fingerprint"
+            rm -rf "$tmpring"
+            exit 1
+        fi
+        rm -rf "$tmpring"
+
+        gpg --import "$asc" >/dev/null 2>&1 || true
+        if ! gpg --fingerprint --with-colons "$fingerprint" 2>/dev/null | grep -q "^fpr:::::::::${fingerprint}:$"; then
+            log_error "trust: imported key '$name' does not match pinned fingerprint $fingerprint"
+            exit 1
+        fi
+        rm -f "$asc"
+        log_info "trust: key '$name' verified (vendor sha256 + keyserver) and imported"
+    done < "$KEYS_CONF"
+}
+
+pinned_fingerprints() {
+    awk '!/^#/ && NF { print $2 }' "$KEYS_CONF"
+}
+
+signed_package_fingerprint() { # <pkg> — prints required fingerprint, if any
+    awk -v p="$1" '!/^#/ && $1 == p { print $2 }' "$SIGNED_CONF"
+}
+
+# ---------------------------------------------------------------------------
+# Gate 3: convergence — every foreign package on the system must be in
+# the Hanzo manifests (debug split packages ride with their parent).
+# ---------------------------------------------------------------------------
+collect_aur_packages() {
+    # `<role>_aur` lists are literal `- name` block sequences by
+    # contract (CLAUDE.md rule 7): no YAML library needed.
+    awk '/^[a-z_]+_aur:$/ { in_list = 1; next }
+         in_list && /^  - / { sub(/^  - /, ""); print; next }
+         { in_list = 0 }' "$HANZO_DIR"/roles/*/vars/main.yml
+}
+
+convergence_check() { # <manifest newline-list>
+    local manifest="$1" pkg base extras=()
+    while IFS= read -r pkg; do
+        [[ -z "$pkg" ]] && continue
+        grep -qx "$pkg" <<< "$manifest" && continue
+        base="${pkg%-debug}"
+        if [[ "$base" != "$pkg" ]] && grep -qx "$base" <<< "$manifest"; then
+            continue
+        fi
+        extras+=("$pkg")
+    done < <(pacman -Qmq 2>/dev/null || true)
+    if [[ "${#extras[@]}" -gt 0 ]]; then
+        log_error "Foreign packages installed but not in the Hanzo AUR manifests: ${extras[*]}"
+        log_error "The system must converge: remove them or add them to a role's <role>_aur list."
+        exit 1
+    fi
+}
+
+# ---------------------------------------------------------------------------
+# State
+# ---------------------------------------------------------------------------
+state_lookup() { # <pkg> — prints the last approved commit, if any
+    if [[ -f "$STATE_FILE" ]]; then
+        awk -v p="$1" '$1 == p { print $2 }' "$STATE_FILE"
+    fi
+}
+
+state_record() { # <pkg> <sha>
+    local tmp
+    tmp="$(mktemp)"
+    if [[ -f "$STATE_FILE" ]]; then
+        awk -v p="$1" '$1 != p' "$STATE_FILE" > "$tmp"
+    fi
+    echo "$1 $2" >> "$tmp"
+    mv "$tmp" "$STATE_FILE"
+}
+
+# ---------------------------------------------------------------------------
+# Gate 4a: Claude review — mandatory. A failed invocation, a missing
+# verdict line, or a FAIL verdict aborts the entire run. No timeout:
+# the review completes or the run stops.
+# ---------------------------------------------------------------------------
+claude_review() { # <pkg> <clone> <reviewed> <head>
+    local pkg="$1" clone="$2" reviewed="$3" head="$4" content subject review
+    if [[ -n "$reviewed" ]]; then
+        subject="PKGBUILD repo diff"
+        content="$(git -C "$clone" diff "$reviewed" "$head")"
+    else
+        subject="full PKGBUILD"
+        content="$(git -C "$clone" show "$head:PKGBUILD")"
+    fi
+    log_info "Claude security review (mandatory)..."
+    if ! review="$(printf '%s\n' "$content" | claude -p "Security-review this AUR ${subject} for package '${pkg}' before it is built and installed. Flag: changed source URLs or new domains; checksum edits without a matching version bump; removed or weakened signature verification (validpgpkeys, .sig sources, gpg --verify calls); network access or curl-piped shell in build()/package()/prepare() or .install scriptlets; writes outside \$pkgdir/\$srcdir; obfuscated or base64 payloads; added binary blobs; wrapper scripts around the packaged binary. Be terse. End with exactly one line: VERDICT: PASS|WARN|FAIL — <reason>.")"; then
+        log_error "$pkg: Claude review failed to run — stopping everything."
+        exit 1
+    fi
+    printf '%s\n' "$review"
+    if ! printf '%s\n' "$review" | grep -qE 'VERDICT: *(PASS|WARN|FAIL)'; then
+        log_error "$pkg: Claude review returned no verdict — stopping everything."
+        exit 1
+    fi
+    if printf '%s\n' "$review" | grep -qE 'VERDICT: *FAIL'; then
+        log_error "$pkg: Claude verdict is FAIL — stopping everything. Investigate before re-running."
+        exit 1
+    fi
+}
+
+# ---------------------------------------------------------------------------
+# Gate 4b: source verification. Guards first, then makepkg
+# --verifysource (checksums + PGP against the pinned user keyring).
+# Any failure aborts the run.
+# ---------------------------------------------------------------------------
+verify_sources() { # <pkg> <clone>
+    local pkg="$1" clone="$2" srcinfo bad fp required
+    # --printsrcinfo sources the PKGBUILD; it runs only after review.
+    srcinfo="$(cd "$clone" && makepkg --printsrcinfo)"
+
+    # Guard: SKIP checksums are acceptable solely for detached
+    # signature files — anything else would unbind our verification
+    # from the bytes Shelly builds.
+    bad="$(awk -F' = ' '
+        { sub(/^[ \t]+/, "") }
+        $1 ~ /^source(_[a-zA-Z0-9_]+)?$/ {
+            suffix = $1; sub(/^source/, "", suffix)
+            src[suffix, ++nsrc[suffix]] = $2
+        }
+        $1 ~ /^(md5|sha1|sha224|sha256|sha384|sha512|b2)sums(_[a-zA-Z0-9_]+)?$/ {
+            type = $1
+            suffix = type; sub(/^[a-z0-9]+sums/, "", suffix)
+            idx = ++nsum[type]
+            if ($2 == "SKIP") {
+                s = src[suffix, idx]
+                if (s !~ /\.(sig|asc)([?#].*)?$/)
+                    print (s == "" ? "<unknown source>" : s)
+            }
+        }' <<< "$srcinfo")"
+    if [[ -n "$bad" ]]; then
+        log_error "$pkg: SKIP checksum on non-signature source(s):"
+        printf '%s\n' "$bad" >&2
+        log_error "$pkg: stopping everything — handle this package manually."
+        exit 1
+    fi
+
+    # Guard: every validpgpkeys entry must be one of our pinned keys —
+    # a swapped signing key aborts instead of verifying against an
+    # attacker-supplied key.
+    while IFS= read -r fp; do
+        [[ -z "$fp" ]] && continue
+        if ! pinned_fingerprints | grep -qix "$fp"; then
+            log_error "$pkg: PKGBUILD declares signing key $fp which is not pinned in trust/keys.conf — stopping everything."
+            exit 1
+        fi
+    done < <(awk -F' = ' '{ sub(/^[ \t]+/, "") } $1 == "validpgpkeys" { print $2 }' <<< "$srcinfo")
+
+    # Guard: signed packages must KEEP their signature verification —
+    # a PKGBUILD update that drops validpgpkeys silently downgrades
+    # PGP-verified trust to checksum-only trust.
+    required="$(signed_package_fingerprint "$pkg")"
+    if [[ -n "$required" ]]; then
+        if ! awk -F' = ' '{ sub(/^[ \t]+/, "") } $1 == "validpgpkeys" { print $2 }' <<< "$srcinfo" | grep -qix "$required"; then
+            log_error "$pkg: upstream signs its artifacts, but the PKGBUILD no longer declares the pinned key $required in validpgpkeys — stopping everything."
+            exit 1
+        fi
+    fi
+
+    log_info "$pkg: verifying sources (checksums + PGP signatures)..."
+    if ! (cd "$clone" && makepkg --verifysource); then
+        log_error "$pkg: source verification failed — stopping everything."
+        exit 1
+    fi
+}
+
+# ---------------------------------------------------------------------------
+# Per-package reconciliation
+# ---------------------------------------------------------------------------
+process_package() { # <pkg> — sets RESULT to installed|current|skipped
+    local pkg="$1"
+    local clone="$CLONE_ROOT/$pkg" head reviewed short answer
+    RESULT=skipped
+
+    if [[ ! -d "$clone/.git" ]]; then
+        if ! git clone -q "https://aur.archlinux.org/${pkg}.git" "$clone"; then
+            log_error "$pkg: AUR clone failed — stopping everything."
+            exit 1
+        fi
+    fi
+    if ! git -C "$clone" fetch -q origin; then
+        log_error "$pkg: AUR fetch failed — stopping everything."
+        exit 1
+    fi
+    head="$(git -C "$clone" rev-parse origin/HEAD 2>/dev/null \
+        || git -C "$clone" rev-parse origin/master)"
+    short="${head:0:12}"
+    reviewed="$(state_lookup "$pkg")"
+
+    if pacman -Q "$pkg" >/dev/null 2>&1 && [[ "$reviewed" == "$head" ]]; then
+        log_info "$pkg: up to date at $short"
+        RESULT=current
+        return 0
+    fi
+
+    git -C "$clone" checkout -q --detach "$head"
+
+    if [[ "$UNATTENDED" != "1" ]]; then
+        echo ""
+        log_info "── ${pkg} @ ${short} ──"
+        if [[ -n "$reviewed" ]]; then
+            log_info "Changes since your last approved commit (${reviewed:0:12}):"
+            git -C "$clone" diff "$reviewed" "$head" | "${PAGER:-less}"
+        else
+            log_info "New package — repo files: $(git -C "$clone" ls-files | tr '\n' ' ')"
+            "${PAGER:-less}" "$clone/PKGBUILD"
+        fi
+        claude_review "$pkg" "$clone" "$reviewed" "$head"
+        read -rp "Install $pkg at $short? [y/N] " answer </dev/tty
+        if [[ ! "$answer" =~ ^[Yy]$ ]]; then
+            log_warn "$pkg: skipped (not approved)"
+            return 0
+        fi
+    fi
+
+    verify_sources "$pkg" "$clone"
+
+    log_info "$pkg: building and installing at $short via Shelly..."
+    # Stdin from `yes` answers Shelly's own prompts (the gates above
+    # are the real controls); process substitution avoids a pipefail
+    # false negative from yes's SIGPIPE exit. sudo still prompts on
+    # the tty.
+    if ! shelly install aur "$pkg" --version "$head" < <(yes); then
+        log_error "$pkg: Shelly install failed — stopping everything."
+        exit 1
+    fi
+    state_record "$pkg" "$head"
+    log_info "$pkg: installed"
+    RESULT=installed
+}
+
+# ---------------------------------------------------------------------------
+# Main
+# ---------------------------------------------------------------------------
+# Shelly first-run bug: its sudo-elevated half root-owns these dirs if
+# they don't exist yet, breaking later unprivileged downloads.
+mkdir -p "$HOME/.cache/Shelly" "$HOME/.local/share/Shelly"
+mkdir -p "$STATE_DIR" "$CLONE_ROOT"
+
+claude_gate
+import_trust_keys
+
+manifest="$(collect_aur_packages)"
+if [[ -z "$manifest" ]]; then
+    log_info "No AUR packages declared."
+    exit 0
+fi
+convergence_check "$manifest"
+
+mapfile -t packages <<< "$manifest"
+log_info "Reconciling ${#packages[@]} AUR package(s): ${packages[*]}"
+
+installed=()
+current=()
+skipped=()
+for pkg in "${packages[@]}"; do
+    process_package "$pkg"
+    case "$RESULT" in
+        installed) installed+=("$pkg") ;;
+        current)   current+=("$pkg") ;;
+        *)         skipped+=("$pkg") ;;
+    esac
+done
+
+echo ""
+log_info "Done: ${#installed[@]} installed, ${#current[@]} current, ${#skipped[@]} skipped"
+if [[ "${#skipped[@]}" -gt 0 ]]; then
+    log_warn "Skipped (re-run shelly-update to review again): ${skipped[*]}"
+fi

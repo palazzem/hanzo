@@ -9,6 +9,6 @@ languages_go_packages:
   - go
 
 languages_node_packages:
-  - fnm-bin
+  - fnm
 
 languages_gopath: ~/.golang

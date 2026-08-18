@@ -129,6 +129,7 @@ fi
 # ---------------------------------------------------------------------------
 mkdir -p "$HOME/.local/bin"
 ln -sf "$HANZO_DIR/bin/hanzo" "$HOME/.local/bin/hanzo"
+ln -sf "$HANZO_DIR/bin/shelly-update" "$HOME/.local/bin/shelly-update"
 
 if [[ ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
     log_warn "\$HOME/.local/bin is not in your PATH — add it to your shell config"

@@ -22,18 +22,23 @@ This will:
 
 1. Install [uv](https://docs.astral.sh/uv/) and [ansible-core](https://docs.ansible.com/ansible-core/)
 2. Clone this repository to `~/.local/src/hanzo`
-3. Install required Galaxy collections (`community.general`, `kewlfft.aur`)
+3. Install required Galaxy collections (`community.general`)
 4. Prompt for your name and email (first run only)
 5. Run the full provisioning (prompts once for your sudo password)
+6. Reconcile AUR packages via `shelly-update` ([Shelly](https://github.com/Seafoam-Labs/Shelly-ALPM)-powered): every PKGBUILD passes a mandatory Claude security review AND your explicit approval, and its sources are checksum- and signature-verified against pinned keys before the build
 
 ## Usage
 
 After bootstrap, re-run provisioning at any time:
 
 ```bash
-hanzo              # full provisioning run
-hanzo --check      # dry run (shows what would change)
+hanzo              # full run: converge the system, then reconcile AUR packages
+hanzo --check      # dry run (shows what would change; no AUR reconciliation)
+hanzo --no-aur     # converge only; run shelly-update later
+shelly-update      # AUR reconciliation alone
 ```
+
+Every full run ends with **`shelly-update`**, the attended AUR reconciliation. It requires the `claude` CLI (starting `claude auth login` if needed), verifies the pinned upstream signing keys, and refuses to run while any AUR package installed on the system is missing from the Hanzo manifests. Then, per package: new packages show their full PKGBUILD and updated packages the diff since your last approved commit; Claude reviews it (a FAIL verdict stops everything) and you confirm explicitly; sources are checksum- and signature-verified before Shelly builds at that exact reviewed commit. Without a terminal (cron, CI, piped runs) the reconciliation is skipped and reported as pending.
 
 For selective provisioning, pass `--tags <role>` to run a subset of the playbook:
 
@@ -66,6 +71,8 @@ Hanzo uses Ansible to provision the local machine via `ansible-playbook playbook
 - `ansible.cfg` — local connection, become defaults, roles path
 - `requirements.yml` — Galaxy collection dependencies (pinned versions)
 - `roles/` — one directory per configured domain; each role declares a tag for selective `--tags <role>` runs
+- `bin/hanzo` — the CLI: runs the playbook, then hands off to `shelly-update`. The playbook itself requires no passwordless sudo at any point.
+- `bin/shelly-update` — attended AUR reconciliation: Claude + human review of every PKGBUILD, pinned trust keys (`trust/keys.conf`, fetched sha256-pinned from the vendor and cross-checked against a keyserver), `makepkg --verifysource` (checksums + PGP), convergence enforcement (no unmanaged AUR packages), and commit-pinned Shelly installs. Signed upstreams (`trust/signed-packages.conf`) must keep their signature verification or the run aborts.
 
 The `hardware` role is dispatched by `ansible_facts['product_name']` and skipped automatically inside containers and other non-systemd contexts (see `CLAUDE.md` rule 3).
 

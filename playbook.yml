@@ -12,15 +12,6 @@
   # otherwise drop pending notifications that idempotent tasks never re-send.
   force_handlers: true
 
-  vars:
-    # Transient sudoers drop-in granting NOPASSWD: /usr/bin/pacman
-    # (for paru's nested sudo calls under become: false AUR tasks)
-    # and NOPASSWD on the exact rm command the bin/hanzo trap uses
-    # to remove this file on interrupt. Installed in the block setup
-    # below, removed in `always:` — and again by the shell trap on
-    # SIGINT/SIGTERM, which ansible primitives cannot cover.
-    hanzo_aur_sudoers: "/etc/sudoers.d/hanzo-aur"
-
   pre_tasks:
     # Stat-gate systemd-touching tasks on the sd_booted(3) marker
     # /run/systemd/system — absent under `docker build` RUN, chroots,
@@ -77,80 +68,57 @@
       when: hanzo_config_stat.stat.exists
       tags: [always]
 
+  # AUR packages are deliberately not installed here: bin/shelly-update
+  # reviews and installs the `<role>_aur` manifests via Shelly after
+  # this play converges, so the playbook itself needs no NOPASSWD
+  # sudoers grant of any kind.
   tasks:
-    - name: Provision with transient NOPASSWD grant for AUR helper
-      block:
-        - name: Install transient sudoers drop-in for AUR helper
-          ansible.builtin.copy:
-            dest: "{{ hanzo_aur_sudoers }}"
-            content: |
-              {{ ansible_facts['user_id'] }} ALL=(ALL) NOPASSWD: /usr/bin/pacman, /usr/bin/rm {{ hanzo_aur_sudoers }}
-            owner: root
-            group: root
-            mode: "0440"
-            validate: "visudo -cf %s"
-          become: true
-          tags: [always]
+    - name: Run hardware role
+      ansible.builtin.import_role:
+        name: hardware
+      tags: [hardware]
 
-        - name: Run hardware role
-          ansible.builtin.import_role:
-            name: hardware
-          tags: [hardware]
+    - name: Run system role
+      ansible.builtin.import_role:
+        name: system
+      tags: [system, always]
 
-        - name: Run system role
-          ansible.builtin.import_role:
-            name: system
-          tags: [system, always]
+    - name: Run desktop role
+      ansible.builtin.import_role:
+        name: desktop
+      tags: [desktop]
 
-        - name: Run desktop role
-          ansible.builtin.import_role:
-            name: desktop
-          tags: [desktop]
+    - name: Run virtualization role
+      ansible.builtin.import_role:
+        name: virtualization
+      tags: [virtualization]
 
-        - name: Run virtualization role
-          ansible.builtin.import_role:
-            name: virtualization
-          tags: [virtualization]
+    - name: Run containers role
+      ansible.builtin.import_role:
+        name: containers
+      tags: [containers]
 
-        - name: Run containers role
-          ansible.builtin.import_role:
-            name: containers
-          tags: [containers]
+    - name: Run languages role
+      ansible.builtin.import_role:
+        name: languages
+      tags: [languages]
 
-        - name: Run trust role
-          ansible.builtin.import_role:
-            name: trust
-          tags: [trust, always]
+    - name: Run tools role
+      ansible.builtin.import_role:
+        name: tools
+      tags: [tools]
 
-        - name: Run languages role
-          ansible.builtin.import_role:
-            name: languages
-          tags: [languages]
+    - name: Run ai role
+      ansible.builtin.import_role:
+        name: ai
+      tags: [ai]
 
-        - name: Run tools role
-          ansible.builtin.import_role:
-            name: tools
-          tags: [tools]
+    - name: Run security role
+      ansible.builtin.import_role:
+        name: security
+      tags: [security]
 
-        - name: Run ai role
-          ansible.builtin.import_role:
-            name: ai
-          tags: [ai]
-
-        - name: Run security role
-          ansible.builtin.import_role:
-            name: security
-          tags: [security]
-
-        - name: Run home role
-          ansible.builtin.import_role:
-            name: home
-          tags: [home]
-
-      always:
-        - name: Remove transient sudoers drop-in for AUR helper
-          ansible.builtin.file:
-            path: "{{ hanzo_aur_sudoers }}"
-            state: absent
-          become: true
-          tags: [always]
+    - name: Run home role
+      ansible.builtin.import_role:
+        name: home
+      tags: [home]

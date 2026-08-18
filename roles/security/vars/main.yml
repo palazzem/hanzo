@@ -1,12 +1,13 @@
 ---
 # Security tooling. Proton VPN ships via pacman; 1Password (GUI + CLI)
-# is AUR-only and depends on the AgileBits GPG key seeded by
-# roles/trust — playbook.yml orders trust before security, and trust is
-# tagged `always` so any --tags security run still imports the key
-# first.
+# is AUR-only. Its source signatures are verified by bin/shelly-update
+# against the pinned AgileBits key (trust/keys.conf and
+# trust/signed-packages.conf).
 security_pacman:
   - proton-vpn-gtk-app
 
+# AUR manifest — consumed by bin/shelly-update, not by this role. Keep
+# entries as literal `- name` lines (parsed without a YAML library).
 security_aur:
   - 1password
   - 1password-cli
