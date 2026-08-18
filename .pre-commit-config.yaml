@@ -6,7 +6,7 @@ default_install_hook_types:
 
 repos:
     - repo: https://github.com/pre-commit/pre-commit-hooks
-      rev: v6.0.0
+      rev: 3e8a8703264a2f4a69428a0aa4dcb512790b2c8c  # frozen: v6.0.0
       hooks:
           - id: check-added-large-files
           - id: check-case-conflict
@@ -28,32 +28,32 @@ repos:
           - id: trailing-whitespace
 
     - repo: https://github.com/shellcheck-py/shellcheck-py
-      rev: v0.11.0.1
+      rev: 745eface02aef23e168a8afb6b5737818efbea95  # frozen: v0.11.0.1
       hooks:
           - id: shellcheck
 
     - repo: https://github.com/ansible/ansible-lint
-      rev: v26.8.0
+      rev: 665d9e07a1943254d2910faffc106adaf7ea7294  # frozen: v26.8.0
       hooks:
           - id: ansible-lint
 
     - repo: https://github.com/gitleaks/gitleaks
-      rev: v8.30.0
+      rev: 2ca41cc1372d1e939a6a879f18cdc19fc1cac1ce  # frozen: v8.30.0
       hooks:
           - id: gitleaks
 
     - repo: https://github.com/rhysd/actionlint
-      rev: v1.7.12
+      rev: 914e7df21a07ef503a81201c76d2b11c789d3fca  # frozen: v1.7.12
       hooks:
           - id: actionlint
 
     - repo: https://github.com/codespell-project/codespell
-      rev: v2.4.3
+      rev: 57b21406f092110c18776e39b0bda50d37c945c8  # frozen: v2.4.3
       hooks:
           - id: codespell
 
     - repo: https://github.com/compilerla/conventional-pre-commit
-      rev: v4.4.0
+      rev: 3db014c16a9d31997ab8c07a4d61fcce936c8f0d  # frozen: v4.4.0
       hooks:
           - id: conventional-pre-commit
             stages: [commit-msg]
