@@ -65,7 +65,7 @@
     # Namespaced under `hanzo_user_config` so the file's keys never land
     # in play scope directly: `~/.config/hanzo/config.yml` is
     # user-writable, and an unfiltered load outranks role vars — a
-    # compromised account could plant `system_packages` and have a
+    # compromised account could plant `system_pacman` and have a
     # `become: true` task install it as root.
     - name: Load Hanzo user configuration if present
       ansible.builtin.include_vars:

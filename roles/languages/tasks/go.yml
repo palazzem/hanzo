@@ -1,7 +1,7 @@
 ---
 - name: Install Go toolchain packages
   community.general.pacman:
-    name: "{{ languages_go_packages }}"
+    name: "{{ languages_go_pacman }}"
   become: true
 
 - name: Create GOPATH directories
@@ -10,6 +10,6 @@
     state: directory
     mode: "0755"
   loop:
-    - "{{ languages_gopath | expanduser }}"
-    - "{{ languages_gopath | expanduser }}/bin"
+    - "{{ languages_gopath }}"
+    - "{{ languages_gopath }}/bin"
   become: false

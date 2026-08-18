@@ -1,10 +1,13 @@
 ---
-hardware_asus_packages:
+hardware_asus_pacman:
   - asusctl
   - rog-control-center
 
 hardware_asus_services:
   - asusd
+
+hardware_gz302_pacman:
+  - keyd
 
 # Disable Panel Replay (DC_DISABLE_REPLAY=0x400) on the Strix Halo OLED panel
 # to prevent scrolling artifacts and flicker on DCN 3.5.

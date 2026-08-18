@@ -1,5 +1,5 @@
 ---
-tools_dev_packages:
+tools_dev_pacman:
   - github-cli
 
 tools_uv_tools:
@@ -10,7 +10,7 @@ tools_uv_tools:
 tools_npm_global_packages:
   - "@anthropic-ai/claude-code"
 
-tools_iac_packages:
+tools_iac_pacman:
   - terraform
   - tflint
 

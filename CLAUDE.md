@@ -8,7 +8,7 @@ CachyOS system provisioner powered by Ansible.
 2. Explicit `become:` on every task. The playbook default is `become: false`. Every task declares `become: true` (system operations: package installs, service management, config writes) or `become: false` (user-space: dotfiles, language version managers).
 3. Detection facts that gate task execution are defined in `playbook.yml` `pre_tasks`; roles consume them via `when:` and never redefine them.
 4. One role per domain. Every role must declare a tag.
-5. Don't install packages already in the CachyOS base image. Verify against `cachyos/cachyos:latest` (`pacman -Qe`) before adding to a role's `vars/main.yml`.
+5. Don't install packages already in the CachyOS base image. Verify against `cachyos/cachyos:latest` (`pacman -Qe`) before adding to a role's package list.
 6. Registered variables inside a role must use the role name as prefix (ansible-lint `var-naming[no-role-prefix]` rule). E.g., inside `roles/tools` use `tools_uv_tool_list`, not `uv_tool_list`.
 7. AUR packages are never managed by Ansible. The package set lives in `bin/hanzo-aur`, which installs it via `shelly install aur` — Shelly shows each PKGBUILD diff for human review before building, and packages with signing upstreams (1Password) are PGP-verified at a pinned AUR commit first. `bin/hanzo` runs it after the playbook — `--check` skips it, `--ci` (container only) auto-accepts Shelly's prompts.
 
@@ -37,6 +37,14 @@ Roles tagged `always` execute on every invocation, including selective runs — 
 All testing goes through the CachyOS container — see the Commands section above.
 
 ## Coding Guidelines
+
+### Ansible Conventions
+
+- Package list variables are named after the install channel that consumes them: `<prefix>_pacman` for pacman sets (`system_pacman`, `tools_iac_pacman`), `tools_uv_tools` and `tools_npm_global_packages` for the tool-manager channels.
+- Home paths are built from `{{ ansible_facts.env.HOME }}` in the variable value.
+- Role variables live in `defaults/main.yml`; `vars/main.yml` holds only values a user config must not override.
+- Every config file Hanzo deploys — template or inline `content:` — opens with `# Managed by Hanzo. Do not edit manually.` in the target format's comment syntax.
+- Unconditional task-file splits use `ansible.builtin.import_tasks`. `include_tasks` is for conditional includes (`when:` on the include) and parameterized includes (`vars:` on the include).
 
 ### Shell Scripts
 

@@ -1,5 +1,5 @@
 ---
 - name: Install Python toolchain packages
   community.general.pacman:
-    name: "{{ languages_python_packages }}"
+    name: "{{ languages_python_pacman }}"
   become: true

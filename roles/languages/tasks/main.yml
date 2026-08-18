@@ -1,12 +1,12 @@
 ---
 - name: Configure Python
-  ansible.builtin.include_tasks: python.yml
+  ansible.builtin.import_tasks: python.yml
 
 - name: Configure Rust
-  ansible.builtin.include_tasks: rust.yml
+  ansible.builtin.import_tasks: rust.yml
 
 - name: Configure Node.js
-  ansible.builtin.include_tasks: node.yml
+  ansible.builtin.import_tasks: node.yml
 
 - name: Configure Go
-  ansible.builtin.include_tasks: go.yml
+  ansible.builtin.import_tasks: go.yml

@@ -1,7 +1,7 @@
 ---
 - name: Install Node.js packages
   community.general.pacman:
-    name: "{{ languages_node_packages }}"
+    name: "{{ languages_node_pacman }}"
   become: true
 
 # Each shell task runs in a fresh process, so we must eval fnm env to
