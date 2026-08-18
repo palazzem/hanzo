@@ -22,7 +22,7 @@ manual_steps() {
     local rule="━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo ""
     echo -e "${BLUE}${rule}${NC}"
-    echo -e "  ${BOLD}Provisioning complete.${NC} Three steps are still yours to run."
+    echo -e "  ${BOLD}Hanzo is done here.${NC} Three steps are still yours to run."
     echo -e "${BLUE}${rule}${NC}"
     echo ""
     echo -e "  ${GREEN}${BOLD}1${NC}  ${BOLD}ProtonVPN over WireGuard${NC}"
@@ -88,5 +88,8 @@ ansible-playbook playbook.yml "${ARGS[@]}"
 # Shelly equivalent, so --check skips it.
 if [ "$MODE" != "--check" ]; then
     "$HANZO_DIR/bin/hanzo-aur" ${MODE:+"$MODE"}
-    manual_steps
 fi
+
+# The handoff closes every run: a dry run and CI must show the same
+# steps a real run does.
+manual_steps
