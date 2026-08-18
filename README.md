@@ -28,6 +28,7 @@ This will:
 5. Install [ansible-core](https://docs.ansible.com/ansible-core/)
 6. Install required Galaxy collections (`community.general`)
 7. Run the full provisioning: the playbook (prompts once for your sudo password), then the AUR package set through Shelly (one PKGBUILD review per package)
+8. Print manual steps automation cannot cover
 
 ## Usage
 
