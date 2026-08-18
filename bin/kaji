@@ -21,10 +21,14 @@
 #      mandatory; a Claude FAIL verdict or an unreadable verdict
 #      aborts. Then the sources are verified (`makepkg
 #      --verifysource`: checksums + PGP) with guards: no SKIP checksum
-#      on non-signature sources, no validpgpkeys outside the pinned
-#      set, and signed packages (trust/signed-packages.conf) must keep
-#      their pinned fingerprint in validpgpkeys. Only then does Shelly
-#      build and install, pinned at the exact approved commit.
+#      on non-signature sources (checked against the local filename
+#      AND the URL, so `name::url` renames cannot evade it), no
+#      validpgpkeys outside the pinned set, and signed packages
+#      (trust/signed-packages.conf) must keep an actually-executed
+#      signature verification: a detached .sig source for mode
+#      "source", or kaji's own in-archive verification for mode
+#      "embedded". Only then does Shelly build and install, pinned at
+#      the exact approved commit.
 #
 # Shelly builds with `makepkg --skippgpcheck`; the verification above
 # restores the PGP guarantee, and the PKGBUILD checksums (enforced by
@@ -146,8 +150,8 @@ pinned_fingerprints() {
     awk '!/^#/ && NF { print $2 }' "$KEYS_CONF"
 }
 
-signed_package_fingerprint() { # <pkg> — prints required fingerprint, if any
-    awk -v p="$1" '!/^#/ && $1 == p { print $2 }' "$SIGNED_CONF"
+signed_package_entry() { # <pkg> — prints "fingerprint mode [sigfile datafile]", if any
+    awk -v p="$1" '!/^#/ && $1 == p { print $2, $3, $4, $5 }' "$SIGNED_CONF"
 }
 
 # ---------------------------------------------------------------------------
@@ -215,7 +219,7 @@ claude_review() { # <pkg> <clone> <reviewed> <head>
         content="$(git -C "$clone" show "$head:PKGBUILD")"
     fi
     log_info "Claude security review (mandatory)..."
-    if ! review="$(printf '%s\n' "$content" | claude -p "Security-review this AUR ${subject} for package '${pkg}' before it is built and installed. Flag: changed source URLs or new domains; checksum edits without a matching version bump; removed or weakened signature verification (validpgpkeys, .sig sources, gpg --verify calls); network access or curl-piped shell in build()/package()/prepare() or .install scriptlets; writes outside \$pkgdir/\$srcdir; obfuscated or base64 payloads; added binary blobs; wrapper scripts around the packaged binary. Be terse. End with exactly one line: VERDICT: PASS|WARN|FAIL — <reason>.")"; then
+    if ! review="$(printf '%s\n' "$content" | claude -p "Security-review this AUR ${subject} for package '${pkg}' before it is built and installed. Flag: changed source URLs or new domains; source renames via the 'name::url' syntax, especially .sig/.asc-named files that are consumed as data or executed rather than used as detached signatures; checksum edits without a matching version bump; removed or weakened signature verification (validpgpkeys, .sig sources, gpg --verify calls); network access or curl-piped shell in build()/package()/prepare() or .install scriptlets; writes outside \$pkgdir/\$srcdir; obfuscated or base64 payloads; added binary blobs; wrapper scripts around the packaged binary. Be terse. End with exactly one line: VERDICT: PASS|WARN|FAIL — <reason>.")"; then
         log_error "$pkg: Claude review failed to run — stopping everything."
         exit 1
     fi
@@ -236,14 +240,30 @@ claude_review() { # <pkg> <clone> <reviewed> <head>
 # Any failure aborts the run.
 # ---------------------------------------------------------------------------
 verify_sources() { # <pkg> <clone>
-    local pkg="$1" clone="$2" srcinfo bad fp required
+    local pkg="$1" clone="$2" srcinfo bad fp required req_fpr req_mode req_sig req_data
     # --printsrcinfo sources the PKGBUILD; it runs only after review.
     srcinfo="$(cd "$clone" && makepkg --printsrcinfo)"
 
     # Guard: SKIP checksums are acceptable solely for detached
     # signature files — anything else would unbind our verification
-    # from the bytes Shelly builds.
+    # from the bytes Shelly builds. A source entry counts as a
+    # signature only when BOTH its local filename (left of a `::`
+    # rename, else the URL basename) and its remote URL end in
+    # .sig/.asc — matching the entry suffix alone is evadable via the
+    # rename syntax (`payload::https://host/x.sig`).
     bad="$(awk -F' = ' '
+        function is_sig(entry,    localname, url) {
+            url = entry
+            localname = entry
+            if (match(entry, /::/)) {
+                localname = substr(entry, 1, RSTART - 1)
+                url = substr(entry, RSTART + 2)
+            } else {
+                sub(/[?#].*$/, "", localname)
+                sub(/^.*\//, "", localname)
+            }
+            return (localname ~ /\.(sig|asc)$/ && url ~ /\.(sig|asc)([?#].*)?$/)
+        }
         { sub(/^[ \t]+/, "") }
         $1 ~ /^source(_[a-zA-Z0-9_]+)?$/ {
             suffix = $1; sub(/^source/, "", suffix)
@@ -255,7 +275,7 @@ verify_sources() { # <pkg> <clone>
             idx = ++nsum[type]
             if ($2 == "SKIP") {
                 s = src[suffix, idx]
-                if (s !~ /\.(sig|asc)([?#].*)?$/)
+                if (s == "" || !is_sig(s))
                     print (s == "" ? "<unknown source>" : s)
             }
         }' <<< "$srcinfo")"
@@ -277,15 +297,54 @@ verify_sources() { # <pkg> <clone>
         fi
     done < <(awk -F' = ' '{ sub(/^[ \t]+/, "") } $1 == "validpgpkeys" { print $2 }' <<< "$srcinfo")
 
-    # Guard: signed packages must KEEP their signature verification —
-    # a PKGBUILD update that drops validpgpkeys silently downgrades
-    # PGP-verified trust to checksum-only trust.
-    required="$(signed_package_fingerprint "$pkg")"
+    # Guard: signed packages must KEEP an actually-executed signature
+    # verification. Declaring validpgpkeys is not enough: with no
+    # detached .sig/.asc source, `makepkg --verifysource` never
+    # consults it, and a PKGBUILD-internal `gpg --verify` in check()
+    # is skipped under Shelly's --skippgpcheck (it sets makepkg's
+    # SKIPPGPCHECK=1). Mode "source" requires a detached signature
+    # source; mode "embedded" makes kaji verify the in-archive
+    # signature itself after download.
+    required="$(signed_package_entry "$pkg")"
+    req_fpr="" req_mode="" req_sig="" req_data=""
     if [[ -n "$required" ]]; then
-        if ! awk -F' = ' '{ sub(/^[ \t]+/, "") } $1 == "validpgpkeys" { print $2 }' <<< "$srcinfo" | grep -qix "$required"; then
-            log_error "$pkg: upstream signs its artifacts, but the PKGBUILD no longer declares the pinned key $required in validpgpkeys — stopping everything."
+        read -r req_fpr req_mode req_sig req_data <<< "$required"
+        if ! awk -F' = ' '{ sub(/^[ \t]+/, "") } $1 == "validpgpkeys" { print $2 }' <<< "$srcinfo" | grep -qix "$req_fpr"; then
+            log_error "$pkg: upstream signs its artifacts, but the PKGBUILD no longer declares the pinned key $req_fpr in validpgpkeys — stopping everything."
             exit 1
         fi
+        case "$req_mode" in
+            source)
+                if ! awk -F' = ' '
+                    function is_sig(entry,    localname, url) {
+                        url = entry; localname = entry
+                        if (match(entry, /::/)) {
+                            localname = substr(entry, 1, RSTART - 1)
+                            url = substr(entry, RSTART + 2)
+                        } else {
+                            sub(/[?#].*$/, "", localname)
+                            sub(/^.*\//, "", localname)
+                        }
+                        return (localname ~ /\.(sig|asc)$/ && url ~ /\.(sig|asc)([?#].*)?$/)
+                    }
+                    { sub(/^[ \t]+/, "") }
+                    $1 ~ /^source(_[a-zA-Z0-9_]+)?$/ && is_sig($2) { found = 1 }
+                    END { exit !found }' <<< "$srcinfo"; then
+                    log_error "$pkg: signed package no longer ships a detached .sig/.asc source — makepkg would verify nothing. Stopping everything."
+                    exit 1
+                fi
+                ;;
+            embedded)
+                if [[ -z "$req_sig" || -z "$req_data" ]]; then
+                    log_error "$pkg: embedded mode requires sigfile and datafile in trust/signed-packages.conf — stopping everything."
+                    exit 1
+                fi
+                ;;
+            *)
+                log_error "$pkg: unknown signature mode '$req_mode' in trust/signed-packages.conf — stopping everything."
+                exit 1
+                ;;
+        esac
     fi
 
     log_info "$pkg: verifying sources (checksums + PGP signatures)..."
@@ -293,6 +352,56 @@ verify_sources() { # <pkg> <clone>
         log_error "$pkg: source verification failed — stopping everything."
         exit 1
     fi
+
+    if [[ "$req_mode" == "embedded" ]]; then
+        verify_embedded_signature "$pkg" "$clone" "$srcinfo" "$req_fpr" "$req_sig" "$req_data"
+    fi
+}
+
+# The signature travels inside the source archive: extract the
+# downloaded (already checksum-verified) sources and verify the
+# signature against the pinned key directly. gpg's VALIDSIG status
+# line carries the signing (sub)key fingerprint and the primary key
+# fingerprint — the pinned fingerprint must appear on it.
+verify_embedded_signature() { # <pkg> <clone> <srcinfo> <fingerprint> <sigfile> <datafile>
+    local pkg="$1" clone="$2" srcinfo="$3" fingerprint="$4" sigfile="$5" datafile="$6"
+    local tmp localname status arch
+    arch="$(uname -m)"
+    tmp="$(mktemp -d)"
+    while IFS= read -r localname; do
+        [[ -z "$localname" ]] && continue
+        [[ "$localname" =~ \.(sig|asc)$ ]] && continue
+        if [[ -f "$clone/$localname" ]]; then
+            if ! bsdtar -xf "$clone/$localname" -C "$tmp"; then
+                log_error "$pkg: failed to extract source archive $localname — stopping everything."
+                rm -rf "$tmp"
+                exit 1
+            fi
+        fi
+    done < <(awk -F' = ' -v archsuf="_$arch" '
+        { sub(/^[ \t]+/, "") }
+        $1 == "source" || $1 == "source" archsuf {
+            entry = $2
+            if (match(entry, /::/)) { print substr(entry, 1, RSTART - 1) }
+            else { sub(/[?#].*$/, "", entry); sub(/^.*\//, "", entry); print entry }
+        }' <<< "$srcinfo")
+    if [[ ! -f "$tmp/$sigfile" || ! -f "$tmp/$datafile" ]]; then
+        log_error "$pkg: embedded signature files '$sigfile'/'$datafile' not found in the extracted sources — stopping everything."
+        rm -rf "$tmp"
+        exit 1
+    fi
+    if ! status="$(gpg --status-fd 1 --verify "$tmp/$sigfile" "$tmp/$datafile" 2>/dev/null)"; then
+        log_error "$pkg: embedded signature verification FAILED — stopping everything."
+        rm -rf "$tmp"
+        exit 1
+    fi
+    if ! grep -E '^\[GNUPG:\] VALIDSIG ' <<< "$status" | grep -q "$fingerprint"; then
+        log_error "$pkg: embedded signature is valid but NOT made by the pinned key $fingerprint — stopping everything."
+        rm -rf "$tmp"
+        exit 1
+    fi
+    rm -rf "$tmp"
+    log_info "$pkg: embedded signature verified against pinned key ($sigfile → $datafile)"
 }
 
 # ---------------------------------------------------------------------------
