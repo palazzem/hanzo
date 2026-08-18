@@ -4,12 +4,13 @@ CachyOS system provisioner powered by Ansible.
 
 ## Rules
 
-1. `ansible.builtin.shell` / `ansible.builtin.command` are the escape hatch. Use only when no module exists (e.g., paru via `kewlfft.aur.aur`, fnm version manager). Always include `name:` and either an explicit `changed_when:` clause or a `creates:` argument so ansible-lint's `no-changed-when` rule is satisfied without disabling it.
-2. Explicit `become:` on every task. The playbook default is `become: false`. Every task declares `become: true` (system operations: package installs, service management, config writes) or `become: false` (user-space: paru, dotfiles, language version managers).
+1. `ansible.builtin.shell` / `ansible.builtin.command` are the escape hatch. Use only when no module exists (e.g., fnm version manager). Always include `name:` and either an explicit `changed_when:` clause or a `creates:` argument so ansible-lint's `no-changed-when` rule is satisfied without disabling it.
+2. Explicit `become:` on every task. The playbook default is `become: false`. Every task declares `become: true` (system operations: package installs, service management, config writes) or `become: false` (user-space: dotfiles, language version managers).
 3. Detection facts that gate task execution are defined in `playbook.yml` `pre_tasks`; roles consume them via `when:` and never redefine them.
 4. One role per domain. Every role must declare a tag.
 5. Don't install packages already in the CachyOS base image. Verify against `cachyos/cachyos:latest` (`pacman -Qe`) before adding to a role's `vars/main.yml`.
 6. Registered variables inside a role must use the role name as prefix (ansible-lint `var-naming[no-role-prefix]` rule). E.g., inside `roles/tools` use `tools_uv_tool_list`, not `uv_tool_list`.
+7. AUR packages are never managed by Ansible. The package set lives in `bin/hanzo-aur`, which installs it via `shelly install aur` — Shelly shows each PKGBUILD diff for human review before building, and packages with signing upstreams (1Password) are PGP-verified at a pinned AUR commit first. `bin/hanzo` runs it after the playbook — `--check` skips it, `--ci` (container only) auto-accepts Shelly's prompts.
 
 ## Commands
 

@@ -14,12 +14,6 @@ desktop_pacman:
   - plasma-keyboard
   - qrca
 
-desktop_aur:
-  - google-chrome
-  - wifiman-desktop
-  - zoom
-  - darkly
-
 desktop_user_groups:
   - video
 

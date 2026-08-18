@@ -2,5 +2,3 @@
 collections:
   - name: community.general
     version: "12.6.0"
-  - name: kewlfft.aur
-    version: "0.13.0"
