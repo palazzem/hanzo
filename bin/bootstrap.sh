@@ -164,7 +164,14 @@ case "$MODE" in
         ;;
     *)
         "$HOME/.local/bin/hanzo" "$@"
-        "$HOME/.local/bin/kaji"
+        # kaji is attended by design — without a terminal, report it
+        # pending instead of failing the whole bootstrap after a
+        # successful provisioning run.
+        if { : </dev/tty; } 2>/dev/null; then
+            "$HOME/.local/bin/kaji"
+        else
+            log_warn "No terminal available — AUR provisioning pending. Run 'kaji' from a terminal."
+        fi
         ;;
 esac
 

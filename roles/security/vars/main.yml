@@ -5,8 +5,7 @@
 # verified by bin/kaji against the pinned AgileBits key
 # (trust/keys.conf and trust/signed-packages.conf).
 
-# AUR manifest — consumed by bin/kaji, not by this role. Keep entries
-# as literal `- name` lines (parsed without a YAML library).
+# AUR manifest — consumed by bin/kaji, not by this role.
 security_aur:
   - 1password
   - 1password-cli

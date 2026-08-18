@@ -105,12 +105,22 @@ claude_gate() {
 # 1password-cli's `gpg --verify op.sig op`) need it there too.
 # ---------------------------------------------------------------------------
 import_trust_keys() {
-    local name fingerprint url asc_sha256 keyserver asc actual tmpring
+    local name fingerprint url asc_sha256 keyserver asc actual tmpring attempt recv_err
     while read -r name fingerprint url asc_sha256 keyserver; do
         [[ -z "$name" || "$name" == \#* ]] && continue
 
+        # Converged fast path: the pinned fingerprint being present in
+        # the user keyring is the exact postcondition of a successful
+        # import — skip the vendor and keyserver round-trips, so
+        # re-runs are local-only and a keyserver outage cannot abort
+        # an already-provisioned host.
+        if gpg --fingerprint --with-colons "$fingerprint" 2>/dev/null | grep -q "^fpr:::::::::${fingerprint}:$"; then
+            log_info "trust: key '$name' already imported and pinned"
+            continue
+        fi
+
         asc="$(mktemp)"
-        if ! curl -fsSL --retry 3 --retry-delay 5 --proto '=https' --tlsv1.2 -o "$asc" "$url"; then
+        if ! curl -fsSL --retry 3 --retry-delay 5 --retry-connrefused --proto '=https' --tlsv1.2 -o "$asc" "$url"; then
             log_error "trust: failed to download key '$name' from $url"
             exit 1
         fi
@@ -124,8 +134,20 @@ import_trust_keys() {
         # same full fingerprint.
         tmpring="$(mktemp -d)"
         chmod 0700 "$tmpring"
-        if ! gpg --homedir "$tmpring" --keyserver "$keyserver" --recv-keys "$fingerprint" >/dev/null 2>&1; then
-            log_error "trust: keyserver $keyserver does not serve key '$name' ($fingerprint)"
+        # gpg exits 2 for both "network failed" and "key absent" —
+        # retry to rule out flakes, and surface gpg's own message so
+        # the highest-severity trust error is never a false alarm.
+        recv_err=""
+        for attempt in 1 2 3; do
+            if recv_err="$(gpg --homedir "$tmpring" --keyserver "$keyserver" --recv-keys "$fingerprint" 2>&1)"; then
+                recv_err=""
+                break
+            fi
+            [[ "$attempt" -lt 3 ]] && sleep 5
+        done
+        if [[ -n "$recv_err" ]]; then
+            log_error "trust: keyserver $keyserver did not return key '$name' ($fingerprint) after 3 attempts — network failure or missing key. gpg said:"
+            printf '%s\n' "$recv_err" >&2
             rm -rf "$tmpring"
             exit 1
         fi
@@ -159,16 +181,47 @@ signed_package_entry() { # <pkg> — prints "fingerprint mode [sigfile datafile]
 # must be declared in the Hanzo manifests (debug split packages ride
 # with their parent).
 # ---------------------------------------------------------------------------
+# Extracts every `<role>_aur` list from the role vars manifests with a
+# real YAML parser — the same document model Ansible uses, so comments,
+# quoting, and reformatting can never desync the manifests from the
+# playbook. PyYAML comes from any python3 that has it, or from the
+# ansible-core uv environment that bootstrap installs.
 collect_aur_packages() {
-    # `<role>_aur` lists are literal `- name` block sequences by
-    # contract (CLAUDE.md rule 7): no YAML library needed.
-    awk '/^[a-z_]+_aur:$/ { in_list = 1; next }
-         in_list && /^  - / { sub(/^  - /, ""); print; next }
-         { in_list = 0 }' "$HANZO_DIR"/roles/*/vars/main.yml
+    local py script
+    script='
+import glob, sys
+import yaml
+pkgs = []
+for path in sorted(glob.glob(sys.argv[1] + "/roles/*/vars/main.yml")):
+    with open(path) as fh:
+        data = yaml.safe_load(fh) or {}
+    for key, value in data.items():
+        if key.endswith("_aur") and isinstance(value, list):
+            pkgs.extend(str(item) for item in value)
+print("\n".join(pkgs))
+'
+    if python3 -c "import yaml" >/dev/null 2>&1; then
+        py="python3"
+    elif command -v uv >/dev/null 2>&1 && [[ -x "$(uv tool dir)/ansible-core/bin/python" ]]; then
+        py="$(uv tool dir)/ansible-core/bin/python"
+    else
+        log_error "No python with PyYAML available to parse the AUR manifests — stopping everything."
+        exit 1
+    fi
+    "$py" -c "$script" "$HANZO_DIR"
 }
 
 foreign_package_check() { # <manifest newline-list>
-    local manifest="$1" pkg base extras=()
+    local manifest="$1" pkg base extras=() qm_out qm_rc=0
+    # Fail closed: a pacman failure must abort, not read as "no
+    # foreign packages". pacman may exit nonzero with empty output for
+    # an empty query result — only nonzero WITH error output is a
+    # failure.
+    qm_out="$(pacman -Qmq 2>&1)" || qm_rc=$?
+    if [[ "$qm_rc" -ne 0 && -n "$qm_out" ]]; then
+        log_error "pacman -Qmq failed — cannot check foreign packages: $qm_out"
+        exit 1
+    fi
     while IFS= read -r pkg; do
         [[ -z "$pkg" ]] && continue
         grep -qx "$pkg" <<< "$manifest" && continue
@@ -177,7 +230,7 @@ foreign_package_check() { # <manifest newline-list>
             continue
         fi
         extras+=("$pkg")
-    done < <(pacman -Qmq 2>/dev/null || true)
+    done <<< "$qm_out"
     if [[ "${#extras[@]}" -gt 0 ]]; then
         log_error "Foreign packages installed but not in the Hanzo AUR manifests: ${extras[*]}"
         log_error "Remove them or add them to a role's <role>_aur list."
@@ -196,7 +249,9 @@ state_lookup() { # <pkg> — prints the last approved commit, if any
 
 state_record() { # <pkg> <sha>
     local tmp
-    tmp="$(mktemp)"
+    # Same-filesystem temp file so the mv is an atomic rename(2) — a
+    # crash mid-record must never truncate the approval state.
+    tmp="$(mktemp "$STATE_DIR/.aur-reviewed.XXXXXX")"
     if [[ -f "$STATE_FILE" ]]; then
         awk -v p="$1" '$1 != p' "$STATE_FILE" > "$tmp"
     fi
@@ -209,17 +264,19 @@ state_record() { # <pkg> <sha>
 # verdict line, or a FAIL verdict aborts the entire run. No timeout:
 # the review completes or the run stops.
 # ---------------------------------------------------------------------------
-claude_review() { # <pkg> <clone> <reviewed> <head>
-    local pkg="$1" clone="$2" reviewed="$3" head="$4" content subject review
-    if [[ -n "$reviewed" ]]; then
-        subject="PKGBUILD repo diff"
-        content="$(git -C "$clone" diff "$reviewed" "$head")"
-    else
-        subject="full PKGBUILD"
-        content="$(git -C "$clone" show "$head:PKGBUILD")"
-    fi
+# Pager may carry flags (PAGER='less -FRX'), and quitting it early
+# must never kill the run. The content is a file, not a pipe, so an
+# early quit cannot SIGPIPE the producer either.
+page_file() { # <file>
+    local -a pager_cmd
+    read -ra pager_cmd <<< "${PAGER:-less}"
+    "${pager_cmd[@]}" "$1" </dev/tty || true
+}
+
+claude_review() { # <pkg> <content-file> <subject>
+    local pkg="$1" file="$2" subject="$3" review
     log_info "Claude security review (mandatory)..."
-    if ! review="$(printf '%s\n' "$content" | claude -p "Security-review this AUR ${subject} for package '${pkg}' before it is built and installed. Flag: changed source URLs or new domains; source renames via the 'name::url' syntax, especially .sig/.asc-named files that are consumed as data or executed rather than used as detached signatures; checksum edits without a matching version bump; removed or weakened signature verification (validpgpkeys, .sig sources, gpg --verify calls); network access or curl-piped shell in build()/package()/prepare() or .install scriptlets; writes outside \$pkgdir/\$srcdir; obfuscated or base64 payloads; added binary blobs; wrapper scripts around the packaged binary. Be terse. End with exactly one line: VERDICT: PASS|WARN|FAIL — <reason>.")"; then
+    if ! review="$(claude -p "Security-review this AUR ${subject} for package '${pkg}' before it is built and installed. Flag: changed source URLs or new domains; source renames via the 'name::url' syntax, especially .sig/.asc-named files that are consumed as data or executed rather than used as detached signatures; checksum edits without a matching version bump; removed or weakened signature verification (validpgpkeys, .sig sources, gpg --verify calls); network access or curl-piped shell in build()/package()/prepare() or .install scriptlets; writes outside \$pkgdir/\$srcdir; obfuscated or base64 payloads; added binary blobs; wrapper scripts around the packaged binary. Be terse. End with exactly one line: VERDICT: PASS|WARN|FAIL — <reason>." < "$file")"; then
         log_error "$pkg: Claude review failed to run — stopping everything."
         exit 1
     fi
@@ -269,7 +326,7 @@ verify_sources() { # <pkg> <clone>
             suffix = $1; sub(/^source/, "", suffix)
             src[suffix, ++nsrc[suffix]] = $2
         }
-        $1 ~ /^(md5|sha1|sha224|sha256|sha384|sha512|b2)sums(_[a-zA-Z0-9_]+)?$/ {
+        $1 ~ /^(ck|md5|sha1|sha224|sha256|sha384|sha512|b2)sums(_[a-zA-Z0-9_]+)?$/ {
             type = $1
             suffix = type; sub(/^[a-z0-9]+sums/, "", suffix)
             idx = ++nsum[type]
@@ -409,7 +466,7 @@ verify_embedded_signature() { # <pkg> <clone> <srcinfo> <fingerprint> <sigfile> 
 # ---------------------------------------------------------------------------
 process_package() { # <pkg> — sets RESULT to installed|current|skipped
     local pkg="$1"
-    local clone="$CLONE_ROOT/$pkg" head reviewed short answer
+    local clone="$CLONE_ROOT/$pkg" head reviewed short answer content subject repo_file
     RESULT=skipped
 
     if [[ ! -d "$clone/.git" ]]; then
@@ -422,10 +479,25 @@ process_package() { # <pkg> — sets RESULT to installed|current|skipped
         log_error "$pkg: AUR fetch failed — stopping everything."
         exit 1
     fi
-    head="$(git -C "$clone" rev-parse origin/HEAD 2>/dev/null \
-        || git -C "$clone" rev-parse origin/master)"
+    # An empty repo clones successfully from aur.archlinux.org for ANY
+    # name — catch it here or the rev-parse dies with a bare git fatal
+    # naming neither kaji nor the package.
+    head="$(git -C "$clone" rev-parse -q --verify origin/HEAD 2>/dev/null \
+        || git -C "$clone" rev-parse -q --verify origin/master 2>/dev/null || true)"
+    if [[ -z "$head" ]]; then
+        log_error "$pkg: AUR repository is empty — package name typo, or package deleted from AUR. Stopping everything."
+        exit 1
+    fi
     short="${head:0:12}"
     reviewed="$(state_lookup "$pkg")"
+    # A recorded commit can vanish from the clone (cache cleared and
+    # the package re-submitted on AUR with fresh history, or a
+    # corrupted state line): fall back to a full review instead of
+    # dying on an unreachable object.
+    if [[ -n "$reviewed" ]] && ! git -C "$clone" cat-file -e "${reviewed}^{commit}" 2>/dev/null; then
+        log_warn "$pkg: recorded approved commit ${reviewed:0:12} not found in the AUR history — falling back to a full review."
+        reviewed=""
+    fi
 
     if pacman -Q "$pkg" >/dev/null 2>&1 && [[ "$reviewed" == "$head" ]]; then
         log_info "$pkg: up to date at $short"
@@ -438,14 +510,36 @@ process_package() { # <pkg> — sets RESULT to installed|current|skipped
     if [[ "$UNATTENDED" != "1" ]]; then
         echo ""
         log_info "── ${pkg} @ ${short} ──"
-        if [[ -n "$reviewed" ]]; then
-            log_info "Changes since your last approved commit (${reviewed:0:12}):"
-            git -C "$clone" diff "$reviewed" "$head" | "${PAGER:-less}"
+        if [[ "$reviewed" == "$head" ]]; then
+            # This exact commit already passed both review gates — the
+            # package just isn't installed. Skip straight to the
+            # install confirmation; the human gate always remains.
+            log_info "Commit $short is already approved; the package is not installed."
         else
-            log_info "New package — repo files: $(git -C "$clone" ls-files | tr '\n' ' ')"
-            "${PAGER:-less}" "$clone/PKGBUILD"
+            content="$(mktemp)"
+            if [[ -n "$reviewed" ]]; then
+                subject="package repo diff"
+                log_info "Changes since your last approved commit (${reviewed:0:12}):"
+                git -C "$clone" diff "$reviewed" "$head" > "$content"
+            else
+                # First review covers EVERY file in the package repo:
+                # .install scriptlets run as root at install time and
+                # patches apply at build time, so they get the same
+                # scrutiny as the PKGBUILD.
+                subject="full package repo (all files)"
+                log_info "New package — reviewing all repo files:"
+                while IFS= read -r repo_file; do
+                    {
+                        echo "==== $repo_file"
+                        git -C "$clone" show "$head:$repo_file"
+                        echo ""
+                    } >> "$content"
+                done < <(git -C "$clone" ls-files)
+            fi
+            page_file "$content"
+            claude_review "$pkg" "$content" "$subject"
+            rm -f "$content"
         fi
-        claude_review "$pkg" "$clone" "$reviewed" "$head"
         read -rp "Install $pkg at $short? [y/N] " answer </dev/tty
         if [[ ! "$answer" =~ ^[Yy]$ ]]; then
             log_warn "$pkg: skipped (not approved)"
@@ -465,6 +559,10 @@ process_package() { # <pkg> — sets RESULT to installed|current|skipped
         exit 1
     fi
     state_record "$pkg" "$head"
+    # Keep the cache at git-repo size: drop the verified source
+    # artifacts, which would otherwise accrete every payload of every
+    # approved update forever.
+    git -C "$clone" clean -dfxq
     log_info "$pkg: installed"
     RESULT=installed
 }

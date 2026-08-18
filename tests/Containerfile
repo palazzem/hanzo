@@ -38,3 +38,12 @@ ENV HANZO_FULLNAME="Test User"
 ENV HANZO_EMAIL="test@example.com"
 
 RUN bash bin/bootstrap.sh $HANZO_TEST_ARGS
+
+# Full builds run kaji a second time: with all AUR packages installed
+# and the state file populated, this exercises the idempotent re-run
+# path and a non-vacuous foreign-package check (including the -debug
+# split handling) — the first run only ever sees an empty system.
+RUN case "$HANZO_TEST_ARGS" in \
+      --unattended*) HANZO_AUR_UNATTENDED=1 kaji ;; \
+      *) echo "check build — kaji re-run skipped" ;; \
+    esac
