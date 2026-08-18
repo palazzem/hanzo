@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 # Hanzo CLI runs the Ansible provisioner.
-# Usage: hanzo [ansible-playbook-args...]
+# Usage: hanzo [--check|--ci] [ansible-playbook-args...]
 # Examples:
 #   hanzo              # full provisioning run
 #   hanzo --check      # dry run (shows what would change)
+#   hanzo --ci         # unattended run for container CI
 
 set -euo pipefail
 
@@ -11,6 +12,13 @@ HANZO_DIR="$(cd "$(dirname "$(readlink -f "$0")")/.." && pwd)"
 
 # shellcheck source=bin/lib.sh
 source "$HANZO_DIR/bin/lib.sh"
+
+# A mode flag must come first; every remaining argument forwards to ansible-playbook.
+HANZO_MODE="full"
+case "${1:-}" in
+    --check|--ci) parse_mode "$1"; shift ;;
+esac
+mode_banner
 
 HANZO_AUR_SUDOERS="/etc/sudoers.d/hanzo-aur"
 
@@ -30,12 +38,25 @@ trap cleanup EXIT INT TERM
 
 cd "$HANZO_DIR"
 
-log_info "Syncing checkout to origin/main..."
-git fetch origin main
-git reset --hard origin/main
+if [ "$HANZO_MODE" = "ci" ]; then
+    log_warn "CI mode: skipping checkout sync to origin/main — CI must test the code under review"
+else
+    log_info "Syncing checkout to origin/main..."
+    git fetch origin main
+    git reset --hard origin/main
+fi
 
 log_info "Refreshing Ansible collections..."
 ansible-galaxy collection install -r requirements.yml
 
+HANZO_ANSIBLE_ARGS=()
+if [ "$HANZO_MODE" = "check" ]; then
+    HANZO_ANSIBLE_ARGS+=(--check)
+fi
+# CI runs unattended; elsewhere the sudo prompt needs a terminal to read from.
+if [ "$HANZO_MODE" != "ci" ] && has_tty; then
+    HANZO_ANSIBLE_ARGS+=(--ask-become-pass)
+fi
+
 log_info "Starting provisioner..."
-ansible-playbook playbook.yml --ask-become-pass "$@"
+ansible-playbook playbook.yml ${HANZO_ANSIBLE_ARGS[@]+"${HANZO_ANSIBLE_ARGS[@]}"} "$@"

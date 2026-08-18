@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Hanzo bootstrap — one-command CachyOS provisioner setup.
 # Usage: curl -L https://raw.githubusercontent.com/palazzem/hanzo/main/bin/bootstrap.sh | bash
+# Modes: bash -s -- --check (dry run) | --ci (unattended, container-only) | none (attended)
 
 set -euo pipefail
 
@@ -16,6 +17,35 @@ NC='\033[0m'
 log_info()    { echo -e "${GREEN}[hanzo]${NC} $1"; }
 log_warn()    { echo -e "${YELLOW}[hanzo]${NC} $1"; }
 log_error()   { echo -e "${RED}[hanzo]${NC} $1" >&2; }
+
+# ---------------------------------------------------------------------------
+# Mode parsing — inline because this script runs curl-piped, before the
+# repo (and bin/lib.sh) exists on disk. Same contract as lib.sh parse_mode.
+# ---------------------------------------------------------------------------
+in_container() {
+    [ -f /run/.containerenv ] || [ -f /.dockerenv ] || \
+        grep -qa 'container=' /proc/1/environ 2>/dev/null
+}
+
+HANZO_MODE="full"
+if [ "$#" -gt 1 ] || { [ "$#" -eq 1 ] && [ "$1" != "--check" ] && [ "$1" != "--ci" ]; }; then
+    log_error "invalid arguments: $*"
+    log_error "usage: bootstrap.sh [--check|--ci]"
+    exit 1
+elif [ "$#" -eq 1 ]; then
+    HANZO_MODE="${1#--}"
+fi
+
+# CI mode later bypasses human AUR verification — never allow it on a real host.
+if [ "$HANZO_MODE" = "ci" ] && ! in_container; then
+    log_error "--ci runs unattended and bypasses human AUR verification — allowed only inside a container"
+    exit 1
+fi
+
+case "$HANZO_MODE" in
+    check) echo -e "${YELLOW}>>> CHECK MODE — dry run — reports changes without applying them${NC}" ;;
+    ci)    echo -e "${YELLOW}>>> CI MODE — unattended provisioning — human AUR verification is bypassed${NC}" ;;
+esac
 
 # ---------------------------------------------------------------------------
 # Banner
@@ -139,4 +169,8 @@ fi
 # ---------------------------------------------------------------------------
 log_info "Running provisioner..."
 echo ""
-exec "$HOME/.local/bin/hanzo"
+if [ "$HANZO_MODE" = "full" ]; then
+    exec "$HOME/.local/bin/hanzo"
+else
+    exec "$HOME/.local/bin/hanzo" "--$HANZO_MODE"
+fi
