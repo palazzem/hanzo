@@ -12,13 +12,13 @@ desktop_pacman:
   - ghostty
   - wl-clipboard
   - plasma-keyboard
+  - qrca
 
 desktop_aur:
   - google-chrome
   - wifiman-desktop
   - zoom
   - darkly
-  - qrca
 
 desktop_user_groups:
   - video
