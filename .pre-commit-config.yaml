@@ -1,14 +1,29 @@
 fail_fast: true
 
+default_install_hook_types:
+    - pre-commit
+    - commit-msg
+
 repos:
     - repo: https://github.com/pre-commit/pre-commit-hooks
-      rev: v5.0.0
+      rev: v6.0.0
       hooks:
+          - id: check-added-large-files
+          - id: check-case-conflict
+          - id: check-executables-have-shebangs
           - id: check-json
           - id: check-merge-conflict
+          - id: check-shebang-scripts-are-executable
+            # Deployed with mode 0755 by ansible.builtin.template; not executable in-tree.
+            exclude: ^roles/hardware/templates/.*\.j2$
+          - id: check-symlinks
           - id: check-toml
+          - id: check-vcs-permalinks
           - id: check-yaml
+          - id: destroyed-symlinks
+          - id: detect-private-key
           - id: end-of-file-fixer
+          - id: forbid-new-submodules
           - id: mixed-line-ending
           - id: trailing-whitespace
 
@@ -18,6 +33,27 @@ repos:
           - id: shellcheck
 
     - repo: https://github.com/ansible/ansible-lint
-      rev: v26.4.0
+      rev: v26.8.0
       hooks:
           - id: ansible-lint
+
+    - repo: https://github.com/gitleaks/gitleaks
+      rev: v8.30.0
+      hooks:
+          - id: gitleaks
+
+    - repo: https://github.com/rhysd/actionlint
+      rev: v1.7.12
+      hooks:
+          - id: actionlint
+
+    - repo: https://github.com/codespell-project/codespell
+      rev: v2.4.3
+      hooks:
+          - id: codespell
+
+    - repo: https://github.com/compilerla/conventional-pre-commit
+      rev: v4.4.0
+      hooks:
+          - id: conventional-pre-commit
+            stages: [commit-msg]
