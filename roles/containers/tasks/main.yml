@@ -1,7 +1,7 @@
 ---
 - name: Install container packages
   community.general.pacman:
-    name: "{{ containers_packages }}"
+    name: "{{ containers_pacman }}"
   become: true
 
 - name: Ensure docker group exists

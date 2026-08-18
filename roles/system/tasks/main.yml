@@ -16,10 +16,12 @@
 
 - name: Install baseline development packages
   community.general.pacman:
-    name: "{{ system_packages }}"
+    name: "{{ system_pacman }}"
     update_cache: true
   become: true
 
+# include_tasks (not import_tasks): the `when` gates the whole file on a
+# runtime systemd fact instead of copying it onto every imported task.
 - name: Configure hibernation
   ansible.builtin.include_tasks: hibernate.yml
   when: host_has_systemd

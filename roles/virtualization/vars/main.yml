@@ -1,5 +1,5 @@
 ---
-virtualization_packages:
+virtualization_pacman:
   - dnsmasq
   - edk2-ovmf
   - libvirt

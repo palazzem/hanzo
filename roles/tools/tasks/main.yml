@@ -1,15 +1,15 @@
 ---
 - name: Include DevTools tasks
-  ansible.builtin.include_tasks: devtools.yml
+  ansible.builtin.import_tasks: devtools.yml
 
 - name: Include Python user tools tasks
-  ansible.builtin.include_tasks: python_tools.yml
+  ansible.builtin.import_tasks: python_tools.yml
 
 - name: Include Node user tools tasks
-  ansible.builtin.include_tasks: node_tools.yml
+  ansible.builtin.import_tasks: node_tools.yml
 
 - name: Include IaC tasks
-  ansible.builtin.include_tasks: iac.yml
+  ansible.builtin.import_tasks: iac.yml
 
 - name: Include Google Cloud SDK tasks
-  ansible.builtin.include_tasks: cloud.yml
+  ansible.builtin.import_tasks: cloud.yml

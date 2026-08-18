@@ -3,7 +3,8 @@
 
 # Wifi-powersave fix runs first and is flushed immediately so the
 # MT7925 stops dropping long-running TCP transfers before any role
-# downloads anything (paru/curl in later roles, pacman in this one).
+# downloads anything (curl-based installers in later roles, pacman in
+# this one).
 - name: Deploy NetworkManager wifi powersave drop-in
   ansible.builtin.template:
     src: wifi-powersave.conf.j2
@@ -17,7 +18,7 @@
 
 - name: Install ASUS packages
   community.general.pacman:
-    name: "{{ hardware_asus_packages }}"
+    name: "{{ hardware_asus_pacman }}"
   become: true
 
 # asusctl ships without /etc/asusd, but asusd.service's namespace
@@ -62,9 +63,9 @@
     mode: "0755"
   become: true
 
-- name: Install keyd
+- name: Install GZ302 packages
   community.general.pacman:
-    name: keyd
+    name: "{{ hardware_gz302_pacman }}"
   become: true
 
 - name: Deploy keyd config
