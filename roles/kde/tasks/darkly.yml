@@ -1,0 +1,92 @@
+---
+# Darkly provides exactly four components: Colors, Plasma Style,
+# Application Style, Window Decorations. Global theme, icons, cursors,
+# GTK sync, Kvantum and splash screens are not shipped by it at all.
+#
+# The two plasma-apply-* tools always report success, so each is guarded
+# on the key it ends up writing. widgetStyle has no plasma-apply-* tool:
+# kwriteconfig6 --notify is the supported fallback, and the notify is
+# what makes running Qt applications restyle without a relogin.
+
+- name: Read current color scheme
+  ansible.builtin.command:
+    cmd: kreadconfig6 --file kdeglobals --group General --key ColorScheme
+  register: kde_darkly_colorscheme
+  changed_when: false
+  check_mode: false
+  become: false
+
+- name: Apply Darkly color scheme
+  ansible.builtin.command:
+    cmd: plasma-apply-colorscheme Darkly
+  when: kde_darkly_colorscheme.stdout != 'Darkly'
+  changed_when: true
+  become: false
+
+# The theme's internal Id is lowercase `darkly`, distinct from its
+# display Name "Darkly" — plasmarc stores the Id.
+- name: Read current Plasma style
+  ansible.builtin.command:
+    cmd: kreadconfig6 --file plasmarc --group Theme --key name
+  register: kde_darkly_desktoptheme
+  changed_when: false
+  check_mode: false
+  become: false
+
+- name: Apply Darkly Plasma style
+  ansible.builtin.command:
+    cmd: plasma-apply-desktoptheme darkly
+  when: kde_darkly_desktoptheme.stdout != 'darkly'
+  changed_when: true
+  become: false
+
+- name: Read current application style
+  ansible.builtin.command:
+    cmd: kreadconfig6 --file kdeglobals --group KDE --key widgetStyle
+  register: kde_darkly_widgetstyle
+  changed_when: false
+  check_mode: false
+  become: false
+
+- name: Apply Darkly application style
+  ansible.builtin.command:
+    cmd: kwriteconfig6 --file kdeglobals --group KDE --key widgetStyle Darkly --notify
+  when: kde_darkly_widgetstyle.stdout != 'Darkly'
+  changed_when: true
+  become: false
+
+# Compiled kdecoration plugin, not an Aurorae SVG theme: both the plugin
+# library and the theme name are needed.
+- name: Set Darkly window decoration plugin
+  community.general.ini_file:
+    path: "{{ ansible_facts.env.HOME }}/.config/kwinrc"
+    section: org.kde.kdecoration2
+    option: library
+    value: org.kde.darkly
+    no_extra_spaces: true
+    mode: "0644"
+  become: false
+  notify: Reconfigure KWin
+
+- name: Set Darkly window decoration theme
+  community.general.ini_file:
+    path: "{{ ansible_facts.env.HOME }}/.config/kwinrc"
+    section: org.kde.kdecoration2
+    option: theme
+    value: Darkly
+    no_extra_spaces: true
+    mode: "0644"
+  become: false
+  notify: Reconfigure KWin
+
+# Decoration extras live in Darkly's own rc file, not in kwinrc.
+- name: Set Darkly decoration button size
+  community.general.ini_file:
+    path: "{{ ansible_facts.env.HOME }}/.config/darklyrc"
+    section: Windeco
+    option: ButtonSize
+    value: "{{ kde_darkly_button_size }}"
+    no_extra_spaces: true
+    mode: "0644"
+  become: false
+  notify: Reconfigure KWin

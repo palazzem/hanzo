@@ -4,13 +4,13 @@ CachyOS system provisioner powered by Ansible.
 
 ## Rules
 
-1. `ansible.builtin.shell` / `ansible.builtin.command` are the escape hatch. Use only when no module exists (e.g., fnm version manager). Always include `name:` and either an explicit `changed_when:` clause or a `creates:` argument so ansible-lint's `no-changed-when` rule is satisfied without disabling it.
+1. `ansible.builtin.shell` / `ansible.builtin.command` are the escape hatch: use them only when no module exists. Always include `name:` and either an explicit `changed_when:` clause or a `creates:` argument so ansible-lint's `no-changed-when` rule passes without being disabled.
 2. Explicit `become:` on every task. The playbook default is `become: false`. Every task declares `become: true` (system operations: package installs, service management, config writes) or `become: false` (user-space: dotfiles, language version managers).
 3. Detection facts that gate task execution are defined in `playbook.yml` `pre_tasks`; roles consume them via `when:` and never redefine them.
 4. One role per domain. Every role must declare a tag.
 5. Don't install packages already in the CachyOS base image. Verify against `cachyos/cachyos:latest` (`pacman -Qe`) before adding to a role's package list.
-6. Registered variables inside a role must use the role name as prefix (ansible-lint `var-naming[no-role-prefix]` rule). E.g., inside `roles/tools` use `tools_uv_tool_list`, not `uv_tool_list`.
-7. AUR packages are never managed by Ansible. The package set lives in `bin/hanzo-aur`, which installs it via `shelly install aur` — Shelly shows each PKGBUILD diff for human review before building, and packages with signing upstreams (1Password) are PGP-verified at a pinned AUR commit first. `bin/hanzo` runs it after the playbook — `--check` skips it, `--ci` (container only) auto-accepts Shelly's prompts.
+6. Variables defined inside a role use the role name as prefix (ansible-lint `var-naming[no-role-prefix]` rule). E.g., inside `roles/tools` use `tools_uv_tool_list`, not `uv_tool_list`. Variables shared by multiple roles are defined at play scope in `playbook.yml`, never in one role.
+7. AUR packages are never managed by Ansible: the set lives in `bin/hanzo-aur` and installs through Shelly, with human review of every package. AUR installation precedes the playbook, so roles may configure AUR packages but never install them.
 
 ## Commands
 

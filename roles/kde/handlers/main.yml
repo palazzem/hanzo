@@ -1,0 +1,33 @@
+---
+# Live-apply calls for config already written to disk by the tasks.
+# Effect-owned settings ([Effect-<id>] groups) are only re-read by
+# reconfigureEffect; the generic reconfigure covers the rest of kwinrc.
+- name: Reconfigure KWin
+  ansible.builtin.command:
+    cmd: busctl --user call org.kde.KWin /KWin org.kde.KWin reconfigure
+  changed_when: true
+  become: false
+
+- name: Reconfigure overview effect
+  ansible.builtin.command:
+    cmd: busctl --user call org.kde.KWin /Effects org.kde.kwin.Effects reconfigureEffect s overview
+  changed_when: true
+  become: false
+
+# evaluateScript persists widget config to disk, but widgets initialized
+# earlier in the same run keep stale in-memory state — plasmashell must
+# restart afterward to load it. grep reads a herestring, not a pipe:
+# grep -q's early exit would SIGPIPE the producer under pipefail.
+- name: Apply panel layout
+  ansible.builtin.shell:
+    cmd: |
+      set -euo pipefail
+      result="$(busctl --user call org.kde.plasmashell /PlasmaShell org.kde.PlasmaShell evaluateScript s "$(cat '{{ kde_panel_layout_file }}')")"
+      echo "$result"
+      if grep -qi error <<<"$result"; then
+        exit 1
+      fi
+      nohup plasmashell --replace >/dev/null 2>&1 &
+    executable: /bin/bash
+  changed_when: true
+  become: false

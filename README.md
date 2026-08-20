@@ -27,8 +27,8 @@ This will:
 4. Link `hanzo` and `hanzo-aur` into `~/.local/bin`
 5. Install [ansible-core](https://docs.ansible.com/ansible-core/)
 6. Install required Galaxy collections (`community.general`)
-7. Run the playbook (prompts once for your sudo password)
-8. Install the AUR package set through Shelly (one PKGBUILD review per package)
+7. Install the AUR package set through Shelly (one PKGBUILD review per package)
+8. Run the playbook (prompts once for your sudo password)
 9. Replace every snapper snapshot with a single `Hanzo configuration` baseline (first run only)
 10. Print manual steps automation cannot cover
 
@@ -57,15 +57,13 @@ The file is loaded into its own namespace and read through an allowlist: exactly
 
 ## Architecture
 
-Hanzo provisions the local machine with `ansible-playbook playbook.yml`, then hands the AUR package set to Shelly — Ansible never manages AUR. All operations are idempotent — running `hanzo` multiple times is safe and will only apply changes that are needed.
+Provisioning runs in two stages: `hanzo-aur` installs the AUR package set through Shelly, then the playbook applies every role. Roles run in dependency order, each owning one domain.
 
-- `playbook.yml` — main entry point, lists roles in dependency order
+- `bin/` — `bootstrap.sh` (one-command setup), `hanzo` (provisioning CLI), `hanzo-aur` (AUR package set via Shelly)
+- `playbook.yml` — entry point: detection facts, then the roles in dependency order
+- `roles/` — one directory per domain, each declaring a tag
 - `ansible.cfg` — local connection, become defaults, roles path
 - `requirements.yml` — Galaxy collection dependencies (pinned versions)
-- `roles/` — one directory per configured domain; each role declares a tag
-- `bin/` — `bootstrap.sh` (one-command setup), `hanzo` (provisioning CLI), `hanzo-aur` (AUR package set via Shelly)
-
-The `hardware` role is dispatched by `ansible_facts['product_name']` and skipped automatically inside containers and other non-systemd contexts (see `CLAUDE.md` rule 3).
 
 ## Development
 
