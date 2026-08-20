@@ -27,8 +27,10 @@ This will:
 4. Link `hanzo` and `hanzo-aur` into `~/.local/bin`
 5. Install [ansible-core](https://docs.ansible.com/ansible-core/)
 6. Install required Galaxy collections (`community.general`)
-7. Run the full provisioning: the playbook (prompts once for your sudo password), then the AUR package set through Shelly (one PKGBUILD review per package)
-8. Print manual steps automation cannot cover
+7. Run the playbook (prompts once for your sudo password)
+8. Install the AUR package set through Shelly (one PKGBUILD review per package)
+9. Replace every snapper snapshot with a single `Hanzo configuration` baseline (first run only)
+10. Print manual steps automation cannot cover
 
 ## Usage
 
