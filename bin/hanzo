@@ -47,12 +47,11 @@ manual_steps() {
 }
 
 # Provisioning leaves a snap-pac pre/post pair behind every pacman and
-# Shelly transaction. On the first run, collapse that trail into a single
-# baseline, keeping snapshots flagged important=yes — the installer's
-# own — as pre-Hanzo restore points; once the baseline exists, snapshots
-# are never touched again, so later runs keep their history. Deleting
-# and creating through snapper (never raw btrfs) lets limine-snapper-sync's
-# plugin keep the boot menu in step.
+# Shelly transaction. On the first run, collapse that trail — and the
+# installer's own snapshot — into a single baseline; once it exists,
+# snapshots are never touched again, so later runs keep their history.
+# Deleting and creating through snapper (never raw btrfs) lets
+# limine-snapper-sync's plugin keep the boot menu in step.
 snapshot_baseline() {
     local description="Hanzo configuration"
     local config configs numbers number
@@ -67,8 +66,7 @@ snapshot_baseline() {
             continue
         fi
         # Number 0 is the live filesystem, not a snapshot.
-        mapfile -t numbers < <(sudo snapper --csvout --no-headers --separator $'\t' -c "$config" list --columns number,userdata \
-            | awk -F'\t' '$1 != 0 && $2 !~ /important=yes/ { print $1 }')
+        mapfile -t numbers < <(sudo snapper --csvout --no-headers -c "$config" list --columns number | grep -vx 0 || true)
         if [ "${#numbers[@]}" -gt 0 ]; then
             log "Deleting ${#numbers[@]} snapshot(s) from '$config'..."
             sudo snapper -c "$config" delete --sync "${numbers[@]}"
