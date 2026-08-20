@@ -56,15 +56,13 @@ The file is loaded into its own namespace and read through an allowlist: exactly
 
 ## Architecture
 
-A run has two stages. Shelly installs the AUR package set first, pausing on each PKGBUILD for review; `ansible-playbook playbook.yml` then provisions the machine unattended. Ansible never manages AUR packages, and the ordering means every prompt comes up front and roles can configure what Shelly installed. All operations are idempotent — running `hanzo` multiple times is safe and applies only what changed.
+Provisioning runs in two stages: `hanzo-aur` installs the AUR package set through Shelly, then the playbook applies every role. Roles run in dependency order, each owning one domain.
 
-- `playbook.yml` — main entry point, lists roles in dependency order
+- `bin/` — `bootstrap.sh` (one-command setup), `hanzo` (provisioning CLI), `hanzo-aur` (AUR package set via Shelly)
+- `playbook.yml` — entry point: detection facts, then the roles in dependency order
+- `roles/` — one directory per domain, each declaring a tag
 - `ansible.cfg` — local connection, become defaults, roles path
 - `requirements.yml` — Galaxy collection dependencies (pinned versions)
-- `roles/` — one directory per configured domain; each role declares a tag
-- `bin/` — `bootstrap.sh` (one-command setup), `hanzo` (provisioning CLI), `hanzo-aur` (AUR package set via Shelly)
-
-The `hardware` role is dispatched by `ansible_facts['product_name']` and skipped automatically inside containers and other non-systemd contexts (see `CLAUDE.md` rule 3).
 
 ## Development
 
