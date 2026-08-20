@@ -64,6 +64,20 @@ if [ -z "$MODE" ]; then
     git reset --hard origin/main
 fi
 
+# Shelly, then AUR, then the playbook. Shelly is installed here because
+# hanzo-aur needs it before the playbook could provide it, with -Sy
+# because the playbook's database refresh now runs after this step. AUR
+# precedes the playbook so its attended PKGBUILD reviews land up front,
+# and so roles configuring AUR packages find them installed. --check
+# skips it: a dry run has no Shelly equivalent.
+if [ "$MODE" != "--check" ]; then
+    log "Installing shelly..."
+    sudo pacman -Sy --needed --noconfirm shelly
+    "$HANZO_DIR/bin/hanzo-aur" ${MODE:+"$MODE"}
+else
+    warn "Skipped AUR installation: --check is a dry run."
+fi
+
 # hanzo owns the pin: bootstrap only guarantees uv, so install here
 # before the first Ansible call. `uv tool install` is idempotent and
 # replaces a stale constraint, so drift converges on every run.
@@ -85,14 +99,6 @@ fi
 
 log "Starting provisioner..."
 ansible-playbook playbook.yml "${ARGS[@]}"
-
-# AUR provisioning is Shelly's job, not Ansible's — a dry run has no
-# Shelly equivalent, so --check skips it.
-if [ "$MODE" != "--check" ]; then
-    "$HANZO_DIR/bin/hanzo-aur" ${MODE:+"$MODE"}
-else
-    warn "Skipped AUR installation: --check is a dry run."
-fi
 
 # The handoff closes every run: a dry run and CI must show the same
 # steps a real run does.

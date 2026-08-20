@@ -1,0 +1,31 @@
+---
+# Touchpad. Booleans are quoted: busctl takes lowercase true|false.
+kde_touchpad_natural_scroll: "true"
+kde_touchpad_tap_to_click: "false"
+
+# Virtual desktops, and the Meta+N shortcuts bound to them.
+kde_virtual_desktops: 5
+kde_virtual_desktop_rows: 1
+
+# Displays. Applied to every connected and enabled output.
+kde_display_color_profile_source: EDID
+kde_display_color_power_tradeoff: preferAccuracy
+kde_display_vrr_policy: automatic
+kde_display_scale: "1.6"
+kde_display_auto_rotate_policy: always
+
+# Virtual keyboard: the input method KWin launches on Wayland.
+kde_virtual_keyboard_desktop_file: /usr/share/applications/org.kde.plasma.keyboard.desktop
+
+# Screen edges and touchscreen gestures. Border values are ElectricBorder
+# enum integers, never symbolic names — a name silently parses as 0. An
+# empty value unbinds the edge.
+kde_overview_border_activate: ""
+kde_overview_touch_border_activate: "4"
+kde_launcher_touch_edge: Top
+
+# Darkly theme.
+kde_darkly_button_size: ButtonLarge
+
+# Panel layout, deployed here and applied from this path.
+kde_panel_layout_file: "{{ ansible_facts.env.HOME }}/.local/share/hanzo/panel-layout.js"

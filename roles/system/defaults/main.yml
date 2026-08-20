@@ -10,7 +10,6 @@ system_pacman:
   - httpie
   - whois
   - tmux
-  - shelly
   - ufw
 
 system_locale: en_US.UTF-8

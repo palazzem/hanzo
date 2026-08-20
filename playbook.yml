@@ -12,6 +12,13 @@
   # otherwise drop pending notifications that idempotent tasks never re-send.
   force_handlers: true
 
+  # Shared by more than one role, so they cannot live in a role's defaults:
+  # home creates the workspace and deploys the launcher, kde binds the
+  # launcher to the Copilot key.
+  vars:
+    cowork_dir: "{{ ansible_facts.env.HOME }}/workspaces/cowork"
+    claude_launcher_file: hanzo-claude-code.desktop
+
   pre_tasks:
     # Stat-gate systemd-touching tasks on the sd_booted(3) marker
     # /run/systemd/system — absent under `docker build` RUN, chroots,
@@ -143,3 +150,12 @@
       ansible.builtin.import_role:
         name: home
       tags: [home]
+
+    # Last: the role configures a live Plasma session, and its panel
+    # launchers and Claude Code entry point at packages and directories
+    # the desktop and home roles put in place.
+    - name: Run kde role
+      ansible.builtin.import_role:
+        name: kde
+      when: host_has_kde
+      tags: [kde]

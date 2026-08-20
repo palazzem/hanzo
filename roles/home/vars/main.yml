@@ -2,8 +2,3 @@
 # Path must match `[include] path = ...` in palazzem/dotfiles gitconfig.
 # Renaming this breaks the cross-repo include and silently drops identity.
 home_gitidentity_file: "{{ ansible_facts.env.HOME }}/.gitidentity"
-
-# KDE resolves the global shortcut to the launcher by this filename, so the
-# deployed .desktop file and the kglobalshortcutsrc group must match exactly.
-# Renaming it in only one place silently kills the Copilot key.
-home_claude_launcher_file: hanzo-claude-code.desktop
