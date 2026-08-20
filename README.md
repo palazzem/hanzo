@@ -29,7 +29,7 @@ This will:
 6. Install required Galaxy collections (`community.general`)
 7. Install the AUR package set through Shelly (one PKGBUILD review per package)
 8. Run the playbook (prompts once for your sudo password)
-9. Replace every snapper snapshot with a single `Hanzo configuration` baseline (first run only)
+9. Collapse the provisioning snapshots into a single `Hanzo configuration` baseline, keeping the installer's (first run only)
 10. Print manual steps automation cannot cover
 
 ## Usage
