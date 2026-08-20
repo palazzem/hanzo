@@ -11,7 +11,14 @@ object at `/org/kde/KWin/InputDevice/<sysName>` is checked for a boolean
 a device name or vendor/product id.
 
 Settings (`naturalScroll`, `tapToClick`, ...) are plain writable D-Bus
-properties on `org.kde.KWin.InputDevice`, applied live. They persist to
+properties on `org.kde.KWin.InputDevice`, applied live.
+
+The "Right-click by" radio maps to two booleans, `clickMethodAreas`
+(bottom-right corner) and `clickMethodClickfinger` (anywhere with two
+fingers). libinput has a single click method, so writing either one flips
+both: `Device::setClickMethod()` in `kwin/src/backends/libinput/device.cpp`
+switches to the other method when a property is set to `false`. Writing
+`clickMethodClickfinger` alone is enough. They persist to
 `~/.config/kcminputrc` under a per-device group keyed by the device's
 hardware identity: `[Libinput][<vendorId decimal>][<productId decimal>][<device name>]`.
 
