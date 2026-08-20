@@ -10,7 +10,8 @@ CachyOS system provisioner powered by Ansible.
 4. One role per domain. Every role must declare a tag.
 5. Don't install packages already in the CachyOS base image. Verify against `cachyos/cachyos:latest` (`pacman -Qe`) before adding to a role's package list.
 6. Registered variables inside a role must use the role name as prefix (ansible-lint `var-naming[no-role-prefix]` rule). E.g., inside `roles/tools` use `tools_uv_tool_list`, not `uv_tool_list`.
-7. AUR packages are never managed by Ansible. The package set lives in `bin/hanzo-aur`, which installs it via `shelly install aur` — Shelly shows each PKGBUILD diff for human review before building, and packages with signing upstreams (1Password) are PGP-verified at a pinned AUR commit first. `bin/hanzo` runs it *before* the playbook, so the attended PKGBUILD reviews happen up front and the playbook then runs unattended; roles may therefore configure AUR packages (the `kde` role themes with Darkly). `--check` skips it, `--ci` (container only) auto-accepts Shelly's prompts.
+7. AUR packages are never managed by Ansible. The package set lives in `bin/hanzo-aur`, which installs it via `shelly install aur` — Shelly shows each PKGBUILD diff for human review before building, and packages with signing upstreams (1Password) are PGP-verified at a pinned AUR commit first. `--check` skips it, `--ci` (container only) auto-accepts Shelly's prompts.
+8. `bin/hanzo` runs the AUR step before the playbook, so the attended PKGBUILD reviews happen up front and the playbook then runs unattended to the end. Roles may therefore configure AUR packages — the `kde` role themes with Darkly.
 
 ## Commands
 

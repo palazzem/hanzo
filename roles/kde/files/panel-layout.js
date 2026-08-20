@@ -3,8 +3,7 @@
 // Plasma Scripting API layout defining a custom panel: top edge, dodge-
 // windows auto-hide, height 42, Application Dashboard launcher with a
 // custom icon, centered task manager with a fixed pinned-apps list, system
-// tray, and a bold monospace digital clock with week numbers shown. No
-// pager, no show-desktop widget.
+// tray, and a bold monospace digital clock with week numbers shown.
 //
 // Removes any existing panel(s) first, so this is safe to run on a fresh
 // default panel or to re-run idempotently on top of itself.
@@ -53,6 +52,3 @@ clock.writeConfig("fontSize", 8);
 clock.writeConfig("fontStyleName", "Bold");
 clock.writeConfig("fontWeight", 700);
 clock.writeConfig("showWeekNumbers", true);
-
-// Not added: org.kde.plasma.pager (redundant with the Meta+1..N desktop
-// shortcuts), org.kde.plasma.showdesktop.

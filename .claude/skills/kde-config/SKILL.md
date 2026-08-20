@@ -1,6 +1,6 @@
 ---
 name: kde-config
-description: Add or change a KDE Plasma 6 setting in Hanzo's kde role (touchpad, virtual desktops, global shortcuts, display, Darkly theme, panel layout, virtual keyboard, screen edges, touchscreen gestures, PowerDevil). Use when a new Plasma setting must be provisioned, or an existing one fixed or extended, without re-deriving the underlying D-Bus/config knowledge from scratch.
+description: Add or change a KDE Plasma 6 setting in Hanzo's kde role. Use when a new Plasma setting must be provisioned, or an existing one fixed or extended, without re-deriving the underlying D-Bus/config knowledge from scratch.
 ---
 
 # KDE Plasma 6 configuration in Hanzo
@@ -152,9 +152,6 @@ comparison layer.
 
 ## Repository rules that apply here
 
-- **Never run `ansible-playbook`, `hanzo`, or `bootstrap.sh` on the host.**
-  Absolute, and `--check` is not an exception. Container testing only —
-  see `CLAUDE.md`.
 - **CI cannot verify any of this.** The test container has no Plasma, so
   `host_has_kde` is false and the whole role is skipped; `--check` and
   `--ci` prove syntax and lint, nothing more. Real verification is the
@@ -197,15 +194,18 @@ curl -s "https://invent.kde.org/api/v4/projects/<namespace>%2F<repo>/repository/
 curl -s "https://invent.kde.org/<namespace>/<repo>/-/raw/master/<path>"
 ```
 
-Repos used so far (namespace/repo): `plasma/plasma-desktop` (touchpad/mouse
-KCMs), `plasma/kwin` (compositor, libinput backend, InputDevice/
-VirtualDesktopManager D-Bus interfaces, effects, screen edges),
-`frameworks/kglobalaccel` (global shortcut marshalling), `plasma/libkscreen`
-(`kscreen-doctor`), `plasma/plasma-workspace` (`plasmashell`, the Scripting
-API). Third-party theme source (e.g. Darkly) is on GitHub — same raw-file
+Repos used so far:
+
+- `plasma/plasma-desktop` — touchpad and mouse KCMs
+- `plasma/kwin` — compositor, libinput backend, `InputDevice` and
+  `VirtualDesktopManager` D-Bus interfaces, effects, screen edges
+- `frameworks/kglobalaccel` — global shortcut marshalling
+- `plasma/libkscreen` — `kscreen-doctor`
+- `plasma/plasma-workspace` — `plasmashell`, the Scripting API
+
+Third-party theme source (e.g. Darkly) is on GitHub — the same raw-file
 trick applies (`raw.githubusercontent.com/<owner>/<repo>/main/<path>`), and
-the GitHub API
-(`api.github.com/repos/<owner>/<repo>/git/trees/main?recursive=1`) lists the
+`api.github.com/repos/<owner>/<repo>/git/trees/main?recursive=1` lists the
 whole tree in one call.
 
 Local system headers are also a direct source of truth — e.g. Qt's exact key
@@ -225,5 +225,5 @@ not from memory.
 | Touchscreen gestures | `tasks/main.yml` (ini_file + handler) | `lessons/touchscreen.md`, `lessons/dbus-kwin.md` |
 | Panel layout | `files/panel-layout.js` + `Apply panel layout` handler | `lessons/layouts.md` |
 | Darkly theme | `tasks/darkly.yml` | `lessons/theming.md` |
-| Claude Code launcher, F23 key | `tasks/main.yml` | — |
+| Copilot key (F23) binding | `tasks/main.yml` | — |
 | PowerDevil sleep mode | `tasks/main.yml` | — |

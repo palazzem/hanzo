@@ -168,30 +168,17 @@
   ansible.builtin.import_tasks: darkly.yml
   when: kde_darkly_stat.stat.exists
 
-# --- Claude Code launcher --------------------------------------------
-
-- name: Ensure ~/.local/share/applications exists
-  ansible.builtin.file:
-    path: "{{ ansible_facts.env.HOME }}/.local/share/applications"
-    state: directory
-    mode: "0755"
-  become: false
-
-- name: Deploy Claude Code launcher .desktop entry
-  ansible.builtin.template:
-    src: hanzo-claude-code.desktop.j2
-    dest: "{{ ansible_facts.env.HOME }}/.local/share/applications/{{ kde_claude_launcher_file }}"
-    mode: "0644"
-  become: false
+# --- Global shortcuts -------------------------------------------------
 
 # kglobalacceld reads launcher shortcuts only from the nested
 # `[services][<file>.desktop]` group; top-level `[<file>.desktop]` groups
 # are ignored and deleted on daemon start. ini_file has no nested-group
-# syntax, hence the `]`+`[` embedded in `section`.
+# syntax, hence the `]`+`[` embedded in `section`. The launcher itself is
+# desktop-agnostic and deployed by the home role.
 - name: Bind Copilot key (F23) to Claude Code launcher
   community.general.ini_file:
     path: "{{ ansible_facts.env.HOME }}/.config/kglobalshortcutsrc"
-    section: "services][{{ kde_claude_launcher_file }}"
+    section: "services][{{ claude_launcher_file }}"
     option: _launch
     value: "F23"
     no_extra_spaces: true

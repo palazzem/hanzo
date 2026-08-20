@@ -27,8 +27,9 @@ This will:
 4. Link `hanzo` and `hanzo-aur` into `~/.local/bin`
 5. Install [ansible-core](https://docs.ansible.com/ansible-core/)
 6. Install required Galaxy collections (`community.general`)
-7. Run the full provisioning: the AUR package set through Shelly (one PKGBUILD review per package), then the playbook (prompts once for your sudo password)
-8. Print manual steps automation cannot cover
+7. Install the AUR package set through Shelly (one PKGBUILD review per package)
+8. Run the playbook (prompts once for your sudo password)
+9. Print manual steps automation cannot cover
 
 ## Usage
 
@@ -55,7 +56,7 @@ The file is loaded into its own namespace and read through an allowlist: exactly
 
 ## Architecture
 
-Hanzo hands the AUR package set to Shelly first — Ansible never manages AUR — and then provisions the local machine with `ansible-playbook playbook.yml`. AUR goes first because it is the attended half of a run: every PKGBUILD review happens up front, the playbook then runs unattended to the end, and roles that configure AUR packages (the `kde` role themes with Darkly) find them already installed. All operations are idempotent — running `hanzo` multiple times is safe and will only apply changes that are needed.
+A run has two stages. Shelly installs the AUR package set first, pausing on each PKGBUILD for review; `ansible-playbook playbook.yml` then provisions the machine unattended. Ansible never manages AUR packages, and the ordering means every prompt comes up front and roles can configure what Shelly installed. All operations are idempotent — running `hanzo` multiple times is safe and applies only what changed.
 
 - `playbook.yml` — main entry point, lists roles in dependency order
 - `ansible.cfg` — local connection, become defaults, roles path
