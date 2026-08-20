@@ -143,3 +143,12 @@
       ansible.builtin.import_role:
         name: home
       tags: [home]
+
+    # Last: the role configures a live Plasma session, and its panel
+    # launchers and Claude Code entry point at packages and directories
+    # the desktop and home roles put in place.
+    - name: Run kde role
+      ansible.builtin.import_role:
+        name: kde
+      when: host_has_kde
+      tags: [kde]

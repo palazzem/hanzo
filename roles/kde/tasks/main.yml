@@ -1,0 +1,220 @@
+---
+# KDE Plasma 6 configuration, applied live against the running session.
+#
+# Three shapes are used throughout:
+#   * config key + reload handler — ini_file writes the key (real change
+#     detection, visible in --check), a handler makes the D-Bus call the
+#     setting needs to go live.
+#   * guarded command — a CLI tool applies the setting, a kreadconfig6
+#     read supplies the change signal.
+#   * script — for device/output discovery or D-Bus marshalling too
+#     intricate for YAML. Each prints CHANGED only when it wrote
+#     something; the task keys off that.
+#
+# Scripts run through ansible.builtin.script (no module speaks Plasma's
+# D-Bus/scripting APIs) and are skipped in check mode by Ansible itself.
+# The whole role is gated on host_has_kde in playbook.yml.
+
+- name: Configure touchpad scrolling and tap-to-click
+  ansible.builtin.script:
+    cmd: touchpad.sh
+  environment:
+    NATURAL_SCROLL: "{{ kde_touchpad_natural_scroll }}"
+    TAP_TO_CLICK: "{{ kde_touchpad_tap_to_click }}"
+  register: kde_touchpad_result
+  changed_when: "'CHANGED' in kde_touchpad_result.stdout"
+  become: false
+
+- name: Configure virtual desktop count and layout
+  ansible.builtin.script:
+    cmd: virtual-desktops.sh
+  environment:
+    TARGET_DESKTOPS: "{{ kde_virtual_desktops }}"
+    TARGET_ROWS: "{{ kde_virtual_desktop_rows }}"
+  register: kde_desktops_result
+  changed_when: "'CHANGED' in kde_desktops_result.stdout"
+  become: false
+
+- name: Bind Meta+N to switch to virtual desktop N
+  ansible.builtin.script:
+    cmd: bind-desktop-shortcuts.py
+  environment:
+    TARGET_DESKTOPS: "{{ kde_virtual_desktops }}"
+  register: kde_shortcuts_result
+  changed_when: "'CHANGED' in kde_shortcuts_result.stdout"
+  become: false
+
+# kscreen-doctor is a declarative apply: it sets each output to the
+# declared value and re-setting a value already in effect does nothing.
+# It reports no change signal of its own, so the task is marked unchanged
+# rather than inventing one.
+- name: Configure displays
+  ansible.builtin.script:
+    cmd: display.sh
+  environment:
+    COLOR_PROFILE_SOURCE: "{{ kde_display_color_profile_source }}"
+    COLOR_POWER_TRADEOFF: "{{ kde_display_color_power_tradeoff }}"
+    VRR_POLICY: "{{ kde_display_vrr_policy }}"
+    SCALE: "{{ kde_display_scale }}"
+    AUTO_ROTATE_POLICY: "{{ kde_display_auto_rotate_policy }}"
+  changed_when: false
+  become: false
+
+# --- Virtual keyboard -------------------------------------------------
+# The applier always writes empty-then-target to defeat KWin's in-memory
+# equality guard, so it cannot self-report change — guard it on the live
+# state instead. `available` covers the case where the key is already
+# correct on disk but the input method is not actually running.
+
+- name: Read configured virtual keyboard
+  ansible.builtin.command:
+    cmd: kreadconfig6 --file kwinrc --group Wayland --key InputMethod
+  register: kde_virtual_keyboard_configured
+  changed_when: false
+  check_mode: false
+  become: false
+
+# Prints `b true` / `b false`. Tolerates failure: the property is absent
+# when no input method has ever been configured.
+- name: Read live virtual keyboard availability
+  ansible.builtin.command:
+    cmd: busctl --user get-property org.kde.KWin /VirtualKeyboard org.kde.kwin.VirtualKeyboard available
+  register: kde_virtual_keyboard_available
+  changed_when: false
+  failed_when: false
+  check_mode: false
+  become: false
+
+- name: Set virtual keyboard to Plasma Keyboard
+  ansible.builtin.script:
+    cmd: virtual-keyboard.sh
+  environment:
+    VIRTUAL_KEYBOARD_DESKTOP_FILE: "{{ kde_virtual_keyboard_desktop_file }}"
+  when: >-
+    kde_virtual_keyboard_configured.stdout != kde_virtual_keyboard_desktop_file
+    or 'true' not in kde_virtual_keyboard_available.stdout
+  changed_when: true
+  become: false
+
+# --- Screen edges and touchscreen gestures ----------------------------
+# BorderActivate/TouchBorderActivate are plain kcfg IntLists: symbolic
+# names like ElectricBottom silently parse to 0, so these carry real
+# ElectricBorder integers. See the kde-config skill's lessons.
+
+- name: Set Overview mouse screen-edge binding
+  community.general.ini_file:
+    path: "{{ ansible_facts.env.HOME }}/.config/kwinrc"
+    section: Effect-overview
+    option: BorderActivate
+    value: "{{ kde_overview_border_activate }}"
+    no_extra_spaces: true
+    mode: "0644"
+  become: false
+  notify: Reconfigure overview effect
+
+- name: Set Overview touchscreen edge binding
+  community.general.ini_file:
+    path: "{{ ansible_facts.env.HOME }}/.config/kwinrc"
+    section: Effect-overview
+    option: TouchBorderActivate
+    value: "{{ kde_overview_touch_border_activate }}"
+    no_extra_spaces: true
+    mode: "0644"
+  become: false
+  notify: Reconfigure overview effect
+
+- name: Bind Application Launcher to a touchscreen edge
+  community.general.ini_file:
+    path: "{{ ansible_facts.env.HOME }}/.config/kwinrc"
+    section: TouchEdges
+    option: "{{ kde_launcher_touch_edge }}"
+    value: ApplicationLauncher
+    no_extra_spaces: true
+    mode: "0644"
+  become: false
+  notify: Reconfigure KWin
+
+# --- Panel layout -----------------------------------------------------
+# Deploying the layout is the change signal: the handler tears the panel
+# down and rebuilds it, so it must not run on an unchanged re-run.
+
+- name: Ensure Hanzo data directory exists
+  ansible.builtin.file:
+    path: "{{ kde_panel_layout_file | dirname }}"
+    state: directory
+    mode: "0755"
+  become: false
+
+- name: Deploy panel layout script
+  ansible.builtin.copy:
+    src: panel-layout.js
+    dest: "{{ kde_panel_layout_file }}"
+    mode: "0644"
+  become: false
+  notify: Apply panel layout
+
+# --- Darkly theme -----------------------------------------------------
+# Installed by Shelly from the AUR before the playbook runs. Declining
+# its PKGBUILD review is a legitimate outcome, so theming is gated on the
+# package actually being present rather than assumed.
+
+- name: Check for the Darkly theme
+  ansible.builtin.stat:
+    path: /usr/share/plasma/desktoptheme/darkly/metadata.json
+  register: kde_darkly_stat
+  become: false
+
+- name: Configure Darkly theme
+  ansible.builtin.import_tasks: darkly.yml
+  when: kde_darkly_stat.stat.exists
+
+# --- Claude Code launcher --------------------------------------------
+
+- name: Ensure ~/.local/share/applications exists
+  ansible.builtin.file:
+    path: "{{ ansible_facts.env.HOME }}/.local/share/applications"
+    state: directory
+    mode: "0755"
+  become: false
+
+- name: Deploy Claude Code launcher .desktop entry
+  ansible.builtin.template:
+    src: hanzo-claude-code.desktop.j2
+    dest: "{{ ansible_facts.env.HOME }}/.local/share/applications/{{ kde_claude_launcher_file }}"
+    mode: "0644"
+  become: false
+
+# kglobalacceld reads launcher shortcuts only from the nested
+# `[services][<file>.desktop]` group; top-level `[<file>.desktop]` groups
+# are ignored and deleted on daemon start. ini_file has no nested-group
+# syntax, hence the `]`+`[` embedded in `section`.
+- name: Bind Copilot key (F23) to Claude Code launcher
+  community.general.ini_file:
+    path: "{{ ansible_facts.env.HOME }}/.config/kglobalshortcutsrc"
+    section: "services][{{ kde_claude_launcher_file }}"
+    option: _launch
+    value: "F23"
+    no_extra_spaces: true
+    mode: "0644"
+  become: false
+
+# --- Power management -------------------------------------------------
+
+# PowerDevil writes lid-action behavior here. SleepMode=3 = "Suspend then
+# Hibernate" — set under all three power profiles (AC, Battery,
+# LowBattery) so behavior is consistent regardless of power source.
+- name: Configure PowerDevil sleep mode
+  ansible.builtin.copy:
+    dest: "{{ ansible_facts.env.HOME }}/.config/powerdevilrc"
+    content: |
+      # Managed by Hanzo. Do not edit manually.
+      [AC][SuspendAndShutdown]
+      SleepMode=3
+
+      [Battery][SuspendAndShutdown]
+      SleepMode=3
+
+      [LowBattery][SuspendAndShutdown]
+      SleepMode=3
+    mode: "0644"
+  become: false

@@ -69,6 +69,3 @@
     dest: "{{ home_cowork_dir }}/CLAUDE.md"
     mode: "0644"
   become: false
-
-- name: Configure KDE Plasma user settings
-  ansible.builtin.import_tasks: kde.yml

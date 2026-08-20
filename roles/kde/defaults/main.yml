@@ -1,0 +1,32 @@
+---
+# Touchpad properties, applied over the KWin InputDevice D-Bus API.
+# busctl booleans: quoted lowercase true|false.
+kde_touchpad_natural_scroll: "true"
+kde_touchpad_tap_to_click: "false"
+
+kde_virtual_desktops: 5
+kde_virtual_desktop_rows: 1
+
+# Applied to every connected+enabled output via kscreen-doctor.
+kde_display_color_profile_source: EDID # sRGB|ICC|EDID
+kde_display_color_power_tradeoff: preferAccuracy # preferEfficiency|preferAccuracy
+kde_display_vrr_policy: automatic # never|always|automatic
+kde_display_scale: "1.6"
+kde_display_auto_rotate_policy: always # never|inTabletMode|always
+
+kde_virtual_keyboard_desktop_file: /usr/share/applications/org.kde.plasma.keyboard.desktop
+
+# Overview hot corner: empty string = no mouse screen-edge binding.
+kde_overview_border_activate: ""
+# ElectricBorder enum integer, not a symbolic name: 4 = ElectricBottom
+# (swipe up from the bottom edge).
+kde_overview_touch_border_activate: "4"
+# Touchscreen edge whose swipe opens the Application Launcher.
+kde_launcher_touch_edge: Top
+
+kde_darkly_button_size: ButtonLarge
+
+kde_panel_layout_file: "{{ ansible_facts.env.HOME }}/.local/share/hanzo/panel-layout.js"
+
+# Must match home_cowork_dir in roles/home — the launcher opens there.
+kde_cowork_dir: "{{ ansible_facts.env.HOME }}/workspaces/cowork"
