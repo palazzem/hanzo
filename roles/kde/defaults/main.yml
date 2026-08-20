@@ -2,6 +2,7 @@
 # Touchpad. Booleans are quoted: busctl takes lowercase true|false.
 kde_touchpad_natural_scroll: "true"
 kde_touchpad_tap_to_click: "false"
+kde_touchpad_click_method: clickfinger
 
 # Virtual desktops, and the Meta+N shortcuts bound to them.
 kde_virtual_desktops: 5

@@ -1,14 +1,17 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Configures touchpad natural (inverted) scrolling and tap-to-click over
-# the KWin InputDevice D-Bus API. KWin applies live and persists to
+# Configures touchpad natural (inverted) scrolling, tap-to-click and the
+# right-click method over the KWin InputDevice D-Bus API. KWin applies live and persists to
 # ~/.config/kcminputrc. Prints one CHANGED line per property it had to
 # write; prints nothing when every touchpad already matches.
 #
 # Config:
 #   NATURAL_SCROLL=true|false   (default: true)  true = inverted scroll direction
 #   TAP_TO_CLICK=true|false     (default: false) false = tap-to-click disabled
+#   CLICK_METHOD=clickfinger|areas (default: clickfinger)
+#     clickfinger = right-click by pressing anywhere with two fingers
+#     areas       = right-click by pressing the bottom-right corner
 
 BUS_DEST="org.kde.KWin"
 MANAGER_PATH="/org/kde/KWin/InputDevice"
@@ -17,6 +20,13 @@ DEVICE_IFACE="org.kde.KWin.InputDevice"
 
 NATURAL_SCROLL="${NATURAL_SCROLL:-true}"
 TAP_TO_CLICK="${TAP_TO_CLICK:-false}"
+CLICK_METHOD="${CLICK_METHOD:-clickfinger}"
+
+case "$CLICK_METHOD" in
+  clickfinger) CLICKFINGER=true ;;
+  areas) CLICKFINGER=false ;;
+  *) echo "CLICK_METHOD must be clickfinger or areas, got: $CLICK_METHOD" >&2; exit 1 ;;
+esac
 
 get_prop() { # <device path> <property> -> lowercase value
   busctl --user --json=short get-property "$BUS_DEST" "$1" "$DEVICE_IFACE" "$2" \
@@ -44,6 +54,7 @@ while IFS= read -r sys_name; do
     found=1
     ensure_prop "$dev_path" naturalScroll "$NATURAL_SCROLL"
     ensure_prop "$dev_path" tapToClick "$TAP_TO_CLICK"
+    ensure_prop "$dev_path" clickMethodClickfinger "$CLICKFINGER"
   fi
 done <<< "$sys_names"
 
