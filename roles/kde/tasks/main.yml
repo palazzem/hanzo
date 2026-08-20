@@ -15,7 +15,7 @@
 # D-Bus/scripting APIs) and are skipped in check mode by Ansible itself.
 # The whole role is gated on host_has_kde in playbook.yml.
 
-- name: Configure touchpad scrolling, tap-to-click and right-click method
+- name: Configure touchpad settings
   ansible.builtin.script:
     cmd: touchpad.sh
   environment:

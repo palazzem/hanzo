@@ -1,6 +1,5 @@
 ---
 # Touchpad. Booleans are quoted: busctl takes lowercase true|false.
-# Click method: clickfinger (two-finger press anywhere) or areas (bottom-right corner).
 kde_touchpad_natural_scroll: "true"
 kde_touchpad_tap_to_click: "false"
 kde_touchpad_click_method: clickfinger
