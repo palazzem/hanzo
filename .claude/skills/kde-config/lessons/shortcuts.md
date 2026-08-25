@@ -29,6 +29,24 @@ group for a launcher kglobalaccel has never seen (the Copilot key):
 `loadSettings` creates the component from that group at daemon start, and
 `setForeignShortcutKeys` cannot target a component that does not exist.
 
+## Shift+digit and Shift+symbol never match: bind the shifted character
+
+Confirmed live: `Meta+Shift+4` and `Meta+Shift+5` set through
+`setForeignShortcutKeys` were accepted, persisted as such, and never
+fired. `Xkb::modifiersRelevantForGlobalShortcuts` (`plasma/kwin`,
+`src/xkb.cpp`) subtracts the modifiers xkb *consumed* to produce the
+keysym; Shift is consumed turning `4` into `$`, and the exception that
+keeps Shift anyway (BUG 370341) applies only when the resulting key is a
+letter. The key itself is `QXkbCommon::keysymToQtKey` of the shifted
+keysym, so KWin asks kglobalaccel for `Meta+$` (`0x10000024`), never
+`Meta+Shift+4`. KDE's own recorder (`frameworks/kguiaddons`,
+`kkeysequencerecorder.cpp`, `isShiftAsModifierAllowed`) stores the same
+thing: Shift is dropped for anything that is not a letter, an F-key or
+one of its listed special keys. Bind the character Shift produces on the
+layout in use (`Meta+$` and `Meta+%` on US) and expect that to be
+layout-dependent. Printable ASCII keys carry their code point as the
+`Qt::Key` value (`Key_Dollar = 0x24`, `Key_Percent = 0x25`).
+
 ## Service components (launcher actions)
 
 `.desktop` launchers are components named after the file
