@@ -36,11 +36,19 @@
   changed_when: "'CHANGED' in kde_desktops_result.stdout"
   become: false
 
-- name: Bind Meta+N to switch to virtual desktop N
+- name: Build Meta+N virtual desktop shortcut bindings
+  ansible.builtin.set_fact:
+    kde_desktop_shortcuts: >-
+      {{ kde_desktop_shortcuts | default([])
+         + [{'component': 'kwin', 'action': 'Switch to Desktop ' ~ item, 'key': 'Meta+' ~ item}] }}
+  loop: "{{ range(1, kde_virtual_desktops + 1) | list }}"
+  become: false
+
+- name: Bind global shortcuts
   ansible.builtin.script:
-    cmd: bind-desktop-shortcuts.py
+    cmd: bind-shortcuts.py
   environment:
-    TARGET_DESKTOPS: "{{ kde_virtual_desktops }}"
+    BINDINGS: "{{ (kde_desktop_shortcuts + kde_global_shortcuts) | to_json }}"
   register: kde_shortcuts_result
   changed_when: "'CHANGED' in kde_shortcuts_result.stdout"
   become: false

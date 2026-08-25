@@ -65,5 +65,5 @@ is deployed with `copy`, and only that file changing notifies the
 The custom panel layout deliberately omits `org.kde.plasma.pager` (virtual
 desktop pager widget) and `org.kde.plasma.showdesktop`. The pager is
 redundant once Meta+1..5 shortcuts exist for desktop switching (see
-`bind-desktop-shortcuts.py`) - worth keeping widget choices and shortcut
+`bind-shortcuts.py`) - worth keeping widget choices and shortcut
 choices in sync when updating either.

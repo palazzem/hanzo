@@ -8,6 +8,12 @@ kde_touchpad_click_method: clickfinger
 kde_virtual_desktops: 5
 kde_virtual_desktop_rows: 1
 
+# Global shortcuts, each added as an alternative to the action's existing
+# keys. `component` is the kglobalaccel component unique name (the
+# .desktop file name for launcher actions), `action` the entry name the
+# component uses in kglobalshortcutsrc.
+kde_global_shortcuts: []
+
 # Displays. Applied to every connected and enabled output.
 kde_display_color_profile_source: EDID
 kde_display_color_power_tradeoff: preferAccuracy
