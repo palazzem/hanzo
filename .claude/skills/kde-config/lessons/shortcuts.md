@@ -1,6 +1,51 @@
 # Global shortcuts (kglobalaccel)
 
-Relevant to `roles/kde/files/bind-desktop-shortcuts.py`.
+Relevant to `roles/kde/files/bind-shortcuts.py`.
+
+## Live path vs config file
+
+On Plasma 6 Wayland `org.kde.kglobalaccel` is owned by `kwin_wayland`
+itself (`busctl --user status org.kde.kglobalaccel` reports
+`Comm=kwin_wayland`; the `kglobalacceld` package ships
+`libKGlobalAccelD.so`, loaded in-process). That is why a marshalling
+error crashes the compositor rather than a helper daemon.
+
+`plasma/kglobalacceld`'s `GlobalShortcutsRegistry` has no
+`KConfigWatcher`: editing `~/.config/kglobalshortcutsrc` changes nothing
+until the next login, and `Component::writeSettings` /
+`KServiceActionComponent::writeSettings` delete and rewrite each loaded
+component's group from memory on every scheduled write, so a hand-written
+entry for a live component can be clobbered before login ever happens.
+`setForeignShortcutKeys` is the live path: it replaces the action's key
+set (`setShortcutKeys` with `NoAutoloading`) and the daemon then persists
+on its own to `~/.config/kglobalshortcutsrc` (service components write
+only keys that differ from the default) and
+`~/.local/state/kglobalshortcutsstaterc` (serials). Confirmed live: after
+the call, `[services][org.kde.spectacle.desktop]` gained
+`CurrentMonitorScreenShot=Meta+Shift+5` within a minute.
+
+The one legitimate config-file write is a `[services][<file>.desktop]`
+group for a launcher kglobalaccel has never seen (the Copilot key):
+`loadSettings` creates the component from that group at daemon start, and
+`setForeignShortcutKeys` cannot target a component that does not exist.
+
+## Service components (launcher actions)
+
+`.desktop` launchers are components named after the file
+(`org.kde.spectacle.desktop`); the D-Bus path is the escaped form
+(`/component/org_kde_spectacle_desktop`) and
+`org.kde.KGlobalAccel.getComponent(s)` resolves it, failing cleanly with
+`The component '…' doesn't exist.` for an unknown name. Actions are the
+`[Desktop Action <name>]` names from
+`/usr/share/kglobalaccel/<file>.desktop` (`RectangularRegionScreenShot`,
+`CurrentMonitorScreenShot`, …) plus `_launch`. `findAction` matches on
+the component and action unique names only; the two friendly-name slots
+of `actionId` are length-checked, never compared.
+
+`allShortcutInfos` reports active keys as a flat int list, one entry per
+alternative (`key[0].toCombined()`), and an unbound action as `[0]`.
+`Utils::normalizeSequences` drops empty sequences on write, so a leading
+zero must be filtered before re-sending the list.
 
 ## Crash risk: `setForeignShortcutKeys` needs fixed 4-int arrays
 
@@ -27,7 +72,8 @@ installed headers, don't trust from memory):
 
 | Constant | Value |
 |---|---|
-| `Key_1`..`Key_5` | `0x31`..`0x35` |
+| `Key_0`..`Key_9` | `0x30`..`0x39` (ASCII) |
+| `Key_A`..`Key_Z` | `0x41`..`0x5a` (ASCII uppercase) |
 | `MetaModifier` | `0x10000000` |
 | `ControlModifier` | `0x04000000` |
 | `ShiftModifier` | `0x02000000` |
