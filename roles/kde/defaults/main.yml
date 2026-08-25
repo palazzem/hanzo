@@ -8,6 +8,15 @@ kde_touchpad_click_method: clickfinger
 kde_virtual_desktops: 5
 kde_virtual_desktop_rows: 1
 
+# Global shortcuts, added as alternatives to each action's existing keys.
+kde_global_shortcuts:
+  - component: org.kde.spectacle.desktop
+    action: RectangularRegionScreenShot
+    key: "Meta+$"
+  - component: org.kde.spectacle.desktop
+    action: CurrentMonitorScreenShot
+    key: "Meta+%"
+
 # Displays. Applied to every connected and enabled output.
 kde_display_color_profile_source: EDID
 kde_display_color_power_tradeoff: preferAccuracy

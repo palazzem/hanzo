@@ -218,7 +218,7 @@ not from memory.
 |---|---|---|
 | Touchpad | `files/touchpad.sh` | `lessons/input-devices.md` |
 | Virtual desktops | `files/virtual-desktops.sh` | `lessons/layouts.md` |
-| Meta+N desktop shortcuts | `files/bind-desktop-shortcuts.py` | `lessons/shortcuts.md` |
+| Global shortcuts (Meta+N desktops, Spectacle captures) | `files/bind-shortcuts.py` | `lessons/shortcuts.md` |
 | Display | `files/display.sh` | `lessons/display.md` |
 | Virtual keyboard | `files/virtual-keyboard.sh` | `lessons/input-devices.md` |
 | Screen edges | `tasks/main.yml` (ini_file + handler) | `lessons/screen-edges.md`, `lessons/dbus-kwin.md` |
