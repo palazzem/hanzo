@@ -11,14 +11,17 @@ kde_virtual_desktop_rows: 1
 # Global shortcuts, each added as an alternative to the action's existing
 # keys. `component` is the kglobalaccel component unique name (the
 # .desktop file name for launcher actions), `action` the entry name the
-# component uses in kglobalshortcutsrc.
+# component uses in kglobalshortcutsrc. Keys are spelled the way KDE's
+# shortcut recorder shows them: Shift+digit arrives as the shifted
+# character, so Meta+Shift+4 and Meta+Shift+5 on a US layout are Meta+$
+# and Meta+%.
 kde_global_shortcuts:
   - component: org.kde.spectacle.desktop
     action: RectangularRegionScreenShot
-    key: Meta+Shift+4
+    key: "Meta+$"
   - component: org.kde.spectacle.desktop
     action: CurrentMonitorScreenShot
-    key: Meta+Shift+5
+    key: "Meta+%"
 
 # Displays. Applied to every connected and enabled output.
 kde_display_color_profile_source: EDID

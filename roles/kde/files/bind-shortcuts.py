@@ -4,11 +4,12 @@
 BINDINGS is a JSON array of {"component", "action", "key"} objects:
 `component` is a kglobalaccel component unique name, `action` an action
 unique name inside it, and `key` a `Modifier+...+Key` string built from
-Meta, Ctrl, Shift, Alt and a single ASCII letter or digit. Each action
-keeps its existing alternatives; setForeignShortcutKeys is called only
-for actions still missing their key, printing one CHANGED line per
-rebound action, so re-runs are no-ops. An unknown component, action,
-modifier or key fails the run.
+Meta, Ctrl, Shift, Alt and one printable ASCII character, spelled the
+way KDE's shortcut recorder shows it (Meta+$ rather than Meta+Shift+4).
+Each action keeps its existing alternatives; setForeignShortcutKeys is
+called only for actions still missing their key, printing one CHANGED
+line per rebound action, so re-runs are no-ops. An unknown component,
+action, modifier or key fails the run.
 """
 import json
 import os
@@ -35,8 +36,13 @@ def query(path, interface, method, *args):
 
 def parse_key(spec):
     *modifiers, key = spec.split("+")
-    if len(key) != 1 or not key.isascii() or not key.isalnum():
+    if len(key) != 1 or not key.isascii() or not key.isprintable():
         sys.exit(f"ERROR: unsupported key '{key}' in '{spec}'")
+    # KWin drops a Shift that xkb consumed to produce the keysym, so Shift only
+    # survives on letters and Space; anything else must be bound as the shifted
+    # character itself (Meta+$ for Meta+Shift+4 on a US layout).
+    if "Shift" in modifiers and not key.isalpha() and key != " ":
+        sys.exit(f"ERROR: Shift+{key} in '{spec}' can never match; bind the character Shift+{key} produces instead")
     code = ord(key.upper())
     for modifier in modifiers:
         if modifier not in MODIFIERS:
