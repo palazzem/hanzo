@@ -1,0 +1,41 @@
+---
+# KWin window rules. A rule is a kwinrulesrc group whose name appears in
+# the [General] rules list; KWin loads whatever names the list holds, so
+# Hanzo's rules carry stable names instead of the UUIDs the KCM mints.
+# The list is merged, never replaced, so rules added by hand survive.
+# count predates the list and is only read when the list is absent, but
+# the KCM still writes it, so it is kept in step.
+
+- name: Write window rule properties
+  ansible.builtin.include_tasks: window-rule.yml
+  loop: "{{ kde_window_rules | dict2items }}"
+  loop_control:
+    loop_var: kde_window_rule
+    label: "{{ kde_window_rule.key }}"
+
+- name: Read registered window rules
+  ansible.builtin.command:
+    cmd: kreadconfig6 --file kwinrulesrc --group General --key rules
+  register: kde_window_rules_registered
+  changed_when: false
+  check_mode: false
+  become: false
+
+- name: Register window rules
+  community.general.ini_file:
+    path: "{{ ansible_facts.env.HOME }}/.config/kwinrulesrc"
+    section: General
+    option: "{{ item.option }}"
+    value: "{{ item.value }}"
+    no_extra_spaces: true
+    mode: "0644"
+  vars:
+    kde_window_rules_existing: "{{ kde_window_rules_registered.stdout | split(',') | reject('eq', '') | list }}"
+    kde_window_rules_merged: "{{ kde_window_rules_existing + (kde_window_rules | list | reject('in', kde_window_rules_existing) | list) }}"
+  loop:
+    - option: rules
+      value: "{{ kde_window_rules_merged | join(',') }}"
+    - option: count
+      value: "{{ kde_window_rules_merged | length }}"
+  become: false
+  notify: Reconfigure KWin

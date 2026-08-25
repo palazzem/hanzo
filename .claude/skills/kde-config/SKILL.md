@@ -227,3 +227,4 @@ not from memory.
 | Darkly theme | `tasks/darkly.yml` | `lessons/theming.md` |
 | Copilot key (F23) binding | `tasks/main.yml` | — |
 | PowerDevil sleep mode | `tasks/main.yml` | — |
+| Window rules | `tasks/window-rules.yml` + `tasks/window-rule.yml` | `lessons/window-rules.md` |

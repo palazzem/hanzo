@@ -1,0 +1,17 @@
+---
+# One kwinrulesrc group per rule. kde_window_rule is the {key: group,
+# value: properties} item supplied by the including loop.
+
+- name: Write window rule {{ kde_window_rule.key }}
+  community.general.ini_file:
+    path: "{{ ansible_facts.env.HOME }}/.config/kwinrulesrc"
+    section: "{{ kde_window_rule.key }}"
+    option: "{{ item.key }}"
+    value: "{{ item.value }}"
+    no_extra_spaces: true
+    mode: "0644"
+  loop: "{{ kde_window_rule.value | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+  become: false
+  notify: Reconfigure KWin
