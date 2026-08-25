@@ -33,7 +33,10 @@ group for a launcher kglobalaccel has never seen (the Copilot key):
 
 Confirmed live: `Meta+Shift+4` and `Meta+Shift+5` set through
 `setForeignShortcutKeys` were accepted, persisted as such, and never
-fired. `Xkb::modifiersRelevantForGlobalShortcuts` (`plasma/kwin`,
+fired. The modifier was not the problem: `Meta` is the Windows/Super key
+(see the constants table below), and the same `Meta` drives the working
+Meta+1..5 desktop shortcuts; the key half of the combination was.
+`Xkb::modifiersRelevantForGlobalShortcuts` (`plasma/kwin`,
 `src/xkb.cpp`) subtracts the modifiers xkb *consumed* to produce the
 keysym; Shift is consumed turning `4` into `$`, and the exception that
 keeps Shift anyway (BUG 370341) applies only when the resulting key is a
@@ -96,6 +99,10 @@ installed headers, don't trust from memory):
 | `ControlModifier` | `0x04000000` |
 | `ShiftModifier` | `0x02000000` |
 | `AltModifier` | `0x08000000` |
+
+`MetaModifier` is the Windows/Super key: KWin resolves it from xkb's
+`Mod4` (`XKB_MOD_NAME_LOGO`, `plasma/kwin` `src/xkb.cpp`,
+`Xkb::updateKeymap`), and KDE spells it `Meta` in `kglobalshortcutsrc`.
 
 ## Testing tip
 
