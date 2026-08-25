@@ -8,13 +8,7 @@ kde_touchpad_click_method: clickfinger
 kde_virtual_desktops: 5
 kde_virtual_desktop_rows: 1
 
-# Global shortcuts, each added as an alternative to the action's existing
-# keys. `component` is the kglobalaccel component unique name (the
-# .desktop file name for launcher actions), `action` the entry name the
-# component uses in kglobalshortcutsrc. Keys are spelled the way KDE's
-# shortcut recorder shows them: Shift+digit arrives as the shifted
-# character, so Meta+Shift+4 and Meta+Shift+5 on a US layout are Meta+$
-# and Meta+%.
+# Global shortcuts, added as alternatives to each action's existing keys.
 kde_global_shortcuts:
   - component: org.kde.spectacle.desktop
     action: RectangularRegionScreenShot
