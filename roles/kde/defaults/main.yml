@@ -12,7 +12,13 @@ kde_virtual_desktop_rows: 1
 # keys. `component` is the kglobalaccel component unique name (the
 # .desktop file name for launcher actions), `action` the entry name the
 # component uses in kglobalshortcutsrc.
-kde_global_shortcuts: []
+kde_global_shortcuts:
+  - component: org.kde.spectacle.desktop
+    action: RectangularRegionScreenShot
+    key: Meta+Shift+4
+  - component: org.kde.spectacle.desktop
+    action: CurrentMonitorScreenShot
+    key: Meta+Shift+5
 
 # Displays. Applied to every connected and enabled output.
 kde_display_color_profile_source: EDID
