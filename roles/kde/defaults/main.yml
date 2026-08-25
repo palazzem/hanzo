@@ -39,3 +39,19 @@ kde_darkly_button_size: ButtonLarge
 
 # Panel layout, deployed here and applied from this path.
 kde_panel_layout_file: "{{ ansible_facts.env.HOME }}/.local/share/hanzo/panel-layout.js"
+
+# KWin window rules, keyed by the kwinrulesrc group that holds each one.
+# Properties are kwinrulesrc keys verbatim, so the ints are KWin's own
+# enums: *match is Rules::StringMatch (1 = exact), *rule is
+# Rules::SetRule (3 = apply initially), types is a NET::WindowTypeMask
+# bitmask (1 = normal window). Booleans are quoted: KConfig reads
+# lowercase true|false.
+kde_window_rules:
+  hanzo-ghostty:
+    Description: Window settings for com.mitchellh.ghostty
+    wmclass: ghostty com.mitchellh.ghostty
+    wmclasscomplete: "true"
+    wmclassmatch: 1
+    types: 1
+    size: 1600,1001
+    sizerule: 3

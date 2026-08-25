@@ -143,6 +143,11 @@
   become: false
   notify: Reconfigure KWin
 
+# --- Window rules -----------------------------------------------------
+
+- name: Configure window rules
+  ansible.builtin.import_tasks: window-rules.yml
+
 # --- Panel layout -----------------------------------------------------
 # Deploying the layout is the change signal: the handler tears the panel
 # down and rebuilds it, so it must not run on an unchanged re-run.
