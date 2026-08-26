@@ -52,21 +52,36 @@ manual_steps() {
 # snapshots are never touched again, so later runs keep their history.
 # Deleting and creating through snapper (never raw btrfs) lets
 # limine-snapper-sync's plugin keep the boot menu in step.
+# Every snapper read lands in a plain assignment: a process substitution
+# or a pipeline into grep would drop snapper's exit status, and a failed
+# read must end the run rather than pass for an empty list.
 snapshot_baseline() {
     local description="Hanzo configuration"
-    local config configs numbers number
+    local config configs descriptions listed numbers number
     if ! command -v snapper >/dev/null 2>&1; then
         warn "Skipped snapshot baseline: snapper is not installed."
         return 0
     fi
-    mapfile -t configs < <(sudo snapper --csvout --no-headers list-configs --columns config)
+    listed="$(sudo snapper --csvout --no-headers list-configs --columns config)"
+    if [ -z "$listed" ]; then
+        warn "Skipped snapshot baseline: snapper has no configuration."
+        return 0
+    fi
+    mapfile -t configs <<<"$listed"
     for config in "${configs[@]}"; do
-        if sudo snapper --csvout --no-headers -c "$config" list --columns description | grep -Fxq "$description"; then
+        descriptions="$(sudo snapper --csvout --no-headers -c "$config" list --columns description)"
+        if grep -Fxq "$description" <<<"$descriptions"; then
             log "Snapshot baseline already exists in '$config' — leaving snapshots alone."
             continue
         fi
+        listed="$(sudo snapper --csvout --no-headers -c "$config" list --columns number)"
+        numbers=()
         # Number 0 is the live filesystem, not a snapshot.
-        mapfile -t numbers < <(sudo snapper --csvout --no-headers -c "$config" list --columns number | grep -vx 0 || true)
+        while IFS= read -r number; do
+            if [ -n "$number" ] && [ "$number" != 0 ]; then
+                numbers+=("$number")
+            fi
+        done <<<"$listed"
         if [ "${#numbers[@]}" -gt 0 ]; then
             log "Deleting ${#numbers[@]} snapshot(s) from '$config'..."
             sudo snapper -c "$config" delete --sync "${numbers[@]}"
@@ -136,6 +151,9 @@ ansible-playbook playbook.yml "${ARGS[@]}"
 # Last stage by design: the baseline must capture the AUR set, the
 # playbook, and its handlers. A dry run changes nothing worth keeping.
 if [ "$MODE" != "--check" ]; then
+    # The playbook outlasts sudo's cached credential: authenticate here,
+    # so any prompt lands before snapper rather than inside it.
+    sudo -v
     snapshot_baseline
 else
     warn "Skipped snapshot baseline: --check is a dry run."
