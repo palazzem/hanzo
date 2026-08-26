@@ -219,3 +219,17 @@
       SleepMode=3
     mode: "0644"
   become: false
+
+# --- Session restore --------------------------------------------------
+
+# ksmserver reads loginMode once, when the session starts, so the key
+# takes effect at the next login and there is no live apply to notify.
+- name: Configure session restore at login
+  community.general.ini_file:
+    path: "{{ ansible_facts.env.HOME }}/.config/ksmserverrc"
+    section: General
+    option: loginMode
+    value: "{{ kde_session_login_mode }}"
+    no_extra_spaces: true
+    mode: "0644"
+  become: false

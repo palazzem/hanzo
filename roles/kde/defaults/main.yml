@@ -55,3 +55,7 @@ kde_window_rules:
     types: 1
     size: 1600,1001
     sizerule: 3
+
+# Session restore at login. One of restorePreviousLogout,
+# restoreSavedSession, emptySession — the ksmserver loginMode names.
+kde_session_login_mode: emptySession
