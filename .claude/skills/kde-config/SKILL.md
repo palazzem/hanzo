@@ -228,3 +228,4 @@ not from memory.
 | Copilot key (F23) binding | `tasks/main.yml` | — |
 | PowerDevil sleep mode | `tasks/main.yml` | — |
 | Window rules | `tasks/window-rules.yml` + `tasks/window-rule.yml` | `lessons/window-rules.md` |
+| Session restore at login | `tasks/main.yml` (ini_file, no handler) | `lessons/session.md` |
