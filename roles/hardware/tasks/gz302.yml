@@ -24,13 +24,6 @@
     mode: "0644"
   become: true
 
-- name: Deploy suspend/resume hook
-  ansible.builtin.template:
-    src: gz302-suspend.sh.j2
-    dest: /usr/lib/systemd/system-sleep/gz302-suspend.sh
-    mode: "0755"
-  become: true
-
 - name: Create XKB override directories
   ansible.builtin.file:
     path: "/etc/xkb/{{ item }}"

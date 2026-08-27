@@ -8,8 +8,3 @@ hardware_asus_services:
 
 # Disable Compute Wavefront Save-Restore to prevent GPU hangs on RDNA 3.5.
 hardware_gz302_amdgpu_cwsr_enable: 0
-
-# ASUS USB identifiers for keyboard, touchpad, and lightbar devices.
-hardware_gz302_asus_usb_vendor: "0b05"
-hardware_gz302_asus_keyboard_product: "1a30"
-hardware_gz302_asus_lightbar_product: "18c6"
