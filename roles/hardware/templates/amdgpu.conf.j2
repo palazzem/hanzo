@@ -1,12 +1,6 @@
 # AMD GPU configuration for Radeon 8060S (RDNA 3.5, Strix Halo)
 # Managed by Hanzo. Do not edit manually.
 
-# Force ABM off. The kernel patch that auto-skipped ABM on OLED panels
-# (76cb763e6ea6) was reverted in 2024 — ABM is still active on OLED in 7.0
-# mainline, and power-profiles-daemon ≥0.20 engages it on battery via
-# panel_power_savings, producing visible gamma/red-shift on this OLED panel.
-options amdgpu abmlevel={{ hardware_gz302_amdgpu_abmlevel }}
-
 # Disable Compute Wavefront Save-Restore. Prevents GPU hangs and
 # graphical artifacts caused by register file synchronization issues
 # on RDNA 3.5.

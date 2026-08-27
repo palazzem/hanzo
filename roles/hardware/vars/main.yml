@@ -9,9 +9,6 @@ hardware_asus_services:
 hardware_gz302_pacman:
   - keyd
 
-# Force ABM off: kernel auto-skip on OLED was reverted in 2024; PPD engages
-# ABM on battery and causes visible gamma/red-shift on AMD OLED panels.
-hardware_gz302_amdgpu_abmlevel: 0
 # Disable Compute Wavefront Save-Restore to prevent GPU hangs on RDNA 3.5.
 hardware_gz302_amdgpu_cwsr_enable: 0
 
