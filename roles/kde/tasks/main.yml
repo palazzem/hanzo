@@ -188,13 +188,16 @@
 # `[services][<file>.desktop]` group; top-level `[<file>.desktop]` groups
 # are ignored and deleted on daemon start. ini_file has no nested-group
 # syntax, hence the `]`+`[` embedded in `section`. The launcher itself is
-# desktop-agnostic and deployed by the home role.
-- name: Bind Copilot key (F23) to Claude Code launcher
+# desktop-agnostic and deployed by the home role. The hardware role's XKB
+# override delivers the Copilot chord as F23 with Shift and Meta still
+# held (a ONE_LEVEL key consumes no modifier), so kglobalaccel sees
+# Meta+Shift+F23.
+- name: Bind Copilot key chord to Claude Code launcher
   community.general.ini_file:
     path: "{{ ansible_facts.env.HOME }}/.config/kglobalshortcutsrc"
     section: "services][{{ claude_launcher_file }}"
     option: _launch
-    value: "F23"
+    value: "Meta+Shift+F23"
     no_extra_spaces: true
     mode: "0644"
   become: false
