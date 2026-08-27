@@ -31,12 +31,6 @@
     mode: "0755"
   become: true
 
-# xkeyboard-config >= 2.44 types <FK23> as PC_SHIFT_SUPER_LEVEL2, so the
-# Copilot chord (LeftShift+LeftMeta+F23) reaches Plasma as XF86Assistant,
-# a keysym Qt has no key for and kglobalaccel cannot bind. /etc/xkb is on
-# libxkbcommon's include path: the override delivers F23 at every level
-# and the kde role binds the chord as Meta+Shift+F23. KWin reads the
-# include path once at startup, so the first deploy needs a new session.
 - name: Create XKB override directories
   ansible.builtin.file:
     path: "/etc/xkb/{{ item }}"
