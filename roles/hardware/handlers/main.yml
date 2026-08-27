@@ -1,14 +1,4 @@
 ---
-- name: Restart network stack
-  ansible.builtin.shell: |
-    set -euo pipefail
-    systemctl restart NetworkManager
-    nmcli radio wifi off
-    nmcli radio wifi on
-    sleep 5
-  changed_when: true
-  become: true
-
 - name: Restart keyd
   ansible.builtin.systemd_service:
     name: keyd
