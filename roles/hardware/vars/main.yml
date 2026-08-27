@@ -5,6 +5,3 @@ hardware_asus_pacman:
 
 hardware_asus_services:
   - asusd
-
-# Disable Compute Wavefront Save-Restore to prevent GPU hangs on RDNA 3.5.
-hardware_gz302_amdgpu_cwsr_enable: 0

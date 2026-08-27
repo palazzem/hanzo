@@ -17,13 +17,6 @@
     - host_has_systemd
   become: true
 
-- name: Deploy GPU modprobe config
-  ansible.builtin.template:
-    src: amdgpu.conf.j2
-    dest: /etc/modprobe.d/amdgpu.conf
-    mode: "0644"
-  become: true
-
 - name: Create XKB override directories
   ansible.builtin.file:
     path: "/etc/xkb/{{ item }}"
