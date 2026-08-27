@@ -39,13 +39,6 @@
     mode: "0644"
   become: true
 
-- name: Ensure OLED kernel param in Limine cmdline
-  ansible.builtin.lineinfile:
-    path: /etc/default/limine
-    regexp: '^KERNEL_CMDLINE\[default\]\+=" amdgpu\.dcdebugmask='
-    line: 'KERNEL_CMDLINE[default]+=" {{ hardware_gz302_oled_kernel_param }}"'
-  become: true
-
 - name: Deploy suspend/resume hook
   ansible.builtin.template:
     src: gz302-suspend.sh.j2
