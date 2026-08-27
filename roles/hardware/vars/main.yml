@@ -16,8 +16,6 @@ hardware_gz302_oled_kernel_param: "amdgpu.dcdebugmask=0x400"
 # Force ABM off: kernel auto-skip on OLED was reverted in 2024; PPD engages
 # ABM on battery and causes visible gamma/red-shift on AMD OLED panels.
 hardware_gz302_amdgpu_abmlevel: 0
-# Disable scatter-gather display to prevent flicker on unified-memory APUs under memory pressure.
-hardware_gz302_amdgpu_sg_display: 0
 # Disable Compute Wavefront Save-Restore to prevent GPU hangs on RDNA 3.5.
 hardware_gz302_amdgpu_cwsr_enable: 0
 
