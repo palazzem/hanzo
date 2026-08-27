@@ -1,21 +1,6 @@
 ---
 # ASUS ROG Flow Z13 (GZ302) hardware fixes.
 
-# Wifi-powersave fix runs first and is flushed immediately so the
-# MT7925 stops dropping long-running TCP transfers before any role
-# downloads anything (curl-based installers in later roles, pacman in
-# this one).
-- name: Deploy NetworkManager wifi powersave drop-in
-  ansible.builtin.template:
-    src: wifi-powersave.conf.j2
-    dest: /etc/NetworkManager/conf.d/wifi-powersave.conf
-    mode: "0644"
-  become: true
-  notify: Restart network stack
-
-- name: Apply wifi powersave before continuing
-  ansible.builtin.meta: flush_handlers
-
 - name: Install ASUS packages
   community.general.pacman:
     name: "{{ hardware_asus_pacman }}"
