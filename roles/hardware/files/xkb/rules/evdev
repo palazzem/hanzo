@@ -1,0 +1,4 @@
+// Managed by Hanzo. Do not edit manually.
+! include %S/evdev
+! model = symbols
+  * = +gz302(copilot)
