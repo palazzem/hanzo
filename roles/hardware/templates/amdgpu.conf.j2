@@ -1,7 +1,2 @@
 # AMD GPU configuration for Radeon 8060S (RDNA 3.5, Strix Halo)
 # Managed by Hanzo. Do not edit manually.
-
-# Disable Compute Wavefront Save-Restore. Prevents GPU hangs and
-# graphical artifacts caused by register file synchronization issues
-# on RDNA 3.5.
-options amdgpu cwsr_enable={{ hardware_gz302_amdgpu_cwsr_enable }}
