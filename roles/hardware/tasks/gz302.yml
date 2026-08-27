@@ -21,16 +21,6 @@
     name: "{{ hardware_asus_pacman }}"
   become: true
 
-# asusctl ships without /etc/asusd, but asusd.service's namespace
-# directives reference it — the unit fails with status=226/NAMESPACE
-# on first start unless the directory exists.
-- name: Ensure /etc/asusd exists for asusd.service
-  ansible.builtin.file:
-    path: /etc/asusd
-    state: directory
-    mode: "0755"
-  become: true
-
 - name: Enable and start ASUS services
   ansible.builtin.systemd_service:
     name: "{{ item }}"
