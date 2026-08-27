@@ -1,0 +1,8 @@
+// Managed by Hanzo. Do not edit manually.
+// xkeyboard-config >= 2.44 maps Shift+Super+F23 (the Copilot chord) to
+// XF86Assistant, which Qt has no key for, so Plasma cannot bind it.
+// Deliver plain F23 at every level instead.
+partial alphanumeric_keys
+xkb_symbols "copilot" {
+    key <FK23> { type[Group1] = "ONE_LEVEL", [ F23 ] };
+};

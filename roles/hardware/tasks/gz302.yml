@@ -31,25 +31,26 @@
     mode: "0755"
   become: true
 
-- name: Install GZ302 packages
-  community.general.pacman:
-    name: "{{ hardware_gz302_pacman }}"
+- name: Create XKB override directories
+  ansible.builtin.file:
+    path: "/etc/xkb/{{ item }}"
+    state: directory
+    mode: "0755"
+  loop:
+    - rules
+    - symbols
   become: true
 
-- name: Deploy keyd config
-  ansible.builtin.template:
-    src: keyd-default.conf.j2
-    dest: /etc/keyd/default.conf
+- name: Deploy XKB rules override
+  ansible.builtin.copy:
+    src: xkb/rules/evdev
+    dest: /etc/xkb/rules/evdev
     mode: "0644"
   become: true
-  notify: Restart keyd
 
-- name: Enable and start keyd
-  ansible.builtin.systemd_service:
-    name: keyd
-    state: started
-    enabled: true
-  when:
-    - not ansible_check_mode
-    - host_has_systemd
+- name: Deploy Copilot key XKB symbols
+  ansible.builtin.copy:
+    src: xkb/symbols/gz302
+    dest: /etc/xkb/symbols/gz302
+    mode: "0644"
   become: true
