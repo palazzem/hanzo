@@ -14,8 +14,6 @@ repos:
           - id: check-json
           - id: check-merge-conflict
           - id: check-shebang-scripts-are-executable
-            # Deployed with mode 0755 by ansible.builtin.template; not executable in-tree.
-            exclude: ^roles/hardware/templates/.*\.j2$
           - id: check-symlinks
           - id: check-toml
           - id: check-vcs-permalinks
