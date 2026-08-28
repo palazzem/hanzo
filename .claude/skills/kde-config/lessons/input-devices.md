@@ -32,16 +32,30 @@ its `.desktop` file to be a valid candidate (`find /usr/share/applications
 
 Live-verify via `busctl --user get-property org.kde.KWin /VirtualKeyboard
 org.kde.kwin.VirtualKeyboard available` (should read `true`) - the process
-itself shows up as `plasma-keyboard` in `pgrep`.
+itself shows up as `plasma-keyboard` in `pgrep`. `available` only means KWin
+holds a non-empty `Exec` command (`InputMethod::isAvailable()`), not that
+the process is running.
 
-### Gotcha: equality guard breaks naive idempotency
+### Gotcha: an unchanged write sends no notification
 
-`setInputMethodCommand()` no-ops if the new value equals the *current
-in-memory* value - even if that value has drifted from what's actually on
-disk. Observed live: `available` stayed `false` and the process wasn't
-running despite the correct key already being in `kwinrc`.
+KWin only learns of the key through a `KConfigWatcher` on the
+`org.kde.kconfig.notify.ConfigChanged` D-Bus signal, and KConfig only emits
+it for entries whose value actually changed (`KEntry::operator==` ignores
+the dirty/notify flags on purpose). Observed live: the correct key already
+in `kwinrc`, `available` `false`, and a plain write of the same value
+changed nothing.
 
-Fix: always write an empty value first (forcing a real transition), then
-the target value, each with `kwriteconfig6 --notify`. This is what makes
-`virtual-keyboard.sh` reliably idempotent even after selecting "None" in the
-GUI, which removes the key entirely.
+Fix: always write an empty value first, then the target, each with
+`kwriteconfig6 --notify` - the transition is what makes KConfig notify.
+This also covers "None" in the GUI, which removes the key entirely.
+
+### Gotcha: `kwriteconfig6 --notify` can lose the signal
+
+`kwriteconfig6` hands the D-Bus signal to Qt's D-Bus worker thread and
+exits without flushing, so on a busy system (mid-install) the process can
+quit before the signal is written and KWin is never told. `kwinrc` is
+still correct and KWin reads it at the next session start. This is why
+`virtual-keyboard.sh` does not verify `available` after applying: the
+task-level `available` guard re-applies on the next run instead of the play
+failing on a lost notification. The System Settings KCM never hits this -
+it is a long-lived process.
