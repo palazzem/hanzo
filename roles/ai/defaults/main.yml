@@ -14,7 +14,3 @@ ai_pacman:
   # an optional dep by `ggml`, so it is not implied by llama-cpp and has
   # to be requested explicitly.
   - ggml-hip
-  # No ggml-cpu: since ggml 0.22.0 the CPU backend ships inside `ggml`,
-  # which provides and conflicts with the retired package. Listing a
-  # name that is only provided fails every rerun — `pacman -Q` never
-  # lists it, so the module retries it and hits the conflict.
