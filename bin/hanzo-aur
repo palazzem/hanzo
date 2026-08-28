@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# hanzo-aur — one-shot AUR provisioning via Shelly for a fresh machine.
+# hanzo-aur — AUR provisioning via Shelly: installs the package set,
+# skipping packages already at the AUR version.
 # Usage: hanzo-aur [--ci]
 
 set -euo pipefail
@@ -47,6 +48,34 @@ shelly_install() { # <shelly args...>
     fi
 }
 
+# The version pacman reports for a build of this srcinfo:
+# [epoch:]pkgver-pkgrel.
+srcinfo_version() { # <srcinfo>
+    awk -F' = ' '
+        $1 ~ /^[[:space:]]*epoch$/  { epoch = $2 ":" }
+        $1 ~ /^[[:space:]]*pkgver$/ { pkgver = $2 }
+        $1 ~ /^[[:space:]]*pkgrel$/ { pkgrel = $2 }
+        END { print epoch pkgver "-" pkgrel }
+    ' <<<"$1"
+}
+
+# Shelly rebuilds whatever it is asked for, so skip a package pacman
+# already reports at (or past) the AUR version.
+up_to_date() { # <pkg> <aur version>
+    local installed
+    installed="$(pacman -Q "$1" 2>/dev/null)" || return 1
+    installed="${installed#* }"
+    [ "$(vercmp "$installed" "$2")" -ge 0 ]
+}
+
+# Shelly clones on its own; this shallow clone only reads .SRCINFO,
+# never running the PKGBUILD ahead of its review.
+aur_version() { # <pkg>
+    local clone="$WORK/$1"
+    git clone -q --depth 1 "https://aur.archlinux.org/$1.git" "$clone"
+    srcinfo_version "$(<"$clone/.SRCINFO")"
+}
+
 # Both sources must agree and the export-minimal material must match
 # the pinned hash — no single point of trust.
 import_signing_key() {
@@ -77,19 +106,24 @@ import_signing_key() {
 # the PKGBUILD checksums bind Shelly's download to the verified bytes,
 # so a republished artifact fails the install (no verify/install race).
 install_signed_package() { # <pkg>
-    local pkg="$1" clone sha srcinfo
+    local pkg="$1" clone sha srcinfo version
     clone="$WORK/$pkg"
     git clone -q "https://aur.archlinux.org/${pkg}.git" "$clone"
     sha="$(git -C "$clone" rev-parse HEAD)"
     # No pipe into grep -q: its early exit would SIGPIPE makepkg and
     # pipefail would misread a successful match as a failure.
     srcinfo="$(cd "$clone" && makepkg --printsrcinfo)"
+    version="$(srcinfo_version "$srcinfo")"
+    if up_to_date "$pkg" "$version"; then
+        log "$pkg: already up to date ($version)."
+        return 0
+    fi
     if ! grep -q "$KEY_FPR" <<<"$srcinfo"; then
         fail "$pkg PKGBUILD at $sha no longer lists the pinned $KEY_NAME key in validpgpkeys."
     fi
     log "$pkg: verifying source signatures at ${sha:0:12}..."
     (cd "$clone" && makepkg --verifysource)
-    log "$pkg: installing at ${sha:0:12} via Shelly..."
+    log "$pkg: installing $version at ${sha:0:12} via Shelly..."
     shelly_install "$pkg" --version "$sha"
 }
 
@@ -104,6 +138,17 @@ for pkg in "${SIGNED_PACKAGES[@]}"; do
     install_signed_package "$pkg"
 done
 
-log "Installing via Shelly: ${PACKAGES[*]}"
-shelly_install "${PACKAGES[@]}"
+pending=()
+for pkg in "${PACKAGES[@]}"; do
+    version="$(aur_version "$pkg")"
+    if up_to_date "$pkg" "$version"; then
+        log "$pkg: already up to date ($version)."
+    else
+        pending+=("$pkg")
+    fi
+done
+if [ "${#pending[@]}" -gt 0 ]; then
+    log "Installing via Shelly: ${pending[*]}"
+    shelly_install "${pending[@]}"
+fi
 log "Done."

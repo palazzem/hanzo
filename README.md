@@ -57,7 +57,7 @@ The file is loaded into its own namespace and read through an allowlist: exactly
 
 ## Architecture
 
-Provisioning runs in two stages: `hanzo-aur` installs the AUR package set through Shelly, then the playbook applies every role. Roles run in dependency order, each owning one domain.
+Provisioning runs in two stages: `hanzo-aur` installs the AUR package set through Shelly (skipping packages already at the AUR version), then the playbook applies every role. Roles run in dependency order, each owning one domain.
 
 - `bin/` — `bootstrap.sh` (one-command setup), `hanzo` (provisioning CLI), `hanzo-aur` (AUR package set via Shelly)
 - `playbook.yml` — entry point: detection facts, then the roles in dependency order
