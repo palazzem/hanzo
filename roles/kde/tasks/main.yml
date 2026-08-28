@@ -70,10 +70,10 @@
   become: false
 
 # --- Virtual keyboard -------------------------------------------------
-# The applier always writes empty-then-target to defeat KWin's in-memory
-# equality guard, so it cannot self-report change — guard it on the live
+# The applier always writes empty-then-target (KConfig only notifies on
+# a real change), so it cannot self-report change — guard it on the live
 # state instead. `available` covers the case where the key is already
-# correct on disk but the input method is not actually running.
+# correct on disk but KWin never picked it up.
 
 - name: Read configured virtual keyboard
   ansible.builtin.command:
