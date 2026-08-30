@@ -11,6 +11,16 @@ read-only, use `createDesktop(position: uint, name: string)` to add one and
 the writable `rows` property for grid layout. No dedicated CLI tool exists
 for this - use the D-Bus interface directly.
 
+"Switch desktops independently for each screen" is **not** on that D-Bus
+interface (no property for it). It is the plain `kwinrc` key
+`[Windows] PerOutputVirtualDesktops=true|false` (kcfg:
+`kwin/src/kcms/desktop/virtualdesktopssettings.kcfg`). The generic
+`reconfigure` applies it live: `Options` re-reads the key on config load and
+`workspace.cpp` connects `Options::perOutputVirtualDesktopsChanged` to
+`VirtualDesktopManager::setPerOutputVirtualDesktops`. Same group as
+`RollOverDesktops` ("Navigation wraps around"), which the D-Bus interface
+*does* expose as `navigationWrappingAround`.
+
 ## Plasma Scripting API (`org.kde.PlasmaShell.evaluateScript`)
 
 The same mechanism used by Look-and-Feel package layouts and layout
