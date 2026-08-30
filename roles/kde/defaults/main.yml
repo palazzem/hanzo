@@ -4,9 +4,11 @@ kde_touchpad_natural_scroll: "true"
 kde_touchpad_tap_to_click: "false"
 kde_touchpad_click_method: clickfinger
 
-# Virtual desktops, and the Meta+N shortcuts bound to them.
+# Virtual desktops, and the Meta+N shortcuts bound to them. The boolean
+# is quoted: KConfig reads lowercase true|false.
 kde_virtual_desktops: 5
 kde_virtual_desktop_rows: 1
+kde_virtual_desktops_per_screen: "true"
 
 # Global shortcuts, added as alternatives to each action's existing keys.
 kde_global_shortcuts:

@@ -36,6 +36,17 @@
   changed_when: "'CHANGED' in kde_desktops_result.stdout"
   become: false
 
+- name: Set per-screen virtual desktop switching
+  community.general.ini_file:
+    path: "{{ ansible_facts.env.HOME }}/.config/kwinrc"
+    section: Windows
+    option: PerOutputVirtualDesktops
+    value: "{{ kde_virtual_desktops_per_screen }}"
+    no_extra_spaces: true
+    mode: "0644"
+  become: false
+  notify: Reconfigure KWin
+
 - name: Build Meta+N virtual desktop shortcut bindings
   ansible.builtin.set_fact:
     kde_desktop_shortcuts: >-
