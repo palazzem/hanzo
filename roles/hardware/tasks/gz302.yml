@@ -17,6 +17,13 @@
     - host_has_systemd
   become: true
 
+- name: Deploy hibernate C-state workaround hook
+  ansible.builtin.copy:
+    src: hibernate-cstate
+    dest: /usr/lib/systemd/system-sleep/hibernate-cstate
+    mode: "0755"
+  become: true
+
 - name: Create XKB override directories
   ansible.builtin.file:
     path: "/etc/xkb/{{ item }}"
