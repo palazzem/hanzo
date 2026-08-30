@@ -1,0 +1,19 @@
+#!/bin/sh
+# Managed by Hanzo. Do not edit manually.
+#
+# Keep online cores out of C2/C3 while hibernating. On this platform a core
+# leaving the deepest C-state during the hibernate CPU offline/online sequence
+# loses its XSAVE control state and the hibernation hangs.
+# See https://github.com/palazzem/hanzo/issues/354
+[ "$SYSTEMD_SLEEP_ACTION" = "hibernate" ] || exit 0
+
+set_deep_cstates() {
+  for f in /sys/devices/system/cpu/cpu*/cpuidle/state[23]/disable; do
+    echo "$1" > "$f"
+  done
+}
+
+case "$1" in
+  pre)  set_deep_cstates 1 ;;
+  post) set_deep_cstates 0 ;;
+esac
