@@ -47,3 +47,18 @@
     dest: /etc/xkb/symbols/gz302
     mode: "0644"
   become: true
+
+- name: Deploy Chrome flags enabling VA-API on Strix Halo
+  ansible.builtin.copy:
+    dest: "{{ ansible_facts.env.HOME }}/.config/chrome-flags.conf"
+    content: |
+      # Managed by Hanzo. Do not edit manually.
+      # Chromium driver-bug entry 475 disables VA-API on the Radeon 8060S
+      # (1002:1586) because of an amdgpu SMU deadlock fixed in kernel 7.1.
+      # Skipping the workaround list restores hardware video decode.
+      # Requires kernel >= 7.1; drop once Chromium removes the entry.
+      # https://github.com/palazzem/hanzo/issues/357
+      --disable-gpu-driver-bug-workarounds
+      --enable-features=AcceleratedVideoEncoder
+    mode: "0644"
+  become: false
