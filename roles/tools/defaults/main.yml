@@ -1,6 +1,7 @@
 ---
 tools_dev_pacman:
   - github-cli
+  - postgresql-libs
 
 tools_uv_tools:
   - ipython
