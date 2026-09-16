@@ -51,8 +51,27 @@ All from `src/rules.h`:
 | `sizerule`, `positionrule`, … (`*rule` for set-type properties) | `Rules::SetRule` (anonymous base enum) | 0 Unused, 1 DontAffect, 2 Force, 3 Apply ("Apply initially"), 4 Remember, 5 ApplyNow, 6 ForceTemporarily |
 | `types` | `NET::WindowTypeMask` bitmask (`/usr/include/KF6/KWindowSystem/netwm_def.h`) | 1 Normal, default `AllTypesMask` (all bits) |
 | `wmclasscomplete` | Bool | `true` = match whole window class |
+| `fullscreen`, `maximizevert`, `maximizehoriz` | Bool (`src/rulesettings.kcfg`) | `true` + a `*rule` companion (`fullscreenrule`, `maximizevertrule`, `maximizehorizrule`) |
 
 `size` is a `QSize` serialised as `width,height`.
+
+## Initial-state order for a new window
+
+`XdgToplevelWindow::initialize()` (`src/xdgshellwindow.cpp`) applies the
+`Apply` rules in a fixed order: position and size first, then maximize,
+then fullscreen, then activities, desktops, and the rest. A fullscreen
+rule therefore wins over a size rule at mapping time; the size only
+matters again if the window later leaves fullscreen. Fullscreen and
+maximized are distinct properties: fullscreen hides the panel and the
+title bar, maximized keeps both.
+
+## Retiring a property
+
+`ini_file` only writes the keys it is given, so dropping a property from
+`kde_window_rules` leaves the old key on every machine that already had
+it. Set the property to `null` instead: the rule task then removes the
+key (`state: absent`), with real change detection under `--check`. Keep
+the null entry until every machine has converged, then delete it.
 
 ## "Detect Window Properties" leaves inert keys behind
 

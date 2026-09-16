@@ -47,7 +47,8 @@ kde_panel_layout_file: "{{ ansible_facts.env.HOME }}/.local/share/hanzo/panel-la
 # enums: *match is Rules::StringMatch (1 = exact), *rule is
 # Rules::SetRule (3 = apply initially), types is a NET::WindowTypeMask
 # bitmask (1 = normal window). Booleans are quoted: KConfig reads
-# lowercase true|false.
+# lowercase true|false. A null value removes the key from the group:
+# that is how a property Hanzo once wrote is retired on every machine.
 kde_window_rules:
   hanzo-ghostty:
     Description: Window settings for com.mitchellh.ghostty
@@ -55,8 +56,10 @@ kde_window_rules:
     wmclasscomplete: "true"
     wmclassmatch: 1
     types: 1
-    size: 1600,1001
-    sizerule: 3
+    fullscreen: "true"
+    fullscreenrule: 3
+    size: ~
+    sizerule: ~
 
 # Session restore at login. One of restorePreviousLogout,
 # restoreSavedSession, emptySession — the ksmserver loginMode names.
