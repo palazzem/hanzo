@@ -70,35 +70,17 @@ zero must be filtered before re-sending the list.
 
 ## A bound launcher's `Exec` is read once per login
 
-Confirmed live after the `Exec` of `hanzo-claude-code.desktop` was
-changed by hand: the Copilot key kept running the old command, with the
-file rewritten, ksycoca up to date, and the new command working from a
-shell. `KServiceActionComponent` (`plasma/kglobalacceld`,
-`src/kserviceactioncomponent.cpp`) keeps the `KService` it was built
-with and hands that same object to `KIO::ApplicationLauncherJob` on
-every `_launch`, so the daemon never re-reads the file. A ksycoca change
-only schedules `GlobalShortcutsRegistry::refreshServices`, which drops
-components whose `.desktop` file no longer resolves and then runs
-`detectAppsWithShortcuts`, which creates components only for files
-carrying `X-KDE-Shortcuts`. A launcher bound through
-`[services][<file>.desktop]` in `kglobalshortcutsrc` matches neither
-branch: its component is built once at daemon start from the file as it
-was then, and it survives every later edit.
-
-The change lands at the next login, when `kwin_wayland` rebuilds the
-registry. Forcing it live would mean making the component vanish and
-reappear through ksycoca (rename the file, rebuild, restore it with a
-temporary `X-KDE-Shortcuts` line, rebuild, drop the line, rebuild): not
-worth the complexity. When a launcher change is applied by hand
-(`CLAUDE.md` rule 9), the plan ends with "log out and back in so the
-Copilot key picks it up".
-
-To see what the daemon actually runs without pressing the key:
+`KServiceActionComponent` (`plasma/kglobalacceld`) is built once, at
+daemon start, from the `.desktop` file as it is then, and every `_launch`
+reuses that `KService`. A ksycoca change only prunes components whose
+file vanished and creates new ones for files carrying `X-KDE-Shortcuts`,
+so a launcher bound through `[services][<file>.desktop]` in
+`kglobalshortcutsrc` is never re-read: an edited `Exec` takes effect at
+the next login, and applying such a change by hand ends with a logout.
 `busctl --user call org.kde.kglobalaccel
 /component/hanzo_claude_code_desktop org.kde.kglobalaccel.Component
-invokeShortcut s _launch`, then `pgrep -af claude` shows the argv it
-launched. `Component::dbusPath` maps `hanzo-claude-code.desktop` to
-`/component/hanzo_claude_code_desktop`.
+invokeShortcut s _launch` followed by `pgrep -af claude` shows what the
+daemon currently runs.
 
 ## Crash risk: `setForeignShortcutKeys` needs fixed 4-int arrays
 
