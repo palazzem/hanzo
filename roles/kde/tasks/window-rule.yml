@@ -1,7 +1,6 @@
 ---
 # One kwinrulesrc group per rule. kde_window_rule is the {key: group,
-# value: properties} item supplied by the including loop. A property
-# with a null value is removed from the group instead of written.
+# value: properties} item supplied by the including loop.
 
 - name: Write window rule {{ kde_window_rule.key }}
   community.general.ini_file:
@@ -9,7 +8,6 @@
     section: "{{ kde_window_rule.key }}"
     option: "{{ item.key }}"
     value: "{{ item.value }}"
-    state: "{{ 'absent' if item.value is none else 'present' }}"
     no_extra_spaces: true
     mode: "0644"
   loop: "{{ kde_window_rule.value | dict2items }}"

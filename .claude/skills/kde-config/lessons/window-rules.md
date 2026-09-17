@@ -65,13 +65,13 @@ matters again if the window later leaves fullscreen. Fullscreen and
 maximized are distinct properties: fullscreen hides the panel and the
 title bar, maximized keeps both.
 
-## Retiring a property
+## Dropping a property
 
-`ini_file` only writes the keys it is given, so dropping a property from
-`kde_window_rules` leaves the old key on every machine that already had
-it. Set the property to `null` instead: the rule task then removes the
-key (`state: absent`), with real change detection under `--check`. Keep
-the null entry until every machine has converged, then delete it.
+`ini_file` only writes the keys it is given, so a property dropped from
+`kde_window_rules` stays in `kwinrulesrc` on a machine that already had
+it. That is by design: provisioning is never backward compatible
+(`CLAUDE.md` rule 8), so no cleanup task exists. Delete the stale key by
+hand or reprovision a fresh machine.
 
 ## "Detect Window Properties" leaves inert keys behind
 

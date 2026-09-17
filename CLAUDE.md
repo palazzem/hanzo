@@ -11,6 +11,7 @@ CachyOS system provisioner powered by Ansible.
 5. Don't install packages already in the CachyOS base image. Verify against `cachyos/cachyos:latest` (`pacman -Qe`) before adding to a role's package list.
 6. Variables defined inside a role use the role name as prefix (ansible-lint `var-naming[no-role-prefix]` rule). E.g., inside `roles/tools` use `tools_uv_tool_list`, not `uv_tool_list`. Variables shared by multiple roles are defined at play scope in `playbook.yml`, never in one role.
 7. AUR packages are never managed by Ansible: the set lives in `bin/hanzo-aur` and installs through Shelly, with human review of every package. AUR installation precedes the playbook, so roles may configure AUR packages but never install them.
+8. Never be backward compatible. Provisioning targets a fresh, clean machine, so a change replaces what it supersedes outright: no migration or cleanup tasks for state an earlier version wrote, and no compatibility shims for existing installs.
 
 ## Commands
 
