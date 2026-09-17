@@ -225,7 +225,7 @@ not from memory.
 | Touchscreen gestures | `tasks/main.yml` (ini_file + handler) | `lessons/touchscreen.md`, `lessons/dbus-kwin.md` |
 | Panel layout | `files/panel-layout.js` + `Apply panel layout` handler | `lessons/layouts.md` |
 | Darkly theme | `tasks/darkly.yml` | `lessons/theming.md` |
-| Copilot key (F23) binding | `tasks/main.yml` | — |
+| Copilot key (F23) binding | `tasks/main.yml` | `lessons/shortcuts.md` |
 | PowerDevil sleep mode | `tasks/main.yml` | — |
 | Window rules | `tasks/window-rules.yml` + `tasks/window-rule.yml` | `lessons/window-rules.md` |
 | Session restore at login | `tasks/main.yml` (ini_file, no handler) | `lessons/session.md` |

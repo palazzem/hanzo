@@ -68,6 +68,20 @@ alternative (`key[0].toCombined()`), and an unbound action as `[0]`.
 `Utils::normalizeSequences` drops empty sequences on write, so a leading
 zero must be filtered before re-sending the list.
 
+## A bound launcher's `Exec` is read once per login
+
+`KServiceActionComponent` (`plasma/kglobalacceld`) is built once, at
+daemon start, from the `.desktop` file as it is then, and every `_launch`
+reuses that `KService`. A ksycoca change only prunes components whose
+file vanished and creates new ones for files carrying `X-KDE-Shortcuts`,
+so a launcher bound through `[services][<file>.desktop]` in
+`kglobalshortcutsrc` is never re-read: an edited `Exec` takes effect at
+the next login, and applying such a change by hand ends with a logout.
+`busctl --user call org.kde.kglobalaccel
+/component/hanzo_claude_code_desktop org.kde.kglobalaccel.Component
+invokeShortcut s _launch` followed by `pgrep -af claude` shows what the
+daemon currently runs.
+
 ## Crash risk: `setForeignShortcutKeys` needs fixed 4-int arrays
 
 `org.kde.kglobalaccel` `/kglobalaccel` `org.kde.KGlobalAccel`
