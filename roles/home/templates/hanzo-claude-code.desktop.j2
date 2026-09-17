@@ -3,7 +3,7 @@
 Type=Application
 Name=Claude Code
 Comment=Open Claude Code in ~/workspaces/cowork
-Exec=ghostty --working-directory={{ cowork_dir }} -e fish -c claude
+Exec=ghostty --working-directory={{ cowork_dir }} -e fish -c "claude --model {{ home_claude_launcher_model }} --effort {{ home_claude_launcher_effort }}"
 Icon=utilities-terminal
 Terminal=false
 Categories=Utility;Development;

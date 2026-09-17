@@ -7,3 +7,9 @@ home_claude_config_dir: "{{ ansible_facts.env.HOME }}/.claude"
 
 home_user_services:
   - ssh-agent
+
+# Claude Code launcher: the model alias and effort level passed on the
+# command line of the session it opens. Both apply to that session only
+# and leave the default model in Claude Code's own settings untouched.
+home_claude_launcher_model: sonnet
+home_claude_launcher_effort: high
