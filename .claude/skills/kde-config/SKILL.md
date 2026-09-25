@@ -105,7 +105,8 @@ notifies a handler that makes the call:
 
 Existing handlers: `Reconfigure KWin` (generic `kwinrc` reload),
 `Reconfigure overview effect` (any `[Effect-<id>]` group — the generic
-reconfigure does **not** reach effects), `Apply panel layout`.
+reconfigure does **not** reach effects), `Apply panel layout`,
+`Rebuild ksycoca` (a launcher's `X-KDE-Shortcuts` binding goes live).
 
 **2. Guarded command** — a CLI tool applies it, and a `kreadconfig6` read
 supplies the change signal. Read tasks need `changed_when: false` and
@@ -226,6 +227,7 @@ not from memory.
 | Panel layout | `files/panel-layout.js` + `Apply panel layout` handler | `lessons/layouts.md` |
 | Darkly theme | `tasks/darkly.yml` | `lessons/theming.md` |
 | Copilot key (F23) binding | `tasks/main.yml` | `lessons/shortcuts.md` |
+| 1Password Quick Access shortcut | `files/hanzo-1password-quick-access.desktop` | `lessons/shortcuts.md` |
 | PowerDevil sleep mode | `tasks/main.yml` | — |
 | Window rules | `tasks/window-rules.yml` + `tasks/window-rule.yml` | `lessons/window-rules.md` |
 | Session restore at login | `tasks/main.yml` (ini_file, no handler) | `lessons/session.md` |

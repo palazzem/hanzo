@@ -31,3 +31,11 @@
     executable: /bin/bash
   changed_when: true
   become: false
+
+# kglobalacceld re-scans launchers for X-KDE-Shortcuts on every ksycoca
+# rebuild; without one a new launcher binding waits for the next login.
+- name: Rebuild ksycoca
+  ansible.builtin.command:
+    cmd: kbuildsycoca6
+  changed_when: true
+  become: false
