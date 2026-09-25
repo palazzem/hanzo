@@ -29,6 +29,20 @@ group for a launcher kglobalaccel has never seen (the Copilot key):
 `loadSettings` creates the component from that group at daemon start, and
 `setForeignShortcutKeys` cannot target a component that does not exist.
 
+## A launcher's `X-KDE-Shortcuts` binds live on a ksycoca rebuild
+
+On every `KSycoca::databaseChanged` the registry scans applications for
+a `.desktop` file carrying `X-KDE-Shortcuts` (`NoDisplay=true` entries
+included; only `NotShowIn` filters) and creates its component with
+`_launch` defaulted to that key, so `kbuildsycoca6` after deploying the
+file makes the binding active without a logout, and removing the file
+prunes the component on the next rebuild. The key is the action's
+default: a `[services][<file>.desktop]` override in `kglobalshortcutsrc`
+still wins, and the daemon writes nothing while they agree. Check with
+`busctl --user call org.kde.kglobalaccel /kglobalaccel
+org.kde.KGlobalAccel getGlobalShortcutsByKey i <key>`, the combined
+`Qt::Key` value (`Ctrl+Shift+Space` is `0x06000020`).
+
 ## Shift+digit and Shift+symbol never match: bind the shifted character
 
 Confirmed live: `Meta+Shift+4` and `Meta+Shift+5` set through
@@ -49,6 +63,9 @@ one of its listed special keys. Bind the character Shift produces on the
 layout in use (`Meta+$` and `Meta+%` on US) and expect that to be
 layout-dependent. Printable ASCII keys carry their code point as the
 `Qt::Key` value (`Key_Dollar = 0x24`, `Key_Percent = 0x25`).
+Shift is consumed only when it changes the keysym, so `Ctrl+Shift+Space`
+matches as written on a layout whose Space key has a single level (plain
+`us`).
 
 ## Service components (launcher actions)
 

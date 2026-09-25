@@ -213,6 +213,18 @@
     mode: "0644"
   become: false
 
+# kglobalacceld creates a component for any launcher carrying
+# X-KDE-Shortcuts on every ksycoca rebuild, so the key ships inside the
+# launcher and the handler makes it live without a logout. 1Password
+# cannot register the key itself on Wayland.
+- name: Deploy 1Password Quick Access launcher
+  ansible.builtin.copy:
+    src: hanzo-1password-quick-access.desktop
+    dest: "{{ ansible_facts.env.HOME }}/.local/share/applications/hanzo-1password-quick-access.desktop"
+    mode: "0644"
+  become: false
+  notify: Rebuild ksycoca
+
 # --- Power management -------------------------------------------------
 
 # PowerDevil writes lid-action behavior here. SleepMode=3 = "Suspend then
