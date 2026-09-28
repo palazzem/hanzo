@@ -49,3 +49,6 @@
     or 'ERROR:' in system_limine_rebuild.stderr
   when: host_has_systemd
   become: true
+  # The hardware role also writes kernel parameters, so its selective runs
+  # need the same rebuild as a full provisioning run.
+  tags: [hardware]

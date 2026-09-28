@@ -17,6 +17,17 @@
     - host_has_systemd
   become: true
 
+- name: Enable HDMI FRL in the GZ302 kernel command line
+  # Linux 7.2 leaves HDMI FRL disabled by default pending FRL VRR support.
+  # Enable DC_FRL_MASK (0x400), preserving the default multi-monitor memory
+  # clock switching bit (0x2). Verified to unlock 4K 240 Hz on the PG32UCDM3.
+  # The system role rebuilds the boot entries after the hardware role.
+  ansible.builtin.lineinfile:
+    path: /etc/default/limine
+    regexp: '^KERNEL_CMDLINE\[default\]\+=" amdgpu\.dcfeaturemask='
+    line: 'KERNEL_CMDLINE[default]+=" amdgpu.dcfeaturemask=0x402"'
+  become: true
+
 - name: Deploy hibernate C-state workaround hook
   ansible.builtin.copy:
     src: hibernate-cstate
