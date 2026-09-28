@@ -55,6 +55,23 @@ Edit this file directly to update your settings. You can also set `HANZO_FULLNAM
 
 The file is loaded into its own namespace and read through an allowlist: exactly `hanzo_fullname` and `hanzo_email` are used, and **any other key is ignored**. It is not a place to override playbook or role variables — since the file is user-writable, an unfiltered load would let anything with write access to your home directory inject variables into tasks that run as root. Both keys are optional; when one is missing, the matching git identity setting is simply skipped.
 
+### GZ302 GPU memory
+
+On the ASUS GZ302, when Linux reports at least 120 GiB of RAM, Hanzo sets
+`ttm.pages_limit=28311552` in Limine to allow up to 108 GiB of GPU allocations.
+This accommodates large local inference models that exceed the default
+half-RAM ceiling. Smaller-memory variants retain their existing limit.
+
+The system role regenerates the boot entries, including on selective
+`hardware` runs. Reboot after provisioning, then verify the active value:
+
+```bash
+cat /sys/module/ttm/parameters/pages_limit  # expected: 28311552
+```
+
+This ceiling does not reserve memory for the OS. Model weights, context caches,
+runtime buffers and other applications still compete for physical RAM.
+
 ## Architecture
 
 Provisioning runs in two stages: `hanzo-aur` installs the AUR package set through Shelly (skipping packages already at the AUR version), then the playbook applies every role. Roles run in dependency order, each owning one domain.
