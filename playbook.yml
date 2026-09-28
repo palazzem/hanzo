@@ -52,9 +52,6 @@
       ansible.builtin.set_fact:
         host_has_systemd: "{{ hanzo_systemd_stat.stat.exists }}"
         host_has_kde: "{{ hanzo_plasma_stat.stat.exists }}"
-        # Allow for firmware carve-outs on 128 GiB machines, without giving
-        # smaller-memory GZ302 variants a 108 GiB GPU allocation ceiling.
-        host_has_120gib_ram: "{{ ansible_facts.memtotal_mb | int >= 120 * 1024 }}"
         model_is_gz302: "{{ 'product_name' in ansible_facts
                            and 'GZ302' in ansible_facts['product_name']
                            and hanzo_systemd_stat.stat.exists }}"
