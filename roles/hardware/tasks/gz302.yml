@@ -28,6 +28,14 @@
     line: 'KERNEL_CMDLINE[default]+=" amdgpu.dcfeaturemask=0x402"'
   become: true
 
+- name: Raise the GZ302 GPU allocation ceiling to 108 GiB
+  # Large local inference models exceed the default half-RAM GPU ceiling.
+  ansible.builtin.lineinfile:
+    path: /etc/default/limine
+    regexp: '^KERNEL_CMDLINE\[default\]\+=" ttm\.pages_limit='
+    line: 'KERNEL_CMDLINE[default]+=" ttm.pages_limit=28311552"'
+  become: true
+
 - name: Deploy hibernate C-state workaround hook
   ansible.builtin.copy:
     src: hibernate-cstate
