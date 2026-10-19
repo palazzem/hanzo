@@ -2,3 +2,13 @@
 virtualization_user_groups:
   - kvm
   - libvirt
+
+# Bridge of libvirt's shipped `default` NAT network.
+virtualization_libvirt_bridge: virbr0
+
+# What guests need from the host's dnsmasq: DHCP (udp 67) and DNS (udp and
+# tcp 53).
+virtualization_ufw_host_services:
+  - { proto: udp, port: "67" }
+  - { proto: udp, port: "53" }
+  - { proto: tcp, port: "53" }

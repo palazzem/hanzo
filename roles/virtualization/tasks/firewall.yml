@@ -1,0 +1,36 @@
+---
+# UFW drops incoming and routed traffic by default, which starves a NAT'd
+# guest twice: its DHCP and DNS requests never reach the dnsmasq bound to
+# virbr0, and its traffic is never forwarded out. The symptom inside the
+# guest is only Windows reporting no working connection.
+#
+# Only DHCP and DNS are opened toward the host, never the whole interface:
+# the guest must not reach the host's other listeners. Replies to forwarded
+# connections pass on the conntrack accept at the head of UFW's forward
+# chain, so no outbound route rule is needed.
+#
+# UFW is installed and enabled by the system role, which runs earlier in
+# the play.
+- name: Provision UFW rules for the libvirt default network
+  # community.general.ufw runs `ufw status verbose` before every operation, which
+  # fails in the unprivileged container and has no binary to call in check mode.
+  when:
+    - host_has_systemd
+    - not ansible_check_mode
+  block:
+    - name: Allow guest DHCP and DNS requests to the host
+      community.general.ufw:
+        rule: allow
+        direction: in
+        interface: "{{ virtualization_libvirt_bridge }}"
+        proto: "{{ item.proto }}"
+        to_port: "{{ item.port }}"
+      loop: "{{ virtualization_ufw_host_services }}"
+      become: true
+
+    - name: Allow guest traffic to be routed out
+      community.general.ufw:
+        rule: allow
+        route: true
+        interface_in: "{{ virtualization_libvirt_bridge }}"
+      become: true
